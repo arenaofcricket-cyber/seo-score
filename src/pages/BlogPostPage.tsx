@@ -28,6 +28,8 @@ const BlogPostPage = () => {
           <div className="flex items-center gap-4 text-[10px] font-bold text-brand-500 uppercase tracking-widest mb-6">
             <span className="flex items-center gap-1"><Calendar size={14} className="text-brand-500/50" /> {post.date}</span>
             <span className="flex items-center gap-1"><User size={14} className="text-brand-500/50" /> {post.author}</span>
+            {/* @ts-ignore */}
+            <span className="px-2 py-0.5 bg-brand-500/10 text-brand-400 rounded-md border border-brand-500/20">{post.category}</span>
           </div>
           <h1 className="text-4xl lg:text-5xl font-semibold text-white mb-8 leading-tight tracking-tight">
             {post.title}
@@ -63,14 +65,24 @@ const BlogPostPage = () => {
           </Markdown>
         </div>
 
-        <div className="border-t border-white/5 mt-16 pt-8 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-             <div className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
-             <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest font-mono">End of Article</span>
+        <div className="border-t border-white/5 mt-16 pt-8">
+          <div className="flex flex-wrap gap-2 mb-8">
+            {/* @ts-ignore */}
+            {post.tags.map((tag: string) => (
+              <span key={tag} className="px-3 py-1 bg-zinc-900 border border-white/5 rounded-lg text-[10px] uppercase font-bold text-slate-500">
+                #{tag}
+              </span>
+            ))}
           </div>
-          <button className="p-3 bg-white/5 rounded-full text-slate-500 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
-            <Share2 size={20} />
-          </button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+               <div className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
+               <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest font-mono">End of Article</span>
+            </div>
+            <button className="p-3 bg-white/5 rounded-full text-slate-500 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+              <Share2 size={20} />
+            </button>
+          </div>
         </div>
       </motion.div>
     </div>

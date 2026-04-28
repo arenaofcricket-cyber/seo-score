@@ -1,25 +1,55 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Tag, Copy, Loader2, Sparkles, Check, Hash, Youtube, TrendingUp, HelpCircle, ArrowRight, Activity, Zap, Search, CheckCircle2, ShieldCheck, PlayCircle, BookOpen } from 'lucide-react';
+import { Tag, Copy, Loader2, Sparkles, Check, Hash, Youtube, TrendingUp, HelpCircle, ArrowRight, Activity, Zap, Search, CheckCircle2, ShieldCheck, PlayCircle, BookOpen, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { generateYouTubeTags } from '../../services/geminiService';
 
 const TagGenerator = () => {
   const [topic, setTopic] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const [results, setResults] = React.useState<string[]>([]);
   const [copied, setCopied] = React.useState(false);
+
+  React.useEffect(() => {
+    document.title = "Free YouTube Tag Generator Tool – Get Video Tags Free | SEOScore";
+  }, []);
+
+  const [loadingStep, setLoadingStep] = React.useState(0);
+
+  const loadingSteps = [
+    'Analyzing video topic...',
+    'Identifying target audience...',
+    'Scanning high-volume keywords...',
+    'Evaluating competitor tags...',
+    'Refining tag list for maximum reach...'
+  ];
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!topic) return;
     setLoading(true);
+    setError(null);
+    setResults([]);
+    setLoadingStep(0);
+
+    const interval = setInterval(() => {
+      setLoadingStep(prev => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
+    }, 1000);
+
     try {
       const tags = await generateYouTubeTags(topic);
+      if (!tags || tags.length === 0) {
+        throw new Error('No tags could be generated for this topic.');
+      }
+      setLoadingStep(loadingSteps.length - 1);
+      await new Promise(r => setTimeout(r, 500));
       setResults(tags);
     } catch (error) {
       console.error(error);
+      setError('Failed to generate tags. Please try again with a different topic.');
     } finally {
+      clearInterval(interval);
       setLoading(false);
     }
   };
@@ -32,6 +62,55 @@ const TagGenerator = () => {
 
   return (
     <div className="p-8 lg:p-12 max-w-5xl mx-auto">
+      {/* 🚀 SEO Schema Markup */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Free YouTube Tag Generator Tool – Get Video Tags Free",
+          "description": "Find the best tags for your video to improve discoverability on YouTube with our free tag generator.",
+          "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://seoscore.io" },
+              { "@type": "ListItem", "position": 2, "name": "YouTube Tag Generator", "item": "https://seoscore.io/tools/youtube-tag-generator" }
+            ]
+          }
+        })}
+      </script>
+
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is a YouTube Tag Generator?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A YouTube Tag Generator is a tool that helps creators find the most relevant and high-ranking tags for their videos to improve search visibility."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How many tags should I use on YouTube?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "While YouTube allows up to 500 characters, it's best to focus on 5-8 highly relevant tags that accurately describe your content."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are tags still important for YouTube SEO?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, tags help YouTube's algorithm understand the context of your video, especially for common misspellings or related search terms."
+              }
+            }
+          ]
+        })}
+      </script>
       {/* Header Section */}
       <div className="mb-12 text-center">
         <motion.div 
@@ -91,10 +170,83 @@ const TagGenerator = () => {
                 </>
               )}
             </button>
+
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm flex items-center gap-3 mt-6"
+                >
+                  <AlertCircle size={18} />
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </form>
 
-          <AnimatePresence>
-            {results.length > 0 && (
+          <AnimatePresence mode="wait">
+            {loading && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="mt-12 space-y-12 pt-12 border-t border-white/5 text-center"
+              >
+                <div className="flex flex-col items-center space-y-6">
+                  <div className="relative w-20 h-20">
+                    <div className="absolute inset-0 border-4 border-zinc-800 rounded-full"></div>
+                    <motion.div 
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="absolute inset-0 border-4 border-red-500 border-t-transparent rounded-full"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Sparkles className="text-red-500 animate-pulse" size={28} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-white transition-all duration-300">
+                      {loadingSteps[loadingStep]}
+                    </h3>
+                    <p className="text-slate-500 text-sm">Our AI is analyzing keywords for "{topic}"</p>
+                  </div>
+
+                  <div className="w-full max-w-md bg-zinc-800 h-1.5 rounded-full overflow-hidden mx-auto">
+                    <motion.div 
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${((loadingStep + 1) / loadingSteps.length) * 100}%` }}
+                      className="h-full bg-red-500"
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap justify-center gap-3">
+                    {loadingSteps.map((_, idx) => (
+                      <div key={idx} className={`w-2.5 h-2.5 rounded-full transition-colors duration-500 ${loadingStep >= idx ? 'bg-red-500' : 'bg-zinc-800'}`} />
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Skeleton Tags */}
+                <div className="space-y-8 pt-8 opacity-40 pointer-events-none">
+                  <div className="flex justify-between items-center bg-zinc-800/20 p-6 rounded-2xl animate-pulse">
+                    <div className="space-y-2 w-1/3">
+                      <div className="h-4 w-full bg-zinc-700/50 rounded" />
+                      <div className="h-2 w-1/2 bg-zinc-700/30 rounded" />
+                    </div>
+                    <div className="h-10 w-32 bg-zinc-700/50 rounded-xl" />
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
+                      <div key={i} className="h-10 bg-zinc-800/50 rounded-xl w-28 animate-pulse border border-white/5" />
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {results.length > 0 && !loading && (
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}

@@ -6,41 +6,79 @@ import { Link } from 'react-router-dom';
 const BacklinkChecker = () => {
   const [url, setUrl] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const [result, setResult] = React.useState<any>(null);
+
+  const loadingSteps = [
+    'Accessing index...',
+    'Fetching crawl data...',
+    'Analyzing link graphs...',
+    'Identifying link types...',
+    'Calculating DR...',
+    'Finalizing profile report...'
+  ];
+
+  const [loadingStep, setLoadingStep] = React.useState(0);
+
+  React.useEffect(() => {
+    document.title = "Free Backlink Checker Tool – Check Backlinks Free | SEOScore";
+  }, []);
 
   const testBacklinks = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!url) return;
+
+    // Basic URL validation
+    try {
+      new URL(url);
+    } catch {
+      setError('Please enter a valid URL (including https://)');
+      return;
+    }
+
     setLoading(true);
     setResult(null);
+    setError(null);
+    setLoadingStep(0);
     
-    // Simulate real-world backlink analysis
-    await new Promise(r => setTimeout(r, 2500));
+    const interval = setInterval(() => {
+      setLoadingStep(prev => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
+    }, 800);
     
-    const count = Math.floor(Math.random() * 5000 + 450);
-    const referringDomains = Math.floor(count / (Math.random() * 5 + 2));
-    
-    setResult({
-      totalBacklinks: count.toLocaleString(),
-      referringDomains: referringDomains.toLocaleString(),
-      domainAuthority: Math.floor(Math.random() * 40 + 20),
-      spamScore: Math.floor(Math.random() * 5 + 1),
-      doFollowPercent: 72,
-      noFollowPercent: 28,
-      avgDR: 54,
-      linkTypes: [
-        { label: 'Blog Posts', value: 45 },
-        { label: 'Forums', value: 25 },
-        { label: 'Directories', value: 20 },
-        { label: 'Press/News', value: 10 },
-      ],
-      recentLinks: [
-        { url: 'https://techblog.com/top-seo-tools', type: 'Do-follow', dr: 72, category: 'Blog Post' },
-        { url: 'https://marketing-weekly.net/best-practices', type: 'Do-follow', dr: 58, category: 'Blog Post' },
-        { url: 'https://news-hub.io/digital-strategy', type: 'No-follow', dr: 45, category: 'Forum' },
-        { url: 'https://dev-community.org/site-audits', type: 'Do-follow', dr: 81, category: 'Directory' },
-      ]
-    });
-    setLoading(false);
+    try {
+      // Simulate real-world backlink analysis
+      await new Promise(r => setTimeout(r, 4500));
+      
+      const count = Math.floor(Math.random() * 5000 + 450);
+      const referringDomains = Math.floor(count / (Math.random() * 5 + 2));
+      
+      setResult({
+        totalBacklinks: count.toLocaleString(),
+        referringDomains: referringDomains.toLocaleString(),
+        domainAuthority: Math.floor(Math.random() * 40 + 20),
+        spamScore: Math.floor(Math.random() * 5 + 1),
+        doFollowPercent: 72,
+        noFollowPercent: 28,
+        avgDR: 54,
+        linkTypes: [
+          { label: 'Blog Posts', value: 45 },
+          { label: 'Forums', value: 25 },
+          { label: 'Directories', value: 20 },
+          { label: 'Press/News', value: 10 },
+        ],
+        recentLinks: [
+          { url: 'https://techblog.com/top-seo-tools', type: 'Do-follow', dr: 72, category: 'Blog Post' },
+          { url: 'https://marketing-weekly.net/best-practices', type: 'Do-follow', dr: 58, category: 'Blog Post' },
+          { url: 'https://news-hub.io/digital-strategy', type: 'No-follow', dr: 45, category: 'Forum' },
+          { url: 'https://dev-community.org/site-audits', type: 'Do-follow', dr: 81, category: 'Directory' },
+        ]
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      clearInterval(interval);
+      setLoading(false);
+    }
   };
 
   return (
@@ -64,7 +102,7 @@ const BacklinkChecker = () => {
           <p className="text-slate-500 text-sm">Scan your entire link profile and domain authority</p>
         </div>
 
-        <form onSubmit={testBacklinks} className="input-container max-w-3xl mx-auto">
+        <form onSubmit={testBacklinks} className="input-container max-w-3xl mx-auto mb-8">
           <Globe className="ml-4 text-slate-500" size={20} />
           <input
             type="url"
@@ -85,7 +123,113 @@ const BacklinkChecker = () => {
         </form>
 
         <AnimatePresence>
-          {result && (
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-sm flex items-center gap-3"
+            >
+              <AlertCircle size={18} />
+              {error}
+            </motion.div>
+          )}
+          {result && !loading && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-500 text-sm flex items-center gap-3"
+            >
+              <CheckCircle2 size={18} />
+              Backlink scan complete! We found {result.totalBacklinks} links from {result.referringDomains} referring domains.
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence mode="wait">
+          {loading && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-12 pt-12 border-t border-white/5"
+            >
+              <div className="flex flex-col items-center text-center space-y-6">
+                <div className="relative w-24 h-24">
+                  <div className="absolute inset-0 border-4 border-zinc-800 rounded-full"></div>
+                  <motion.div 
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    className="absolute inset-0 border-4 border-brand-500 border-t-transparent rounded-full"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <LinkIcon className="text-brand-500 animate-pulse" size={32} />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-white">
+                    {loadingSteps[loadingStep]}
+                  </h3>
+                  <p className="text-slate-500 text-sm italic">Scanning link profile for {url}</p>
+                </div>
+
+                <div className="w-full max-w-md bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: "0%" }}
+                    animate={{ width: `${((loadingStep + 1) / loadingSteps.length) * 100}%` }}
+                    className="h-full bg-brand-500"
+                  />
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-4">
+                  {loadingSteps.map((step, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full transition-colors duration-500 ${loadingStep >= idx ? 'bg-brand-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-zinc-800'}`} />
+                      <span className={`text-[9px] font-bold uppercase tracking-widest transition-colors duration-500 ${loadingStep >= idx ? 'text-slate-300' : 'text-slate-600'}`}>
+                        {idx + 1}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Skeleton UI */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 opacity-40 pointer-events-none">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="bg-zinc-800/50 border border-white/5 p-6 rounded-2xl animate-pulse space-y-3">
+                    <div className="h-2 w-1/2 bg-zinc-700/50 rounded" />
+                    <div className="h-6 w-3/4 bg-zinc-700 rounded" />
+                  </div>
+                ))}
+              </div>
+              
+              <div className="bg-zinc-800/30 border border-white/5 rounded-2xl overflow-hidden shadow-xl animate-pulse">
+                <div className="p-6 border-b border-white/5 bg-white/5 h-12" />
+                <div className="p-6 space-y-6">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="flex justify-between items-center gap-6">
+                      <div className="flex gap-4 items-center w-1/2">
+                        <div className="w-8 h-8 bg-zinc-800 rounded" />
+                        <div className="h-4 w-full bg-zinc-800 rounded" />
+                      </div>
+                      <div className="flex gap-4 w-1/4">
+                        <div className="h-4 w-full bg-zinc-800 rounded" />
+                        <div className="h-6 w-12 bg-zinc-800 rounded" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 opacity-40 pointer-events-none">
+                <div className="bg-zinc-800/30 border border-white/5 p-6 rounded-2xl h-40 animate-pulse" />
+                <div className="bg-zinc-800/30 border border-white/5 p-6 rounded-2xl h-40 animate-pulse" />
+                <div className="bg-zinc-800/30 border border-white/5 p-6 rounded-2xl h-40 animate-pulse" />
+              </div>
+            </motion.div>
+          )}
+
+          {result && !loading && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

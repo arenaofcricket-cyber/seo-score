@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Youtube, Copy, Loader2, Sparkles, Check, Hash, TrendingUp, HelpCircle, ArrowRight, Activity, Zap, Search, CheckCircle2, ShieldCheck, PlayCircle, Star, BookOpen } from 'lucide-react';
+import { Youtube, Copy, Loader2, Sparkles, Check, Hash, TrendingUp, HelpCircle, ArrowRight, Activity, Zap, Search, CheckCircle2, ShieldCheck, PlayCircle, Star, BookOpen, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { generateYouTubeTitle } from '../../services/geminiService';
 
@@ -8,19 +8,45 @@ const TitleGenerator = () => {
   const [topic, setTopic] = React.useState('');
   const [keywords, setKeywords] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const [results, setResults] = React.useState<string[]>([]);
   const [copied, setCopied] = React.useState<number | null>(null);
+
+  const [loadingStep, setLoadingStep] = React.useState(0);
+
+  const loadingSteps = [
+    'Analyzing video topic...',
+    'Researching high-CTR patterns...',
+    'Incorporating target keywords...',
+    'Evaluating emotional triggers...',
+    'Generating viral title variations...'
+  ];
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!topic) return;
     setLoading(true);
+    setError(null);
+    setResults([]);
+    setLoadingStep(0);
+
+    const interval = setInterval(() => {
+      setLoadingStep(prev => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
+    }, 1000);
+
     try {
       const titles = await generateYouTubeTitle(topic, keywords);
+      if (!titles || titles.length === 0) {
+        throw new Error('No titles could be generated.');
+      }
+      setLoadingStep(loadingSteps.length - 1);
+      await new Promise(r => setTimeout(r, 500));
       setResults(titles);
     } catch (error) {
       console.error(error);
+      setError('Something went wrong. Please check your topic and try again.');
     } finally {
+      clearInterval(interval);
       setLoading(false);
     }
   };
@@ -33,6 +59,55 @@ const TitleGenerator = () => {
 
   return (
     <div className="p-8 lg:p-12 max-w-5xl mx-auto">
+      {/* 🚀 SEO Schema Markup */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Free YouTube Title Generator Tool – Generate Catchy Titles",
+          "description": "Generate high-CTR, SEO-optimized YouTube titles for your videos with our free AI tool.",
+          "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://seoscore.io" },
+              { "@type": "ListItem", "position": 2, "name": "YouTube Title Generator", "item": "https://seoscore.io/youtube/title-generator" }
+            ]
+          }
+        })}
+      </script>
+
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Why is the YouTube title important?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The title is one of the most important factors for Click-Through Rate (CTR) and SEO, helping users and the algorithm understand what your video is about."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What makes a good YouTube title?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A good title is catchy, contains relevant keywords, is under 60-70 characters, and creates curiosity without being clickbait."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does the YouTube title help in ranking?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, including your primary keyword near the beginning of your title significantly helps your video rank in YouTube search results."
+              }
+            }
+          ]
+        })}
+      </script>
       {/* Header Section */}
       <div className="mb-12 text-center">
         <motion.div 
@@ -104,10 +179,77 @@ const TitleGenerator = () => {
                 </>
               )}
             </button>
+
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm flex items-center gap-3 mt-6"
+                >
+                  <AlertCircle size={18} />
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </form>
 
-          <AnimatePresence>
-            {results.length > 0 && (
+          <AnimatePresence mode="wait">
+            {loading && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="mt-12 space-y-12 pt-12 border-t border-white/5 text-center"
+              >
+                <div className="flex flex-col items-center space-y-6">
+                  <div className="relative w-20 h-20">
+                    <div className="absolute inset-0 border-4 border-zinc-800 rounded-full"></div>
+                    <motion.div 
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="absolute inset-0 border-4 border-red-500 border-t-transparent rounded-full"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Sparkles className="text-red-500 animate-pulse" size={28} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-white transition-all duration-300">
+                      {loadingSteps[loadingStep]}
+                    </h3>
+                    <p className="text-slate-500 text-sm italic">Our AI is drafting high-engagement titles for "{topic}"</p>
+                  </div>
+
+                  <div className="w-full max-w-md bg-zinc-800 h-1.5 rounded-full overflow-hidden mx-auto">
+                    <motion.div 
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${((loadingStep + 1) / loadingSteps.length) * 100}%` }}
+                      className="h-full bg-red-500"
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap justify-center gap-3">
+                    {loadingSteps.map((_, idx) => (
+                      <div key={idx} className={`w-2.5 h-2.5 rounded-full transition-colors duration-500 ${loadingStep >= idx ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-zinc-800'}`} />
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Skeleton Titles */}
+                <div className="space-y-4 opacity-40 pointer-events-none">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-16 bg-zinc-800/40 border border-white/5 rounded-2xl w-full animate-pulse flex items-center justify-between px-6">
+                      <div className="h-4 w-2/3 bg-zinc-700/50 rounded" />
+                      <div className="h-6 w-16 bg-zinc-700/30 rounded-lg" />
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {results.length > 0 && !loading && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}

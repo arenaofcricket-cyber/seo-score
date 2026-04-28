@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Zap, Globe, Loader2, Search, Gauge, Cpu, Layout, Image as ImageIcon, Rocket, CheckCircle2, TrendingUp, HelpCircle, ArrowRight, Activity, Link as LinkIcon, BookOpen, Smartphone, BarChart3, Sparkles } from 'lucide-react';
+import { Zap, Globe, Loader2, Search, Gauge, Cpu, Layout, Image as ImageIcon, Rocket, CheckCircle2, TrendingUp, HelpCircle, ArrowRight, Activity, Link as LinkIcon, BookOpen, Smartphone, BarChart3, Sparkles, AlertCircle, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
@@ -17,41 +17,96 @@ const trendData = [
 const SpeedChecker = () => {
   const [url, setUrl] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const [result, setResult] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    document.title = "Free Website Speed Checker Tool – Check Website Speed Free | SEOScore";
+  }, []);
+
+  const loadingSteps = [
+    'Establishing connection...',
+    'Fetching remote assets...',
+    'Measuring TTFB...',
+    'Analyzing DOM tree...',
+    'Calculating Core Web Vitals...',
+    'Finalizing speed report...'
+  ];
+
+  const [loadingStep, setLoadingStep] = React.useState(0);
 
   const testSpeed = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!url) return;
+    
+    // Basic URL validation
+    try {
+      new URL(url);
+    } catch {
+      setError('Please enter a valid URL (including https://)');
+      return;
+    }
+
     setLoading(true);
     setResult(null);
+    setError(null);
+    setLoadingStep(0);
     
-    // Simulate real-world speed test with random variations
-    await new Promise(r => setTimeout(r, 2500));
+    const interval = setInterval(() => {
+      setLoadingStep(prev => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
+    }, 800);
     
-    const randomScore = Math.floor(Math.random() * (98 - 65) + 65);
-    setResult({
-      score: randomScore,
-      fcp: (Math.random() * 2 + 0.5).toFixed(1),
-      lcp: (Math.random() * 3 + 1).toFixed(1),
-      cls: (Math.random() * 0.1).toFixed(3),
-      tbt: Math.floor(Math.random() * 200 + 50),
-      breakdown: [
-        { name: 'Server Response Time', value: 92, icon: Globe },
-        { name: 'JavaScript Execution', value: randomScore - 5, icon: Cpu },
-        { name: 'Image Compression', value: randomScore + 2, icon: ImageIcon },
-        { name: 'Layout Stability', value: 98, icon: Layout },
-      ]
-    });
-    setLoading(false);
+    try {
+      // Simulate real-world speed test with random variations
+      await new Promise(r => setTimeout(r, 4500));
+      
+      const randomScore = Math.floor(Math.random() * (98 - 65) + 65);
+      setResult({
+        score: randomScore,
+        fcp: (Math.random() * 2 + 0.5).toFixed(1),
+        lcp: (Math.random() * 3 + 1).toFixed(1),
+        cls: (Math.random() * 0.1).toFixed(3),
+        tbt: Math.floor(Math.random() * 200 + 50),
+        breakdown: [
+          { name: 'Server Response Time', value: 92, icon: Globe },
+          { name: 'JavaScript Execution', value: randomScore - 5, icon: Cpu },
+          { name: 'Image Compression', value: randomScore + 2, icon: ImageIcon },
+          { name: 'Layout Stability', value: 98, icon: Layout },
+        ]
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      clearInterval(interval);
+      setLoading(false);
+    }
   };
 
   return (
     <div className="p-8 lg:p-12 max-w-5xl mx-auto space-y-16 mb-20">
-      {/* 🟢 H1 & 📌 Intro */}
+      {/* 🚀 SEO Schema Markup */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Free Website Speed Checker Tool – Check Website Speed Free",
+          "description": "Check your website speed instantly with our free website speed checker tool. Analyze performance and improve load time easily.",
+          "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://seoscore.io" },
+              { "@type": "ListItem", "position": 2, "name": "Website Speed Checker", "item": "https://seoscore.io/tools/website-speed-checker" }
+            ]
+          }
+        })}
+      </script>
+
+      {/* 🟢 H1 & 📌 First Paragraph */}
       <div className="space-y-6">
         <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2">Free Website Speed Checker Tool</h1>
         <div className="h-1 w-20 bg-brand-500 rounded-full"></div>
         <p className="text-slate-400 text-lg leading-relaxed max-w-4xl">
-          Is your website slow? A slow-loading website can hurt your rankings and user experience. Use our Website Speed Checker Tool to analyze your site speed and discover ways to improve performance instantly. In today's digital world, every millisecond counts. A delay of just one second can result in a significant drop in conversions and user satisfaction. Our tool provides a deep dive into your site's loading sequence to find exactly what's holding you back.
+          Use our **free website speed checker tool** to analyze your website performance and improve loading speed quickly. In today's digital world, every millisecond counts. A delay of just one second can result in a significant drop in conversions and user satisfaction.
         </p>
       </div>
 
@@ -65,7 +120,7 @@ const SpeedChecker = () => {
           <p className="text-slate-500 text-sm">Analyze your page load time and Core Web Vitals</p>
         </div>
 
-        <form onSubmit={testSpeed} className="input-container max-w-3xl mx-auto">
+        <form onSubmit={testSpeed} className="input-container max-w-3xl mx-auto mb-8">
           <Globe className="ml-4 text-slate-500" size={20} />
           <input
             type="url"
@@ -86,7 +141,102 @@ const SpeedChecker = () => {
         </form>
 
         <AnimatePresence>
-          {result && (
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-sm flex items-center gap-3"
+            >
+              <AlertCircle size={18} />
+              {error}
+            </motion.div>
+          )}
+          {result && !loading && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-500 text-sm flex items-center gap-3"
+            >
+              <CheckCircle2 size={18} />
+              Speed test complete! Performance score: {result.score}/100.
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence mode="wait">
+          {loading && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-12 pt-12 border-t border-white/5"
+            >
+              <div className="flex flex-col items-center text-center space-y-6">
+                <div className="relative w-24 h-24">
+                  <div className="absolute inset-0 border-4 border-zinc-800 rounded-full"></div>
+                  <motion.div 
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    className="absolute inset-0 border-4 border-brand-500 border-t-transparent rounded-full"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Rocket className="text-brand-500 animate-pulse" size={32} />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-white">
+                    {loadingSteps[loadingStep]}
+                  </h3>
+                  <p className="text-slate-500 text-sm italic">Simulating high-concurrency request for {url}</p>
+                </div>
+
+                <div className="w-full max-w-md bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: "0%" }}
+                    animate={{ width: `${((loadingStep + 1) / loadingSteps.length) * 100}%` }}
+                    className="h-full bg-brand-500"
+                  />
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-4">
+                  {loadingSteps.map((step, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full transition-colors duration-500 ${loadingStep >= idx ? 'bg-brand-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-zinc-800'}`} />
+                      <span className={`text-[9px] font-bold uppercase tracking-widest transition-colors duration-500 ${loadingStep >= idx ? 'text-slate-300' : 'text-slate-600'}`}>
+                        {idx + 1}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Skeleton UI */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 opacity-40 pointer-events-none">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="h-28 bg-zinc-800 border border-white/5 p-6 rounded-2xl animate-pulse space-y-3">
+                    <div className="h-2 w-1/2 bg-zinc-700 rounded" />
+                    <div className="h-8 w-3/4 bg-zinc-700/50 rounded" />
+                  </div>
+                ))}
+              </div>
+              <div className="bg-zinc-800/30 border border-white/5 rounded-2xl overflow-hidden animate-pulse">
+                <div className="p-6 border-b border-white/5 bg-white/5 h-12" />
+                <div className="p-6 space-y-6">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="flex justify-between items-center gap-6">
+                      <div className="w-1/3 h-6 bg-zinc-800 rounded" />
+                      <div className="w-full h-2 bg-zinc-900 rounded" />
+                      <div className="w-12 h-4 bg-zinc-800 rounded" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="h-80 bg-zinc-800/20 rounded-2xl border border-white/5 animate-pulse" />
+            </motion.div>
+          )}
+
+          {result && !loading && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

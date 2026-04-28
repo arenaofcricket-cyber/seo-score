@@ -1,38 +1,50 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Hash, FileText, AlertTriangle, CheckCircle2, Search, TrendingUp, HelpCircle, ArrowRight, Zap, ShieldCheck, Activity, Info, Sparkles, MessageSquare, BookOpen } from 'lucide-react';
+import { Hash, FileText, AlertTriangle, CheckCircle2, Search, TrendingUp, HelpCircle, ArrowRight, Zap, ShieldCheck, Activity, Info, Sparkles, MessageSquare, BookOpen, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const KeywordDensity = () => {
   const [text, setText] = React.useState('');
   const [results, setResults] = React.useState<{word: string, count: number, density: number}[]>([]);
 
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+
   const analyze = () => {
-    if (!text) return;
+    if (!text) {
+      setResults([]);
+      setIsAnalyzing(false);
+      return;
+    }
     
-    // Simple word regex, filtering out common short words and non-alphanumeric
-    const words = text.toLowerCase().match(/\b(\w+)\b/g) || [];
-    const totalWords = words.length;
-    const freq: Record<string, number> = {};
+    setIsAnalyzing(true);
     
-    // Stop words to ignore (basic set)
-    const stopWords = new Set(['the', 'and', 'for', 'you', 'was', 'with', 'your', 'from', 'this', 'that', 'our', 'are', 'were']);
+    // Simulate slight processing delay for better UX "feel"
+    setTimeout(() => {
+      // Simple word regex, filtering out common short words and non-alphanumeric
+      const words: string[] = text.toLowerCase().match(/\b(\w+)\b/g) || [];
+      const totalWords = words.length;
+      const freq: Record<string, number> = {};
+      
+      // Stop words to ignore (basic set)
+      const stopWords = new Set(['the', 'and', 'for', 'you', 'was', 'with', 'your', 'from', 'this', 'that', 'our', 'are', 'were', 'how', 'can', 'not', 'but']);
 
-    words.forEach(w => {
-      if (w.length > 2 && !stopWords.has(w)) {
-        freq[w] = (freq[w] || 0) + 1;
-      }
-    });
+      words.forEach(w => {
+        if (w.length > 2 && !stopWords.has(w)) {
+          freq[w] = (freq[w] || 0) + 1;
+        }
+      });
 
-    const entries = Object.entries(freq)
-      .map(([word, count]) => ({
-        word,
-        count,
-        density: totalWords > 0 ? (count / totalWords) * 100 : 0
-      }))
-      .sort((a, b) => b.count - a.count);
+      const entries = Object.entries(freq)
+        .map(([word, count]) => ({
+          word,
+          count,
+          density: totalWords > 0 ? (count / totalWords) * 100 : 0
+        }))
+        .sort((a, b) => b.count - a.count);
 
-    setResults(entries.slice(0, 15));
+      setResults(entries.slice(0, 15));
+      setIsAnalyzing(false);
+    }, 400);
   };
 
   React.useEffect(() => {
@@ -123,6 +135,21 @@ const KeywordDensity = () => {
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-zinc-900 border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden h-full">
+            <div className="absolute top-0 right-0 p-4 z-20">
+              <div className="flex items-center gap-2 bg-zinc-950/50 border border-white/5 px-2 py-1 rounded-full">
+                {text.length > 0 ? (
+                  <>
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Analyzing Live</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-2 h-2 rounded-full bg-slate-600" />
+                    <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Idle</span>
+                  </>
+                )}
+              </div>
+            </div>
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
             
             <div className="relative z-10 h-full flex flex-col">
@@ -158,52 +185,63 @@ const KeywordDensity = () => {
               Density Analysis (Top 15)
             </h3>
             
-            <AnimatePresence mode="popLayout">
-              {results.length > 0 ? (
-                <div className="space-y-6">
-                  {results.map((res, i) => (
-                    <motion.div 
-                      key={res.word}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.03 }}
-                      className="group"
-                    >
-                      <div className="flex justify-between items-end text-sm mb-2.5">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-white tracking-tight text-lg leading-none uppercase italic">{res.word}</span>
-                          <span className="text-[10px] text-slate-500 font-bold tracking-widest mt-1 uppercase">{res.count} Occurrences</span>
+            <div className="relative">
+              <AnimatePresence mode="popLayout">
+                {results.length > 0 ? (
+                  <div className={`space-y-6 transition-opacity duration-300 ${isAnalyzing ? 'opacity-30 blur-[1px]' : 'opacity-100'}`}>
+                    {results.map((res, i) => (
+                      <motion.div 
+                        key={res.word}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                        className="group"
+                      >
+                        <div className="flex justify-between items-end text-sm mb-2.5">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-white tracking-tight text-lg leading-none uppercase italic">{res.word}</span>
+                            <span className="text-[10px] text-slate-500 font-bold tracking-widest mt-1 uppercase">{res.count} Occurrences</span>
+                          </div>
+                          <span className={`font-mono text-lg ${res.density > 2.5 ? 'text-red-500 font-black' : 'text-brand-400'}`}>
+                            {res.density.toFixed(1)}%
+                          </span>
                         </div>
-                        <span className={`font-mono text-lg ${res.density > 2.5 ? 'text-red-500 font-black' : 'text-brand-400'}`}>
-                          {res.density.toFixed(1)}%
-                        </span>
-                      </div>
-                      <div className="h-2 bg-white/5 rounded-full overflow-hidden relative">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${Math.min(res.density * 20, 100)}%` }}
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            res.density > 2.5 
-                            ? 'bg-gradient-to-r from-red-600 to-rose-400' 
-                            : 'bg-gradient-to-r from-brand-600 to-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                          }`}
-                        />
-                      </div>
-                      {res.density > 2.5 && (
-                        <div className="flex items-center gap-1.5 text-[9px] text-red-400 mt-2 uppercase font-bold tracking-widest animate-pulse">
-                          <AlertTriangle size={12} /> Stuffing Risk Detected
+                        <div className="h-2 bg-white/5 rounded-full overflow-hidden relative">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min(res.density * 20, 100)}%` }}
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              res.density > 2.5 
+                              ? 'bg-gradient-to-r from-red-600 to-rose-400' 
+                              : 'bg-gradient-to-r from-brand-600 to-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                            }`}
+                          />
                         </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center py-20 text-center opacity-30">
-                  <Search size={48} className="mb-4" />
-                  <p className="text-sm font-medium">Capture text to see live data</p>
+                        {res.density > 2.5 && (
+                          <div className="flex items-center gap-1.5 text-[9px] text-red-400 mt-2 uppercase font-bold tracking-widest animate-pulse">
+                            <AlertTriangle size={12} /> Stuffing Risk Detected
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center py-20 text-center opacity-30">
+                    <Search size={48} className="mb-4" />
+                    <p className="text-sm font-medium">Capture text to see live data</p>
+                  </div>
+                )}
+              </AnimatePresence>
+              
+              {isAnalyzing && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex items-center gap-3 bg-zinc-950/80 border border-white/5 px-4 py-2 rounded-xl backdrop-blur-sm shadow-xl">
+                    <Loader2 className="animate-spin text-brand-500" size={16} />
+                    <span className="text-xs font-bold text-white uppercase tracking-widest">Processing...</span>
+                  </div>
                 </div>
               )}
-            </AnimatePresence>
+            </div>
           </div>
 
           <motion.div 

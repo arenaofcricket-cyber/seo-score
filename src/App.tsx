@@ -26,6 +26,7 @@ import BlogPostPage from './pages/BlogPostPage';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
+import Disclaimer from './pages/Disclaimer';
 import ToolsGuide from './pages/ToolsGuide';
 
 // Components
@@ -47,22 +48,22 @@ const Sidebar = () => {
     {
       title: 'SEO Tools',
       links: [
-        { name: 'SEO Score Checker', path: '/seo/score-checker', icon: Activity },
+        { name: 'SEO Score Checker', path: '/tools/seo-score-checker', icon: Activity },
         { name: 'Keyword Density', path: '/seo/keyword-density', icon: Hash },
-        { name: 'Backlink Checker', path: '/seo/backlink-checker', icon: Globe },
+        { name: 'Backlink Checker', path: '/tools/backlink-checker', icon: Globe },
       ]
     },
     {
       title: 'YouTube Tools',
       links: [
         { name: 'Title Generator', path: '/youtube/title-generator', icon: Youtube },
-        { name: 'Tag Generator', path: '/youtube/tag-generator', icon: Tag },
+        { name: 'Tag Generator', path: '/tools/youtube-tag-generator', icon: Tag },
       ]
     },
     {
       title: 'Infrastructure',
       links: [
-        { name: 'Speed Checker', path: '/website/speed-checker', icon: Zap },
+        { name: 'Speed Checker', path: '/tools/website-speed-checker', icon: Zap },
         { name: 'Mobile Test', path: '/website/mobile-test', icon: Smartphone },
       ]
     }
@@ -145,11 +146,11 @@ const Header = () => {
   const location = useLocation();
   const getTitle = () => {
     if (location.pathname === '/') return 'Overview Dashboard';
-    if (location.pathname.includes('score-checker')) return 'SEO Score Checker';
+    if (location.pathname.includes('seo-score-checker')) return 'SEO Score Checker';
     if (location.pathname.includes('keyword-density')) return 'Keyword Density';
     if (location.pathname.includes('title-generator')) return 'YT Title Generator';
-    if (location.pathname.includes('tag-generator')) return 'YT Tag Generator';
-    if (location.pathname.includes('speed-checker')) return 'Speed Checker';
+    if (location.pathname.includes('youtube-tag-generator')) return 'YT Tag Generator';
+    if (location.pathname.includes('website-speed-checker')) return 'Speed Checker';
     if (location.pathname.includes('mobile-test')) return 'Mobile Friendly Test';
     if (location.pathname.includes('blog')) return 'Learning Center';
     return 'SEOScore';
@@ -184,18 +185,19 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/tools-guide" element={<ToolsGuide />} />
-              <Route path="/seo/score-checker" element={<ScoreChecker />} />
+              <Route path="/tools/seo-score-checker" element={<ScoreChecker />} />
               <Route path="/seo/keyword-density" element={<KeywordDensity />} />
-              <Route path="/seo/backlink-checker" element={<BacklinkChecker />} />
+              <Route path="/tools/backlink-checker" element={<BacklinkChecker />} />
               <Route path="/youtube/title-generator" element={<TitleGenerator />} />
-              <Route path="/youtube/tag-generator" element={<TagGenerator />} />
-              <Route path="/website/speed-checker" element={<SpeedChecker />} />
+              <Route path="/tools/youtube-tag-generator" element={<TagGenerator />} />
+              <Route path="/tools/website-speed-checker" element={<SpeedChecker />} />
               <Route path="/website/mobile-test" element={<MobileTest />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:id" element={<BlogPostPage />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/disclaimer" element={<Disclaimer />} />
             </Routes>
           </main>
           <Footer />

@@ -9,8 +9,8 @@ const Footer = () => {
     {
       title: 'SEO Tools',
       links: [
-        { name: 'SEO Score Checker', path: '/seo/score-checker', icon: Activity },
-        { name: 'Backlink Checker', path: '/seo/backlink-checker', icon: Globe },
+        { name: 'SEO Score Checker', path: '/tools/seo-score-checker', icon: Activity },
+        { name: 'Backlink Checker', path: '/tools/backlink-checker', icon: Globe },
         { name: 'Keyword Density', path: '/seo/keyword-density', icon: Hash },
       ]
     },
@@ -18,13 +18,13 @@ const Footer = () => {
       title: 'YouTube SEO',
       links: [
         { name: 'Title Generator', path: '/youtube/title-generator', icon: Youtube },
-        { name: 'Tag Generator', path: '/youtube/tag-generator', icon: Tag },
+        { name: 'Tag Generator', path: '/tools/youtube-tag-generator', icon: Tag },
       ]
     },
     {
       title: 'Website Tools',
       links: [
-        { name: 'Speed Checker', path: '/website/speed-checker', icon: Zap },
+        { name: 'Speed Checker', path: '/tools/website-speed-checker', icon: Zap },
         { name: 'Mobile Friendly Test', path: '/website/mobile-test', icon: Smartphone },
       ]
     },
@@ -34,7 +34,7 @@ const Footer = () => {
         { name: 'Blog', path: '/blog', icon: BookOpen },
         { name: 'About Us', path: '/about', icon: Info },
         { name: 'Contact', path: '/contact', icon: Mail },
-        { name: 'Privacy Policy', path: '/privacy', icon: Shield },
+        { name: 'Disclaimer', path: '/disclaimer', icon: Shield },
       ]
     }
   ];
@@ -78,8 +78,8 @@ const Footer = () => {
             © {currentYear} SEOScore. All rights reserved.
           </div>
           <div className="flex items-center gap-6 text-slate-600 text-xs font-medium">
-            <Link to="/privacy" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+            <Link to="/disclaimer" className="hover:text-white transition-colors">Disclaimer</Link>
+            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <div className="flex items-center gap-1.5 opacity-50">
               Made with <Heart size={10} className="text-red-500 fill-red-500" /> for creators
             </div>

@@ -5,7 +5,7 @@ export const TOOLS: Tool[] = [
     id: 'seo-score',
     name: 'SEO Score Checker',
     description: 'Analyze your website and get a comprehensive SEO score with improvement tips.',
-    path: '/seo/score-checker',
+    path: '/tools/seo-score-checker',
     category: 'seo',
     icon: 'Activity'
   },
@@ -29,7 +29,7 @@ export const TOOLS: Tool[] = [
     id: 'yt-tag',
     name: 'YouTube Tag Generator',
     description: 'Find the best tags for your video to improve discoverability on YouTube.',
-    path: '/youtube/tag-generator',
+    path: '/tools/youtube-tag-generator',
     category: 'youtube',
     icon: 'Tag'
   },
@@ -37,7 +37,7 @@ export const TOOLS: Tool[] = [
     id: 'speed-checker',
     name: 'Website Speed Checker',
     description: 'Check your website loading speed and performance metrics.',
-    path: '/website/speed-checker',
+    path: '/tools/website-speed-checker',
     category: 'website',
     icon: 'Zap'
   },
@@ -58,6 +58,8 @@ export const BLOG_POSTS = [
     excerpt: 'A comprehensive beginner\'s guide to understanding search engine optimization and its core pillars in the AI era.',
     date: 'March 15, 2026',
     author: 'SEOScore Team',
+    category: 'SEO Basics',
+    tags: ['Keywords', 'Google'],
     content: `
 # What is SEO and How It Works (Beginner Guide 2026)
 
@@ -135,6 +137,8 @@ SEO is a long-term strategy that can transform your online presence. Start with 
     excerpt: 'Technical tips and tricks to make your website load lightning fast for better rankings and user experience.',
     date: 'April 10, 2026',
     author: 'SEOScore Team',
+    category: 'Technical SEO',
+    tags: ['Speed', 'Analytics'],
     content: `
 # How to Improve Your Website Speed (Complete Guide)
 
@@ -196,6 +200,8 @@ Improving website speed is essential for better rankings and user experience. St
     excerpt: 'Everything you need to know about building authority through high-quality backlinks in 2026.',
     date: 'May 05, 2026',
     author: 'SEOScore Team',
+    category: 'SEO Basics',
+    tags: ['Backlinks', 'Algorithm'],
     content: `
 # Beginner’s Guide to Backlinks
 
@@ -214,6 +220,8 @@ It's vital to know who is linking to you. You can [Analyze backlinks](/seo/backl
     excerpt: 'Master the YouTube algorithm with the latest strategies for video titles, descriptions, and tag optimization.',
     date: 'June 20, 2026',
     author: 'SEOScore Team',
+    category: 'YouTube Growth',
+    tags: ['Keywords', 'Algorithm'],
     content: `
 # YouTube SEO: How to Rank Your Videos in 2026
 
@@ -271,6 +279,8 @@ YouTube SEO is essential if you want to grow your channel. Focus on optimization
     excerpt: 'The ultimate checklist for optimizing your on-page elements to improve visibility and climb search rankings in 2026.',
     date: 'July 15, 2026',
     author: 'SEOScore Team',
+    category: 'SEO Basics',
+    tags: ['Keywords', 'Backlinks'],
     content: `
 # Complete On-Page SEO Checklist (2026 Guide)
 
@@ -366,6 +376,8 @@ On-page SEO is the foundation of ranking. If you follow this checklist, you can 
     excerpt: 'Deep dive into what backlinks are, why they are the "votes of confidence" of the internet, and how they define your authority.',
     date: 'August 02, 2026',
     author: 'SEOScore Team',
+    category: 'SEO Basics',
+    tags: ['Backlinks', 'Google'],
     content: `
 # What Are Backlinks? Complete Beginner Guide
 
@@ -438,6 +450,8 @@ Backlinks are essential for SEO success. Focus on quality links and consistent e
     excerpt: 'Master advanced link building strategies to acquire high-authority backlinks and outrank your competition.',
     date: 'August 15, 2026',
     author: 'SEOScore Team',
+    category: 'Content Strategy',
+    tags: ['Backlinks', 'Analytics'],
     content: `
 # How to Build High-Quality Backlinks (Pro Guide)
 
@@ -502,6 +516,8 @@ Building high-quality backlinks takes time, but it’s one of the most effective
     excerpt: 'Ultimate pre-publish checklist to ensure your content ranks. Checklist for keywords, quality, structure, and speed.',
     date: 'September 10, 2026',
     author: 'SEOScore Team',
+    category: 'SEO Basics',
+    tags: ['Keywords', 'Speed'],
     content: `
 # SEO Optimization Checklist (Publish Se Pehle)
 
@@ -638,47 +654,54 @@ Har post ke end me CTA add karo to convert traffic:
   {
     id: 'how-to-improve-seo-score',
     title: 'How to Improve SEO Score (Step-by-Step Guide)',
-    excerpt: 'Learn how to improve SEO score with simple and effective tips. Boost your website ranking and performance step by step.',
+    excerpt: 'Learn how to improve SEO score with simple and effective strategies. Boost your rankings and optimize your website easily.',
     date: 'October 05, 2026',
     author: 'SEOScore Team',
+    category: 'Technical SEO',
+    tags: ['Keywords', 'Speed'],
     content: `
 # How to Improve SEO Score (Step-by-Step Guide)
 
-If you've ever wondered **how to improve SEO score** for your website, you're in the right place. Improving your website's performance and visibility on search engines is essential for long-term growth.
+If you want better rankings, you must learn **how to improve SEO score** effectively. Search Engine Optimization is not a one-time thing; it's a continuous process of refining your strategy, content, and technical infrastructure to meet the evolving demands of search engine algorithms.
 
 In this guide, we will walk you through actionable **seo optimization tips** to help you **increase seo score** and **improve website seo** effectively.
 
-## 📊 Why SEO Score is Important
+## 📊 What is SEO Score?
 
-Your SEO score is a direct reflection of how search engines perceive your website. A higher score often correlates with higher rankings, better user experience, and increased organic traffic.
+Your SEO score is a metric that evaluates how well your website's technical and on-page elements are optimized for search engines. It takes into account factors like page speed, mobile friendliness, meta tag optimization, and content quality.
 
-👉 **Before we begin, you can [check your SEO score](/seo/score-checker) using our free tool.**
+## 📈 Why SEO Score is Important
+
+A high SEO score is critical because it signals to Google and other search engines that your website is high-quality, trustworthy, and provides a great user experience. Websites with higher scores are more likely to rank on the first page, leading to increased organic visibility, more clicks, and higher conversion rates.
+
+👉 **Before we begin, you can [check your SEO score](/tools/seo-score-checker) using our free tool.**
 
 ## 🚀 Tips to Improve SEO Score
 
 ### 1. Optimize Your Meta Tags
-Ensure your titles and meta descriptions are engaging and include relevant keywords. Your title should be under 60 characters and clearly describe the page content.
+Ensure your titles and meta descriptions are engaging and include relevant keywords. Your title should be under 60 characters and clearly describe the page content. Meta descriptions should be between 140-160 characters and provide a clear benefit to the user.
 
 ### 2. High-Quality Content is King
-To **improve website seo**, focus on creating high-quality, original content. Solve user problems and provide value that keeps them engaged.
+To **improve website seo**, focus on creating high-quality, original content. Solve user problems and provide value that keeps them engaged. Use keywords naturally in your first paragraph and headers.
 
 ### 3. Improve Page Speed
-Slow websites penalize your ranking. Compress images and use a clean design to ensure your pages load quickly.  
-👉 Check your performance with our [Website Speed Checker](/website/speed-checker).
+Slow websites penalize your ranking. Compress images, minify code, and use a clean design to ensure your pages load quickly.  
+👉 Check your performance with our [Website Speed Checker](/tools/website-speed-checker).
 
 ### 4. Build Authoritative Backlinks
-Acquiring "votes of trust" from other reputable websites is a classic way to **increase seo score**.
+Acquiring "votes of trust" from other reputable websites is a classic way to **increase seo score**. Focus on earning links from domains with high authority in your niche.
 
 ## ⚠️ Common SEO Mistakes
-- Keyword stuffing (don't repeat keywords like spam)
-- Missing alt text for images
-- Poor mobile optimization
+- **Keyword stuffing**: Don't repeat keywords like spam; keep it natural.
+- **Thin content**: Pages with very little text are unlikely to rank well.
+- **No internal links**: Help search engines crawl your site by linking your pages together.
+- **Duplicate content**: Ensure every page has unique meta tags and body text.
 
 ## 🎯 Conclusion
 
 Learning **how to improve seo score** takes time and consistency. By following these **seo optimization tips**, you are setting your website up for search engine success.
 
-👉 **[Check your SEO score now](/seo/score-checker) and start improving today!**
+👉 **[Check your SEO score now](/tools/seo-score-checker) and start improving your performance today!**
     `
   }
 ];

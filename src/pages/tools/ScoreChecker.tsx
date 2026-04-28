@@ -8,9 +8,14 @@ import { getRealPageSpeedData } from '../../services/pageSpeedService';
 const ScoreChecker = () => {
   const [url, setUrl] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const [loadingStep, setLoadingStep] = React.useState(0);
   const [result, setResult] = React.useState<any>(null);
   const [previewDevice, setPreviewDevice] = React.useState<'desktop' | 'mobile'>('desktop');
+
+  React.useEffect(() => {
+    document.title = "Free SEO Score Checker Tool – Analyze Website Score | SEOScore";
+  }, []);
 
   const loadingSteps = [
     'Initializing audit engine...',
@@ -24,23 +29,40 @@ const ScoreChecker = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url) return;
+    
+    // Basic URL validation
+    try {
+      new URL(url);
+    } catch {
+      setError('Please enter a valid URL (including https://)');
+      return;
+    }
+
     setLoading(true);
     setResult(null);
+    setError(null);
     setLoadingStep(0);
 
     // Simulated progress for better UX
     const interval = setInterval(() => {
       setLoadingStep(prev => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
-    }, 1500);
+    }, 1200);
 
     try {
       // 1. Try to get real performance data first
       const realData = await getRealPageSpeedData(url);
       
+      // Force a minimum loading time for better UX and to show the steps
+      await new Promise(r => setTimeout(r, 2000));
+      
+      setLoadingStep(prev => Math.min(prev + 1, loadingSteps.length - 1));
+
       // 2. Get AI insights (Gemini) for a deeper qualitative analysis
-      // We pass the real score if we have it to make Gemini more accurate
       const aiData = await getSEOScore(url, realData);
       
+      setLoadingStep(loadingSteps.length - 1);
+      await new Promise(r => setTimeout(r, 500));
+
       if (realData) {
         // Merge real metrics with AI recommendations
         setResult({
@@ -57,8 +79,9 @@ const ScoreChecker = () => {
       } else {
         setResult(aiData);
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      setError('Unable to analyze this URL. It might be blocking automated crawlers or could be offline.');
     } finally {
       clearInterval(interval);
       setLoading(false);
@@ -219,7 +242,7 @@ const ScoreChecker = () => {
           <p className="text-slate-500 text-sm italic">Analyze your site with our **seo analyzer tool free** of charge.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="input-container max-w-3xl mx-auto">
+        <form onSubmit={handleSubmit} className="input-container max-w-3xl mx-auto mb-8">
           <Globe className="ml-4 text-slate-500" size={20} />
           <input
             type="url"
@@ -238,6 +261,29 @@ const ScoreChecker = () => {
             {loading ? 'Analyzing...' : 'Analyze Now'}
           </button>
         </form>
+
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-sm flex items-center gap-3"
+            >
+              <XCircle size={18} />
+              {error}
+            </motion.div>
+          )}
+          {result && !loading && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-500 text-sm flex items-center gap-3"
+            >
+              <CheckCircle2 size={18} />
+              Audit complete! We've found {result.recommendations?.length || 0} optimization opportunities.
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <AnimatePresence mode="wait">
           {loading && (
@@ -288,18 +334,44 @@ const ScoreChecker = () => {
               </div>
               
               {/* Skeleton Result View */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 opacity-40 grayscale pointer-events-none">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 opacity-40 pointer-events-none">
                 <div className="lg:col-span-2 space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-zinc-800/20 border border-white/5 p-8 rounded-2xl h-48 animate-pulse" />
-                    <div className="md:col-span-2 bg-zinc-800/20 border border-white/5 p-8 rounded-2xl h-48 animate-pulse" />
+                    <div className="bg-zinc-800/20 border border-white/5 p-8 rounded-2xl h-48 flex items-center justify-center">
+                      <div className="w-24 h-24 rounded-full border-4 border-zinc-700 animate-pulse" />
+                    </div>
+                    <div className="md:col-span-2 bg-zinc-800/20 border border-white/5 p-8 rounded-2xl h-48 space-y-4">
+                      <div className="h-6 w-1/3 bg-zinc-700 rounded animate-pulse" />
+                      <div className="h-4 w-full bg-zinc-700 rounded animate-pulse" />
+                      <div className="h-4 w-full bg-zinc-700 rounded animate-pulse" />
+                      <div className="h-4 w-2/3 bg-zinc-700 rounded animate-pulse" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[1, 2, 3, 4].map(i => (
+                      <div key={i} className="bg-zinc-800/20 border border-white/5 p-4 rounded-xl h-20 animate-pulse" />
+                    ))}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-zinc-800/20 border border-white/5 h-64 rounded-2xl animate-pulse" />
-                    <div className="bg-zinc-800/20 border border-white/5 h-64 rounded-2xl animate-pulse" />
+                    <div className="bg-zinc-800/20 border border-white/5 h-64 rounded-2xl p-6 space-y-4">
+                      <div className="h-5 w-1/2 bg-zinc-700 rounded animate-pulse" />
+                      <div className="space-y-2">
+                        {[1, 2, 3, 4].map(i => <div key={i} className="h-3 w-full bg-zinc-700/50 rounded animate-pulse" />)}
+                      </div>
+                    </div>
+                    <div className="bg-zinc-800/20 border border-white/5 h-64 rounded-2xl p-6 space-y-4">
+                      <div className="h-5 w-1/2 bg-zinc-700 rounded animate-pulse" />
+                      <div className="space-y-2">
+                        {[1, 2, 3, 4].map(i => <div key={i} className="h-3 w-full bg-zinc-700/50 rounded animate-pulse" />)}
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="lg:col-span-1 bg-zinc-800/20 border border-white/5 h-full min-h-[400px] rounded-2xl animate-pulse" />
+                <div className="lg:col-span-1 bg-zinc-800/20 border border-white/5 min-h-[400px] rounded-2xl p-6 space-y-4">
+                  <div className="h-6 w-1/2 bg-zinc-700 rounded animate-pulse" />
+                  <div className="aspect-[4/5] bg-zinc-700/30 rounded-xl animate-pulse" />
+                  <div className="h-10 w-full bg-zinc-700/50 rounded-xl animate-pulse" />
+                </div>
               </div>
             </motion.div>
           )}

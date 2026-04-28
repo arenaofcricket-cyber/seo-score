@@ -13,5 +13,7 @@ export interface BlogPost {
   excerpt: string;
   date: string;
   author: string;
+  category: string;
+  tags: string[];
   content: string;
 }

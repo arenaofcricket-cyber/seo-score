@@ -10,8 +10,23 @@ import {
 import { BLOG_POSTS } from '../constants';
 
 const Home = () => {
+  React.useEffect(() => {
+    document.title = "Free SEO Tools Online – Analyze & Optimize Your Website | SEOScore";
+  }, []);
+
   return (
     <div className="p-8 lg:p-12 max-w-6xl mx-auto space-y-24 mb-20">
+      {/* 🚀 SEO Schema Markup */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Free SEO Tools Online – SEOScore",
+          "description": "Use free SEO tools to check website speed, backlinks, and SEO score. Improve rankings and grow your traffic easily.",
+          "url": "https://seoscore.io"
+        })}
+      </script>
+
       {/* 🔥 Hero Section */}
       <motion.section 
         initial={{ opacity: 0, y: 20 }}
@@ -23,28 +38,33 @@ const Home = () => {
           Updated for 2026
         </div>
         <h1 className="text-5xl lg:text-7xl font-bold text-white tracking-tight leading-tight">
-          Free SEO Tools to Grow Your <br className="hidden lg:block" />
-          <span className="text-brand-400">Website & YouTube</span> Channel
+          Free SEO Tools to Boost Your Website
         </h1>
         <p className="text-slate-400 text-xl max-w-3xl mx-auto leading-relaxed">
           Analyze, optimize, and improve your website performance with our powerful free SEO tools. 
-          From SEO score checking to backlinks and site speed analysis — everything in one place.
+          Use free SEO tools to check website speed, backlinks, and SEO score. Improve rankings and grow your traffic easily.
         </p>
         <div className="flex flex-wrap justify-center gap-4 pt-4">
-          <Link to="/seo/score-checker" className="btn-primary flex items-center gap-2 px-8 py-4 text-lg">
+          <Link to="/tools/seo-score-checker" className="btn-primary flex items-center gap-2 px-8 py-4 text-lg">
             Check SEO Score <ArrowRight size={20} />
           </Link>
-          <Link to="/seo/keyword-density" className="px-8 py-4 rounded-xl bg-zinc-900 border border-white/10 text-white font-medium hover:bg-zinc-800 transition-all flex items-center gap-2 text-lg">
+          <Link to="/tools-guide" className="px-8 py-4 rounded-xl bg-zinc-900 border border-white/10 text-white font-medium hover:bg-zinc-800 transition-all flex items-center gap-2 text-lg">
             Explore Tools
           </Link>
         </div>
       </motion.section>
 
       {/* 💡 Short Intro */}
-      <section className="bg-zinc-900/40 border border-white/5 rounded-3xl p-10 lg:p-16 text-center max-w-4xl mx-auto">
-        <h2 className="text-white text-2xl font-semibold mb-6">Welcome to SEOScore</h2>
+      <section className="bg-zinc-900/40 border border-white/5 rounded-3xl p-10 lg:p-16 text-left max-w-4xl mx-auto space-y-6">
+        <h2 className="text-white text-3xl font-bold">Welcome to SEOScore</h2>
         <p className="text-slate-400 text-lg leading-relaxed">
           Welcome to SEOScore, your all-in-one platform for free SEO tools designed to help bloggers, marketers, and creators improve their online presence. Whether you want to rank higher on Google or grow your YouTube channel, our tools make SEO simple and effective.
+        </p>
+        <p className="text-slate-400 text-lg leading-relaxed">
+          In today's digital landscape, having a strong search engine optimization strategy is critical for success. Search engines prioritize websites that load fast, have high-quality backlinks, and provide a great user experience. SEOScore provides the technical insights you need to meet these requirements. From our comprehensive **SEO Score Checker** to our specialized **YouTube SEO tools**, we cover every aspect of your growth.
+        </p>
+        <p className="text-slate-400 text-lg leading-relaxed">
+          Our mission is to democratize high-level SEO data. Most professional tools cost hundreds of dollars a month, which is a barrier for small creators. At SEOScore, we believe everyone deserves a chance to rank. That is why our tools are 100% free, updated regularly, and require no login to use. Take the first step toward better rankings today by auditing your site with our performance checkers.
         </p>
       </section>
 
@@ -59,28 +79,28 @@ const Home = () => {
             { 
               name: 'SEO Score Checker', 
               desc: 'Analyze your website’s SEO performance and get actionable insights.',
-              path: '/seo/score-checker',
+              path: '/tools/seo-score-checker',
               icon: Activity,
               color: 'text-blue-400'
             },
             { 
               name: 'Website Speed Checker', 
               desc: 'Check how fast your site loads and improve user experience.',
-              path: '/website/speed-checker',
+              path: '/tools/website-speed-checker',
               icon: Zap,
               color: 'text-amber-400'
             },
             { 
               name: 'Backlink Checker', 
               desc: 'Discover backlinks pointing to your website and boost authority.',
-              path: '/seo/backlink-checker',
+              path: '/tools/backlink-checker',
               icon: Globe,
               color: 'text-emerald-400'
             },
             { 
               name: 'YouTube Tag Generator', 
               desc: 'Generate SEO-friendly tags to increase video visibility.',
-              path: '/youtube/tag-generator',
+              path: '/tools/youtube-tag-generator',
               icon: Youtube,
               color: 'text-red-400'
             },

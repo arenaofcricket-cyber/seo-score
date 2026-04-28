@@ -6,31 +6,69 @@ import { Link } from 'react-router-dom';
 const MobileTest = () => {
   const [url, setUrl] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const [result, setResult] = React.useState<any>(null);
+
+  const loadingSteps = [
+    'Detecting viewports...',
+    'Analyzing layout shifts...',
+    'Checking tap targets...',
+    'Testing font legibility...',
+    'Checking media queries...',
+    'Finalizing mobile report...'
+  ];
+
+  const [loadingStep, setLoadingStep] = React.useState(0);
+
+  React.useEffect(() => {
+    document.title = "Free Mobile Friendly Test Tool – Check Website Responsiveness | SEOScore";
+  }, []);
 
   const runTest = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!url) return;
+    
+    // Basic URL validation
+    try {
+      new URL(url);
+    } catch {
+      setError('Please enter a valid URL (including https://)');
+      return;
+    }
+
     setLoading(true);
     setResult(null);
+    setError(null);
+    setLoadingStep(0);
     
-    // Simulated analysis delay
-    await new Promise(r => setTimeout(r, 2000));
+    const interval = setInterval(() => {
+      setLoadingStep(prev => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
+    }, 800);
     
-    setResult({
-      isFriendly: Math.random() > 0.2,
-      viewports: [
-        { name: 'iPhone 15 Pro', status: 'Optimal' },
-        { name: 'Samsung S24 Ultra', status: 'Optimal' },
-        { name: 'Google Pixel 8', status: 'Optimal' },
-        { name: 'iPad Air', status: 'Warning' },
-      ],
-      issues: [
-        { title: 'Touch targets too close', type: 'warning', desc: 'Buttons are difficult to press on small screens.' },
-        { title: 'Horizontal scrolling detected', type: 'error', desc: 'Content exceeds viewport width.' },
-        { title: 'Font sizes legible', type: 'success', desc: 'Typography is large enough for reading.' }
-      ]
-    });
-    setLoading(false);
+    try {
+      // Simulated analysis delay
+      await new Promise(r => setTimeout(r, 4000));
+      
+      setResult({
+        isFriendly: Math.random() > 0.3,
+        viewports: [
+          { name: 'iPhone 15 Pro', status: 'Optimal' },
+          { name: 'Samsung S24 Ultra', status: 'Optimal' },
+          { name: 'Google Pixel 8', status: 'Optimal' },
+          { name: 'iPad Air', status: 'Warning' },
+        ],
+        issues: [
+          { title: 'Touch targets too close', type: 'warning', desc: 'Buttons are difficult to press on small screens.' },
+          { title: 'Horizontal scrolling detected', type: 'error', desc: 'Content exceeds viewport width.' },
+          { title: 'Font sizes legible', type: 'success', desc: 'Typography is large enough for reading.' }
+        ]
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      clearInterval(interval);
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,7 +96,7 @@ const MobileTest = () => {
         <div className="absolute top-0 left-0 w-64 h-64 bg-brand-500/5 rounded-full blur-3xl -ml-32 -mt-32"></div>
         
         <div className="relative z-10 max-w-5xl mx-auto">
-          <form onSubmit={runTest} className="flex flex-col md:flex-row gap-4 mb-12">
+          <form onSubmit={runTest} className="flex flex-col md:flex-row gap-4 mb-8">
             <div className="flex-1 relative group">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-brand-500 transition-colors">
                 <Globe size={20} />
@@ -83,7 +121,108 @@ const MobileTest = () => {
           </form>
 
           <AnimatePresence>
-            {result && (
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-sm flex items-center gap-3"
+              >
+                <XCircle size={18} />
+                {error}
+              </motion.div>
+            )}
+            {result && !loading && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-500 text-sm flex items-center gap-3"
+              >
+                <CheckCircle2 size={18} />
+                Mobile test complete! Your site is {result.isFriendly ? 'optimized for mobile devices.' : 'experiencing technical mobile issues.'}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence mode="wait">
+            {loading && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-12 pt-12 border-t border-white/5"
+              >
+                <div className="flex flex-col items-center text-center space-y-6">
+                  <div className="relative w-24 h-24">
+                    <div className="absolute inset-0 border-4 border-zinc-800 rounded-full"></div>
+                    <motion.div 
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="absolute inset-0 border-4 border-brand-500 border-t-transparent rounded-full"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Smartphone className="text-brand-500 animate-pulse" size={32} />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-white">
+                      {loadingSteps[loadingStep]}
+                    </h3>
+                    <p className="text-slate-500 text-sm italic">Audit in progress for {url}</p>
+                  </div>
+
+                  <div className="w-full max-w-md bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${((loadingStep + 1) / loadingSteps.length) * 100}%` }}
+                      className="h-full bg-brand-500"
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap justify-center gap-4">
+                    {loadingSteps.map((step, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <div className={`w-2.5 h-2.5 rounded-full transition-colors duration-500 ${loadingStep >= idx ? 'bg-brand-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-zinc-800'}`} />
+                        <span className={`text-[9px] font-bold uppercase tracking-widest transition-colors duration-500 ${loadingStep >= idx ? 'text-slate-300' : 'text-slate-600'}`}>
+                          {idx + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Skeleton UI */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 opacity-40 pointer-events-none">
+                  <div className="lg:col-span-5 flex justify-center h-[500px]">
+                    <div className="relative w-[280px] h-[500px] border-8 border-zinc-800 rounded-[2.5rem] bg-zinc-900 overflow-hidden animate-pulse">
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-zinc-800 rounded-b-2xl" />
+                      <div className="p-6 space-y-6">
+                        <div className="h-6 w-1/3 bg-zinc-800 rounded mx-auto" />
+                        <div className="h-32 w-full bg-zinc-800/50 rounded-xl" />
+                        <div className="space-y-2">
+                          <div className="h-3 w-full bg-zinc-800 rounded" />
+                          <div className="h-3 w-5/6 bg-zinc-800 rounded" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="lg:col-span-7 space-y-8 py-4">
+                    <div className="h-28 bg-zinc-800 border border-white/5 rounded-3xl animate-pulse" />
+                    <div className="bg-zinc-800/30 border border-white/5 p-8 rounded-3xl h-64 animate-pulse space-y-4">
+                      <div className="h-4 w-1/4 bg-zinc-800 rounded" />
+                      <div className="grid grid-cols-2 gap-4">
+                        {[1, 2, 3, 4].map(i => <div key={i} className="h-14 bg-zinc-800 rounded-xl" />)}
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      {[1, 2].map(i => <div key={i} className="h-20 bg-zinc-800/50 rounded-2xl animate-pulse" />)}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {result && !loading && (
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
