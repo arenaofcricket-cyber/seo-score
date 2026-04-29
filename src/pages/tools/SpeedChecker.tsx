@@ -190,7 +190,7 @@ const SpeedChecker = () => {
                           cx="40" cy="40" r="36" fill="transparent" stroke="currentColor" strokeWidth="4" 
                           strokeDasharray={226}
                           initial={{ strokeDashoffset: 226 }}
-                          animate={{ strokeDashoffset: 226 - (226 * score.value) / 100 }}
+                          animate={{ strokeDashoffset: 226 - (226 * (score.value || 0)) / 100 }}
                           transition={{ duration: 1, delay: i * 0.2 }}
                           className={score.color} 
                         />

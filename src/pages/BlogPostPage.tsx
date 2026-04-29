@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft, Calendar, User, Share2 } from 'lucide-react';
@@ -9,10 +9,82 @@ const BlogPostPage = () => {
   const { id } = useParams();
   const post = BLOG_POSTS.find(p => p.id === id);
 
+  useEffect(() => {
+    if (post) {
+      // 📝 Dynamic Meta Tags
+      document.title = `${post.title} | SEOScore Blog`;
+      
+      const metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) metaDescription.setAttribute('content', post.excerpt);
+
+      // 🌐 Open Graph Tags
+      const ogTags = {
+        'og:title': post.title,
+        'og:description': post.excerpt,
+        'og:type': 'article',
+        'og:url': `https://seoscore.site/blog/${post.id}`,
+        'og:image': `https://seoscore.site/blog-placeholders/${post.id}.jpg`,
+        'twitter:card': 'summary_large_image',
+        'twitter:title': post.title,
+        'twitter:description': post.excerpt,
+        'twitter:image': `https://seoscore.site/blog-placeholders/${post.id}.jpg`,
+      };
+
+      Object.entries(ogTags).forEach(([property, content]) => {
+        let element = document.querySelector(`meta[property="${property}"]`) || 
+                     document.querySelector(`meta[name="${property}"]`);
+        
+        if (!element) {
+          element = document.createElement('meta');
+          if (property.startsWith('og:')) {
+            element.setAttribute('property', property);
+          } else {
+            element.setAttribute('name', property);
+          }
+          document.head.appendChild(element);
+        }
+        element.setAttribute('content', content);
+      });
+
+      // Cleanup on unmount
+      return () => {
+        document.title = 'Free SEO Tools Online – SEOScore';
+      };
+    }
+  }, [post]);
+
   if (!post) return <div className="text-center py-24 text-slate-500 font-mono text-sm">HTTP 404: Post Not Found</div>;
 
   return (
     <div className="p-4 md:p-8 lg:p-12 max-w-3xl mx-auto overflow-x-hidden">
+      {/* 🚀 SEO Schema Markup for this specific post */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          "headline": post.title,
+          "description": post.excerpt,
+          "image": `https://seoscore.site/blog-placeholders/${post.id}.jpg`,
+          "author": {
+            "@type": "Person",
+            "name": post.author
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "SEOScore",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://seoscore.site/logo.png"
+            }
+          },
+          "datePublished": new Date(post.date).toISOString(),
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": `https://seoscore.site/blog/${post.id}`
+          }
+        })}
+      </script>
+
       <Link 
         to="/blog" 
         className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-brand-400 mb-12 uppercase tracking-widest transition-colors group"
@@ -28,7 +100,6 @@ const BlogPostPage = () => {
           <div className="flex items-center gap-4 text-[10px] font-bold text-brand-500 uppercase tracking-widest mb-6">
             <span className="flex items-center gap-1"><Calendar size={14} className="text-brand-500/50" /> {post.date}</span>
             <span className="flex items-center gap-1"><User size={14} className="text-brand-500/50" /> {post.author}</span>
-            {/* @ts-ignore */}
             <span className="px-2 py-0.5 bg-brand-500/10 text-brand-400 rounded-md border border-brand-500/20">{post.category}</span>
           </div>
           <h1 className="text-4xl lg:text-5xl font-semibold text-white mb-8 leading-tight tracking-tight">
@@ -67,7 +138,6 @@ const BlogPostPage = () => {
 
         <div className="border-t border-white/5 mt-16 pt-8">
           <div className="flex flex-wrap gap-2 mb-8">
-            {/* @ts-ignore */}
             {post.tags.map((tag: string) => (
               <span key={tag} className="px-3 py-1 bg-zinc-900 border border-white/5 rounded-lg text-[10px] uppercase font-bold text-slate-500">
                 #{tag}

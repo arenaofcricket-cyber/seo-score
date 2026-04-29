@@ -70,8 +70,9 @@ const ScoreChecker = () => {
           performanceScore: realData.performanceScore,
           accessibilityScore: realData.accessibilityScore,
           bestPracticesScore: realData.bestPracticesScore,
-          pros: [...realData.audits.filter(a => a.score >= 0.9).map(a => a.title), ...aiData.pros].slice(0, 8),
-          cons: [...realData.audits.filter(a => a.score < 0.9).map(a => `${a.title}: ${a.displayValue || ''}`), ...aiData.cons].slice(0, 8),
+          seoScore: realData.seoScore,
+          pros: realData.audits.filter(a => a.score >= 0.9).slice(0, 8),
+          cons: realData.audits.filter(a => a.score < 0.9).slice(0, 8),
           recommendations: aiData.recommendations,
           metrics: realData.metrics,
           isRealData: true
@@ -385,96 +386,121 @@ const ScoreChecker = () => {
             >
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-10">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-zinc-800/50 border border-white/5 p-8 rounded-2xl text-center flex flex-col items-center justify-center">
-                      <div className="relative w-32 h-32 flex items-center justify-center mb-4">
-                        <svg className="w-full h-full transform -rotate-90">
-                          <circle
-                            cx="64"
-                            cy="64"
-                            r="58"
-                            stroke="currentColor"
-                            strokeWidth="8"
-                            fill="transparent"
-                            className="text-white/5"
-                          />
-                          <circle
-                            cx="64"
-                            cy="64"
-                            r="58"
-                            stroke="currentColor"
-                            strokeWidth="8"
-                            fill="transparent"
-                            strokeDasharray={364.4}
-                            strokeDashoffset={364.4 - (364.4 * result.score) / 100}
-                            className={`${result.score >= 80 ? 'text-brand-500' : result.score >= 50 ? 'text-amber-500' : 'text-red-500'} transition-all duration-1000 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]`}
-                          />
-                        </svg>
-                        <span className="absolute text-4xl font-display font-bold text-white">{result.score}</span>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                      { label: 'Performance', score: result.performanceScore },
+                      { label: 'Accessibility', score: result.accessibilityScore },
+                      { label: 'Best Practices', score: result.bestPracticesScore },
+                      { label: 'SEO', score: result.seoScore },
+                    ].map((cat, i) => (
+                      <div key={i} className="bg-zinc-800/50 border border-white/5 p-6 rounded-2xl text-center flex flex-col items-center">
+                        <div className="relative w-20 h-20 flex items-center justify-center mb-3">
+                          <svg className="w-full h-full transform -rotate-90">
+                            <circle
+                              cx="40" cy="40" r="36"
+                              stroke="currentColor" strokeWidth="4" fill="transparent"
+                              className="text-white/5"
+                            />
+                            <circle
+                              cx="40" cy="40" r="36"
+                              stroke="currentColor" strokeWidth="4" fill="transparent"
+                              strokeDasharray={226.2}
+                              strokeDashoffset={226.2 - (226.2 * (cat.score || 0)) / 100}
+                              className={`${(cat.score || 0) >= 90 ? 'text-emerald-500' : (cat.score || 0) >= 50 ? 'text-amber-500' : 'text-red-500'} transition-all duration-1000`}
+                            />
+                          </svg>
+                          <span className="absolute text-xl font-bold text-white">{cat.score}</span>
+                        </div>
+                        <div className="text-[10px] uppercase font-black tracking-widest text-slate-500">{cat.label}</div>
                       </div>
-                      <div className="micro-label">Overall Score</div>
-                    </div>
-
-                    <div className="md:col-span-2 bg-zinc-800/50 border border-white/5 p-8 rounded-2xl">
-                      <h3 className="font-bold text-xl text-white mb-6 flex items-center gap-2">
-                        <Sparkles size={20} className="text-brand-400" /> Improvement Tips
-                      </h3>
-                      <div className="space-y-4">
-                        {result.recommendations.map((rec: string, i: number) => (
-                          <div key={i} className="flex gap-4 text-slate-300 text-sm leading-relaxed">
-                            <div className="w-5 h-5 rounded-full bg-brand-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <RefreshCw size={12} className="text-brand-400" />
-                            </div>
-                            <span>{rec}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    ))}
                   </div>
 
-                  {result.isRealData && result.metrics && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-zinc-800/50 border border-white/5 p-8 rounded-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-5">
+                      <Zap size={120} />
+                    </div>
+                    <h3 className="font-bold text-xl text-white mb-6 flex items-center gap-2">
+                      <Gauge size={20} className="text-brand-400" /> Core Web Vitals
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                       {[
-                        { label: 'LCP', value: result.metrics.lcp, color: 'text-brand-400' },
-                        { label: 'Total Blocking', value: result.metrics.fid, color: 'text-amber-400' },
-                        { label: 'Speed Index', value: result.metrics.speedIndex, color: 'text-emerald-400' },
-                        { label: 'CLS', value: result.metrics.cls, color: 'text-purple-400' },
+                        { label: 'First Contentful Paint', sub: '(FCP)', value: result.metrics?.fcp || 'N/A', icon: Activity, desc: 'Time until first text/image is painted.' },
+                        { label: 'Largest Contentful Paint', sub: '(LCP)', value: result.metrics?.lcp || 'N/A', icon: Zap, desc: 'Time until the largest content element is visible.' },
+                        { label: 'Cumulative Layout Shift', sub: '(CLS)', value: result.metrics?.cls || 'N/A', icon: Smartphone, desc: 'Measures visual stability and unexpected shifts.' },
+                        { label: 'Total Blocking Time', sub: '(TBT)', value: result.metrics?.fid || 'N/A', icon: Loader2, desc: 'Total time tasks were blocked from reacting to input.' },
+                        { label: 'Speed Index', sub: '', value: result.metrics?.speedIndex || 'N/A', icon: Gauge, desc: 'How quickly the page contents are visibly populated.' },
                       ].map((metric, i) => (
-                        <div key={i} className="bg-zinc-800/40 p-4 rounded-xl border border-white/5 text-center">
-                          <div className={`text-sm font-bold ${metric.color} mb-1`}>{metric.value}</div>
-                          <div className="text-[10px] text-slate-500 uppercase tracking-tighter">{metric.label}</div>
+                        <div key={i} className="space-y-2">
+                          <div className="flex items-center gap-2 text-slate-500">
+                            <metric.icon size={14} className="text-brand-500" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">{metric.label} {metric.sub}</span>
+                          </div>
+                          <div className="text-2xl font-display font-bold text-white">{metric.value}</div>
+                          <p className="text-[10px] text-slate-600 leading-tight">{metric.desc}</p>
                         </div>
                       ))}
                     </div>
-                  )}
+                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-zinc-800/30 p-8 rounded-2xl border border-emerald-500/10">
                       <h3 className="micro-label text-brand-400 mb-6 flex items-center gap-2">
                         <CheckCircle2 size={16} /> Points of Success
                       </h3>
-                      <ul className="space-y-4 text-sm text-slate-400">
-                        {result.pros.map((pro: string, i: number) => (
-                          <li key={i} className="flex gap-3">
-                            <div className="w-1.5 h-1.5 rounded-full bg-brand-500 mt-1.5 flex-shrink-0" />
-                            {pro}
-                          </li>
+                      <div className="space-y-6">
+                        {result.pros.map((pro: any, i: number) => (
+                          <div key={i} className="space-y-1">
+                            <div className="flex gap-3 text-sm font-bold text-emerald-400">
+                              <CheckCircle2 size={14} className="mt-0.5 shrink-0" />
+                              {typeof pro === 'string' ? pro : pro.title}
+                            </div>
+                            {pro.description && (
+                              <p className="text-[11px] text-slate-500 ml-6 leading-relaxed bg-zinc-950/30 p-2 rounded-lg border border-white/5">
+                                {pro.description.replace(/\[Learn more\]\(.*\)/g, '').split('. ')[0]}.
+                              </p>
+                            )}
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
 
                     <div className="bg-zinc-800/30 p-8 rounded-2xl border border-red-500/10">
                       <h3 className="micro-label text-red-400 mb-6 flex items-center gap-2">
-                        <XCircle size={16} /> Critical Issues
+                        <XCircle size={16} /> Issues to Fix
                       </h3>
-                      <ul className="space-y-4 text-sm text-slate-400">
-                        {result.cons.map((con: string, i: number) => (
-                          <li key={i} className="flex gap-3">
-                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0" />
-                            {con}
-                          </li>
+                      <div className="space-y-6">
+                        {result.cons.map((con: any, i: number) => (
+                          <div key={i} className="space-y-1">
+                            <div className="flex gap-3 text-sm font-bold text-red-400">
+                              <XCircle size={14} className="mt-0.5 shrink-0" />
+                              {typeof con === 'string' ? con : con.title}
+                              {con.displayValue && <span className="text-[10px] opacity-70 ml-auto bg-red-500/10 px-1.5 rounded">({con.displayValue})</span>}
+                            </div>
+                            {con.description && (
+                              <p className="text-[11px] text-slate-500 ml-6 leading-relaxed bg-zinc-950/30 p-2 rounded-lg border border-white/5">
+                                {con.description.replace(/\[Learn more\]\(.*\)/g, '').split('. ')[0]}.
+                              </p>
+                            )}
+                          </div>
                         ))}
-                      </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-zinc-800/50 border border-white/5 p-8 rounded-2xl">
+                    <h3 className="font-bold text-xl text-white mb-6 flex items-center gap-2">
+                      <Sparkles size={20} className="text-brand-400" /> Actionable Recommendations
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {result.recommendations.map((rec: string, i: number) => (
+                        <div key={i} className="flex gap-4 p-4 bg-zinc-900 border border-white/5 rounded-xl text-slate-300 text-sm leading-relaxed hover:border-brand-500/30 transition-colors">
+                          <div className="w-6 h-6 rounded-lg bg-brand-500/10 flex items-center justify-center flex-shrink-0">
+                            <span className="text-[10px] font-black text-brand-400">{i+1}</span>
+                          </div>
+                          <span>{rec}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>

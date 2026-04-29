@@ -9,8 +9,8 @@ const TitleGenerator = () => {
   const [keywords, setKeywords] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [results, setResults] = React.useState<string[]>([]);
-  const [copied, setCopied] = React.useState<number | null>(null);
+  const [results, setResults] = React.useState<{title: string, description: string}[]>([]);
+  const [copied, setCopied] = React.useState<{index: number, type: 'title' | 'description'} | null>(null);
 
   const [loadingStep, setLoadingStep] = React.useState(0);
 
@@ -19,7 +19,7 @@ const TitleGenerator = () => {
     'Researching high-CTR patterns...',
     'Incorporating target keywords...',
     'Evaluating emotional triggers...',
-    'Generating viral title variations...'
+    'Drafting viral titles & descriptions...'
   ];
 
   const handleGenerate = async (e: React.FormEvent) => {
@@ -51,9 +51,9 @@ const TitleGenerator = () => {
     }
   };
 
-  const copyToClipboard = (text: string, index: number) => {
+  const copyToClipboard = (text: string, index: number, type: 'title' | 'description') => {
     navigator.clipboard.writeText(text);
-    setCopied(index);
+    setCopied({ index, type });
     setTimeout(() => setCopied(null), 2000);
   };
 
@@ -306,64 +306,98 @@ const TitleGenerator = () => {
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-white font-semibold flex items-center gap-2">
                     <Star size={18} className="text-red-500" />
-                    Suggested Viral Titles
+                    Suggested AI Content Packages
                   </h3>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest hidden md:block">Click to Copy Any Title</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest hidden md:block">Optimized for Viral Reach</p>
                 </div>
-                <div className="grid grid-cols-1 gap-4">
-                  {results.map((title, i) => (
+                <div className="grid grid-cols-1 gap-6">
+                  {results.map((item, i) => (
                     <motion.div
                       key={i}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.1 }}
-                      onClick={() => copyToClipboard(title, i)}
-                      className={`group relative p-6 rounded-3xl flex items-center justify-between cursor-pointer transition-all border-l-4 border-l-transparent overflow-hidden ${
-                        title.length > 70 
-                        ? 'bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 hover:border-red-500/40 hover:border-l-red-500' 
-                        : 'bg-zinc-800/40 border-white/5 hover:bg-zinc-800/80 hover:border-red-500/30 hover:border-l-red-500'
+                      className={`group relative p-8 rounded-[2rem] transition-all border-l-4 border-l-transparent overflow-hidden ${
+                        item.title.length > 70 
+                        ? 'bg-red-500/5 border border-red-500/20' 
+                        : 'bg-zinc-800/40 border border-white/5'
                       }`}
                     >
-                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-red-500/0 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                      <div className="flex flex-col gap-1.5 flex-1 relative z-10 pr-12">
-                        <span className="text-slate-200 font-bold md:text-lg line-clamp-2">{title}</span>
-                        <div className="flex items-center gap-3">
-                          <div className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tighter ${
-                            title.length > 70 ? 'bg-red-500/20 text-red-500 border border-red-500/20' : 'bg-white/5 text-slate-500 border border-white/5'
-                          }`}>
-                            {title.length} characters
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-red-500/0 to-red-500/[0.03] pointer-events-none" />
+                      
+                      <div className="relative z-10 space-y-6">
+                        {/* Title Section */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-4">
+                            <span className="text-slate-200 font-bold text-xl leading-tight line-clamp-2">{item.title}</span>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => copyToClipboard(item.title, i, 'title')}
+                              className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl font-black uppercase text-[10px] tracking-tighter transition-all duration-300 ${
+                                copied?.index === i && copied?.type === 'title'
+                                ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
+                                : 'bg-white/10 text-white hover:bg-white/20'
+                              }`}
+                            >
+                              {copied?.index === i && copied?.type === 'title' ? <Check size={14} strokeWidth={3} /> : <Copy size={14} strokeWidth={3} />}
+                              {copied?.index === i && copied?.type === 'title' ? 'Title Copied!' : 'Copy Title'}
+                            </motion.button>
                           </div>
-                          {title.length > 70 && (
-                            <div className="flex items-center gap-1.5 text-red-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
-                              <AlertTriangle size={12} />
-                              <span>Length Warning</span>
+                          
+                          <div className="flex items-center gap-3">
+                            <div className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tighter ${
+                              item.title.length > 70 ? 'bg-red-500/20 text-red-500 border border-red-500/20' : 'bg-zinc-950 text-slate-500 border border-white/5'
+                            }`}>
+                              {item.title.length} characters
                             </div>
-                          )}
+                            {item.title.length > 70 && (
+                              <div className="flex items-center gap-1.5 text-red-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                                <AlertTriangle size={12} />
+                                <span>Optimization Warning</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="h-px bg-white/5 w-full" />
+
+                        {/* Description Section */}
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-2 text-slate-500">
+                              <BookOpen size={14} />
+                              <span className="text-[10px] font-black uppercase tracking-widest">Suggested Description</span>
+                            </div>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => copyToClipboard(item.description, i, 'description')}
+                              className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl font-black uppercase text-[10px] tracking-tighter transition-all duration-300 ${
+                                copied?.index === i && copied?.type === 'description'
+                                ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
+                                : 'bg-brand-500/10 text-brand-400 hover:bg-brand-500/20'
+                              }`}
+                            >
+                              {copied?.index === i && copied?.type === 'description' ? <Check size={14} strokeWidth={3} /> : <Copy size={14} strokeWidth={3} />}
+                              {copied?.index === i && copied?.type === 'description' ? 'Desc Copied!' : 'Copy description'}
+                            </motion.button>
+                          </div>
+                          <p className="text-slate-400 text-sm leading-relaxed bg-zinc-950/40 p-5 rounded-2xl border border-white/5 italic">
+                            "{item.description}"
+                          </p>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-2 relative z-10 shrink-0">
-                        <motion.button
-                          animate={copied === i ? { scale: [1, 1.1, 1] } : {}}
-                          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-black uppercase text-[10px] tracking-tighter transition-all duration-300 ${
-                            copied === i 
-                            ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
-                            : 'bg-white/10 text-white opacity-0 md:group-hover:opacity-100 md:translate-x-4 md:group-hover:translate-x-0'
-                          }`}
-                        >
-                          {copied === i ? <Check size={14} strokeWidth={3} /> : <Copy size={14} strokeWidth={3} />}
-                          {copied === i ? 'Title Copied!' : 'Copy to Clipboard'}
-                        </motion.button>
-                      </div>
-
                       {/* Sparkle effect on copy */}
                       <AnimatePresence>
-                        {copied === i && (
+                        {copied?.index === i && (
                           <motion.div 
                             initial={{ scale: 0, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 1.5, opacity: 0 }}
-                            className="absolute right-12 top-1/2 -translate-y-1/2 text-emerald-400"
+                            className="absolute right-8 top-8 text-emerald-400 pointer-events-none"
                           >
                             <Sparkles size={40} className="animate-pulse" />
                           </motion.div>

@@ -1,4 +1,4 @@
-import { Tool } from './types';
+import { Tool, BlogPost } from './types';
 
 export const TOOLS: Tool[] = [
   {
@@ -51,7 +51,7 @@ export const TOOLS: Tool[] = [
   }
 ];
 
-export const BLOG_POSTS = [
+export const BLOG_POSTS: BlogPost[] = [
   {
     id: 'what-is-seo',
     title: 'What is SEO and How It Works (Beginner Guide 2026)',

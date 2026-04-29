@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Calendar, User, ChevronRight, Search, Tag as TagIcon, X, Filter, ArrowRight } from 'lucide-react';
@@ -9,6 +9,36 @@ const Blog = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
+  useEffect(() => {
+    // 📝 Dynamic Meta Tags for the Blog Page
+    let title = "SEO & Digital Marketing Guides | SEOScore Blog";
+    let description = "Deep dives into search engine optimization, content strategy, and digital growth with free guides and tools.";
+
+    if (selectedCategory) {
+      title = `${selectedCategory} Guides | SEOScore Blog`;
+      description = `Expert guides and tips on ${selectedCategory} to help you grow your search visibility.`;
+    } else if (searchQuery) {
+      title = `Search results for "${searchQuery}" | SEOScore Blog`;
+    }
+
+    document.title = title;
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) metaDescription.setAttribute('content', description);
+
+    // Sync OG tags
+    const ogTags = {
+      'og:title': title,
+      'og:description': description,
+      'og:url': 'https://seoscore.site/blog',
+    };
+
+    Object.entries(ogTags).forEach(([property, content]) => {
+      let element = document.querySelector(`meta[property="${property}"]`) || 
+                   document.querySelector(`meta[name="${property}"]`);
+      if (element) element.setAttribute('content', content);
+    });
+  }, [selectedCategory, searchQuery]);
+
   const categories = ['SEO Basics', 'Technical SEO', 'YouTube Growth', 'Content Strategy'];
   const tags = ['Backlinks', 'Speed', 'Keywords', 'Google', 'Algorithm', 'Analytics'];
 
@@ -16,9 +46,7 @@ const Blog = () => {
     return BLOG_POSTS.filter(post => {
       const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-      // @ts-ignore - added fields to constant but TS might be stale if it doesn't see types update yet
       const matchesCategory = selectedCategory ? post.category === selectedCategory : true;
-      // @ts-ignore
       const matchesTag = selectedTag ? post.tags.includes(selectedTag) : true;
       return matchesSearch && matchesCategory && matchesTag;
     });
@@ -145,12 +173,10 @@ const Blog = () => {
                       {post.excerpt}
                     </p>
                     <div className="mt-auto flex items-center justify-between min-h-[40px]">
-                      {/* @ts-ignore */}
                       <button 
                         onClick={() => setSelectedCategory(post.category)}
                         className="text-[9px] font-black uppercase tracking-tighter bg-zinc-800 text-slate-400 px-3 py-1.5 rounded-lg border border-white/5 hover:text-brand-400 transition-colors"
                       >
-                        {/* @ts-ignore */}
                         {post.category}
                       </button>
 

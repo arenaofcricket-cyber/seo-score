@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Link as LinkIcon, Globe, Loader2, Search, CheckCircle2, TrendingUp, HelpCircle, ArrowRight, Activity, Zap, Hash, ShieldCheck, ExternalLink, BarChart3, RefreshCw, AlertCircle, PieChart, Layers, BookOpen } from 'lucide-react';
+import { Link as LinkIcon, Globe, Loader2, Search, CheckCircle2, TrendingUp, HelpCircle, ArrowRight, Activity, Zap, Hash, ShieldCheck, ExternalLink, BarChart3, RefreshCw, AlertCircle, PieChart, Layers, BookOpen, Copy, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const BacklinkChecker = () => {
@@ -23,6 +23,14 @@ const BacklinkChecker = () => {
   React.useEffect(() => {
     document.title = "Free Backlink Checker Tool – Check Backlinks Free | SEOScore";
   }, []);
+
+  const [copiedUrl, setCopiedUrl] = React.useState<string | null>(null);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedUrl(text);
+    setTimeout(() => setCopiedUrl(null), 2000);
+  };
 
   const testBacklinks = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,10 +75,10 @@ const BacklinkChecker = () => {
           { label: 'Press/News', value: 10 },
         ],
         recentLinks: [
-          { url: 'https://techblog.com/top-seo-tools', type: 'Do-follow', dr: 72, category: 'Blog Post' },
-          { url: 'https://marketing-weekly.net/best-practices', type: 'Do-follow', dr: 58, category: 'Blog Post' },
-          { url: 'https://news-hub.io/digital-strategy', type: 'No-follow', dr: 45, category: 'Forum' },
-          { url: 'https://dev-community.org/site-audits', type: 'Do-follow', dr: 81, category: 'Directory' },
+          { url: 'https://techblog.com/top-seo-tools', type: 'Do-follow', dr: 72, category: 'Blog Post', anchor: 'best free seo tools' },
+          { url: 'https://marketing-weekly.net/best-practices', type: 'Do-follow', dr: 58, category: 'Blog Post', anchor: 'seo optimization guide' },
+          { url: 'https://news-hub.io/digital-strategy', type: 'No-follow', dr: 45, category: 'Forum', anchor: 'digital marketing forum' },
+          { url: 'https://dev-community.org/site-audits', type: 'Do-follow', dr: 81, category: 'Directory', anchor: 'seoscore.site' },
         ]
       });
     } catch (err) {
@@ -260,24 +268,58 @@ const BacklinkChecker = () => {
                 </div>
                 <div className="divide-y divide-white/5">
                   {result.recentLinks.map((link: any, i: number) => (
-                    <div key={i} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/5 transition-colors">
-                      <div className="flex items-center gap-4 truncate">
-                        <div className="p-2 bg-zinc-700/50 rounded text-slate-400">
-                          <ExternalLink size={14} />
+                    <div key={i} className="p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-white/5 transition-colors">
+                      <div className="flex-1 min-w-0 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-zinc-700/50 rounded text-slate-400 shrink-0">
+                            <ExternalLink size={14} />
+                          </div>
+                          <div className="truncate">
+                            <div className="text-sm font-bold text-slate-200 truncate group flex items-center gap-2">
+                              {link.url}
+                              <button 
+                                onClick={() => copyToClipboard(link.url)}
+                                className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-white/10 rounded transition-all text-slate-500 hover:text-brand-400"
+                                title="Copy URL"
+                              >
+                                {copiedUrl === link.url ? <Check size={12} /> : <Copy size={12} />}
+                              </button>
+                            </div>
+                            <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-0.5">Source URL</div>
+                          </div>
                         </div>
-                        <div className="truncate">
-                          <div className="text-sm font-medium text-slate-200 truncate">{link.url}</div>
-                          <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-0.5">Source URL</div>
+
+                        <div className="flex items-center gap-6 ml-11">
+                          <div>
+                            <div className="text-xs font-medium text-slate-400">{link.anchor}</div>
+                            <div className="text-[9px] text-slate-600 uppercase font-bold tracking-tighter">Anchor Text</div>
+                          </div>
+                          <div className="h-6 w-px bg-white/5" />
+                          <div>
+                            <div className="text-xs font-medium text-slate-400">{link.category}</div>
+                            <div className="text-[9px] text-slate-600 uppercase font-bold tracking-tighter">Platform</div>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-6">
+
+                      <div className="flex items-center gap-4 shrink-0">
                         <div className="text-right">
-                          <div className="text-xs font-bold text-slate-200">{link.category}</div>
-                          <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">{link.type}</div>
+                          <div className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${link.type === 'Do-follow' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-400'}`}>
+                            {link.type}
+                          </div>
                         </div>
-                        <div className="px-3 py-1 bg-brand-500/10 border border-brand-500/20 rounded text-brand-400 text-xs font-bold">
-                          DR {link.dr}
+                        <div className="px-4 py-2 bg-zinc-900 border border-white/10 rounded-xl">
+                          <div className="text-lg font-display font-bold text-white leading-none">
+                            {link.dr}
+                          </div>
+                          <div className="text-[9px] text-slate-600 uppercase font-black tracking-tighter mt-1 text-center">DR</div>
                         </div>
+                        <button 
+                          onClick={() => copyToClipboard(link.url)}
+                          className="lg:hidden p-3 bg-zinc-800 rounded-xl hover:bg-zinc-700 transition-colors text-slate-400"
+                        >
+                           {copiedUrl === link.url ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+                        </button>
                       </div>
                     </div>
                   ))}

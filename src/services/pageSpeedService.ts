@@ -17,12 +17,14 @@ export interface PageSpeedResults {
     url: string;
   };
   metrics: {
+    fcp: string; // First Contentful Paint
     lcp: string; // Largest Contentful Paint
     fid: string; // First Input Delay (or TBT)
     cls: string; // Cumulative Layout Shift
     speedIndex: string;
   };
   audits: {
+    id: string;
     title: string;
     description: string;
     score: number;
@@ -30,14 +32,14 @@ export interface PageSpeedResults {
   }[];
 }
 
-export async function getRealPageSpeedData(targetUrl: string, category: 'seo' | 'performance' | 'accessibility' | 'best-practices' = 'seo'): Promise<PageSpeedResults | null> {
+export async function getRealPageSpeedData(targetUrl: string): Promise<PageSpeedResults | null> {
   if (!API_KEY) {
     console.warn('VITE_PAGESPEED_API_KEY is not set. Real analysis skipped.');
     return null;
   }
 
   try {
-    const response = await fetch(`${API_URL}?url=${encodeURIComponent(targetUrl)}&key=${API_KEY}&category=seo&category=performance&strategy=desktop`);
+    const response = await fetch(`${API_URL}?url=${encodeURIComponent(targetUrl)}&key=${API_KEY}&category=seo&category=performance&category=accessibility&category=best-practices&strategy=desktop`);
     
     if (!response.ok) {
       throw new Error(`PageSpeed API error: ${response.statusText}`);
@@ -59,20 +61,21 @@ export async function getRealPageSpeedData(targetUrl: string, category: 'seo' | 
         url: lighthouse.finalUrl
       },
       metrics: {
+        fcp: lighthouse.audits['first-contentful-paint']?.displayValue || 'N/A',
         lcp: lighthouse.audits['largest-contentful-paint']?.displayValue || 'N/A',
         fid: lighthouse.audits['total-blocking-time']?.displayValue || 'N/A',
         cls: lighthouse.audits['cumulative-layout-shift']?.displayValue || 'N/A',
         speedIndex: lighthouse.audits['speed-index']?.displayValue || 'N/A',
       },
       audits: Object.values(lighthouse.audits)
-        .filter((a: any) => a.score !== null && a.score < 0.9)
+        .filter((a: any) => a.score !== null && a.title && a.description)
         .map((a: any) => ({
+          id: a.id,
           title: a.title,
           description: a.description,
           score: a.score,
           displayValue: a.displayValue
         }))
-        .slice(0, 10)
     };
   } catch (error) {
     console.error('Error fetching real SEO data:', error);

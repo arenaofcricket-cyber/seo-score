@@ -8,7 +8,7 @@ import { GoogleGenAI } from "@google/genai";
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function generateYouTubeTitle(topic: string, keywords: string) {
-  const prompt = `Generate 5 catchy, SEO-optimized YouTube titles for the topic: "${topic}". Keywords to include: ${keywords}. Return as a JSON array of strings.`;
+  const prompt = `Generate 5 catchy, SEO-optimized YouTube titles and a compelling video description for EACH title for the topic: "${topic}". Keywords to include: ${keywords}. Return as a JSON array of objects, each with "title" and "description" fields.`;
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: prompt,
