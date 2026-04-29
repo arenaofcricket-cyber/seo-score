@@ -15,7 +15,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="p-8 lg:p-12 max-w-6xl mx-auto space-y-24 mb-20">
+    <div className="p-4 md:p-8 lg:p-12 max-w-6xl mx-auto space-y-24 mb-20 overflow-x-hidden">
       {/* 🚀 SEO Schema Markup */}
       <script type="application/ld+json">
         {JSON.stringify({
@@ -23,7 +23,7 @@ const Home = () => {
           "@type": "WebPage",
           "name": "Free SEO Tools Online – SEOScore",
           "description": "Use free SEO tools to check website speed, backlinks, and SEO score. Improve rankings and grow your traffic easily.",
-          "url": "https://seoscore.io"
+          "url": "https://seoscore.site"
         })}
       </script>
 
@@ -37,7 +37,7 @@ const Home = () => {
           <RefreshCw size={14} className="animate-spin-slow" />
           Updated for 2026
         </div>
-        <h1 className="text-5xl lg:text-7xl font-bold text-white tracking-tight leading-tight">
+        <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white tracking-tight leading-tight">
           Free SEO Tools to Boost Your Website
         </h1>
         <p className="text-slate-400 text-xl max-w-3xl mx-auto leading-relaxed">
@@ -55,7 +55,7 @@ const Home = () => {
       </motion.section>
 
       {/* 💡 Short Intro */}
-      <section className="bg-zinc-900/40 border border-white/5 rounded-3xl p-10 lg:p-16 text-left max-w-4xl mx-auto space-y-6">
+      <section className="bg-zinc-900/40 border border-white/5 rounded-3xl p-6 md:p-10 lg:p-16 text-left max-w-4xl mx-auto space-y-6">
         <h2 className="text-white text-3xl font-bold">Welcome to SEOScore</h2>
         <p className="text-slate-400 text-lg leading-relaxed">
           Welcome to SEOScore, your all-in-one platform for free SEO tools designed to help bloggers, marketers, and creators improve their online presence. Whether you want to rank higher on Google or grow your YouTube channel, our tools make SEO simple and effective.
@@ -242,7 +242,7 @@ const Home = () => {
       </section>
 
       {/* 🎯 Final CTA */}
-      <section className="relative overflow-hidden bg-brand-500 rounded-3xl p-12 lg:p-20 text-center">
+      <section className="relative overflow-hidden bg-brand-500 rounded-3xl p-8 md:p-12 lg:p-20 text-center">
         <div className="absolute top-0 right-0 p-8 opacity-10">
           <RefreshCw size={160} />
         </div>
@@ -252,7 +252,7 @@ const Home = () => {
           </h2>
           <div className="flex justify-center pt-4">
             <Link 
-              to="/seo/score-checker" 
+              to="/tools/seo-score-checker" 
               className="bg-black text-white hover:bg-zinc-900 px-10 py-5 rounded-xl font-bold text-xl shadow-2xl transition-all transform hover:-translate-y-1 flex items-center gap-3"
             >
               👉 Try Free Tools Now

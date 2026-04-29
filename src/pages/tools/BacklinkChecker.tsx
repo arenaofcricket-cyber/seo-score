@@ -82,7 +82,7 @@ const BacklinkChecker = () => {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-5xl mx-auto space-y-16 mb-20">
+    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto space-y-16 mb-20 overflow-x-hidden">
       {/* 🟢 H1 & 📌 Intro */}
       <div className="space-y-6">
         <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2">Free Backlink Checker Tool</h1>
@@ -93,7 +93,7 @@ const BacklinkChecker = () => {
       </div>
 
       {/* ⚙️ Tool Section */}
-      <section className="bg-zinc-900 shadow-2xl border border-white/5 p-8 lg:p-12 rounded-3xl space-y-8">
+      <section className="bg-zinc-900 shadow-2xl border border-white/5 p-4 md:p-8 lg:p-12 rounded-3xl space-y-8">
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="p-3 bg-brand-500/10 rounded-full text-brand-500">
             <LinkIcon size={32} />

@@ -10,9 +10,9 @@ const ToolsGuide = () => {
       description: 'Master your search engine rankings with our essential optimization suite.',
       icon: <Activity className="text-brand-500" />,
       tools: [
-        { name: 'SEO Score Checker', path: '/seo/score-checker', desc: 'Complete website audit and performance analysis.' },
-        { name: 'Backlink Checker', path: '/seo/backlink-checker', desc: 'Identify and analyze your domain authority links.' },
-        { name: 'Keyword Density', path: '/seo/keyword-density', desc: 'Optimize content frequency for better ranking.' },
+        { name: 'SEO Score Checker', path: '/tools/seo-score-checker', desc: 'Complete website audit and performance analysis.' },
+        { name: 'Backlink Checker', path: '/tools/backlink-checker', desc: 'Identify and analyze your domain authority links.' },
+        { name: 'Keyword Density', path: '/tools/keyword-density', desc: 'Optimize content frequency for better ranking.' },
       ]
     },
     {
@@ -20,8 +20,8 @@ const ToolsGuide = () => {
       description: 'Grow your channel faster with AI-powered video metadata generation.',
       icon: <Youtube className="text-red-500" />,
       tools: [
-        { name: 'Title Generator', path: '/youtube/title-generator', desc: 'Create viral, catchy titles for higher CTR.' },
-        { name: 'Tag Generator', path: '/youtube/tag-generator', desc: 'Generate SEO-friendly metadata for video discovery.' },
+        { name: 'Title Generator', path: '/tools/youtube-title-generator', desc: 'Create viral, catchy titles for higher CTR.' },
+        { name: 'Tag Generator', path: '/tools/youtube-tag-generator', desc: 'Generate SEO-friendly metadata for video discovery.' },
       ]
     },
     {
@@ -29,8 +29,8 @@ const ToolsGuide = () => {
       description: 'Ensure your website is fast, reliable, and mobile-friendly for 2026.',
       icon: <Zap className="text-yellow-500" />,
       tools: [
-        { name: 'Website Speed Checker', path: '/website/speed-checker', desc: 'Analyze and improve your page load times.' },
-        { name: 'Mobile Friendly Test', path: '/website/mobile-test', desc: 'Verify your UX across all mobile devices.' },
+        { name: 'Website Speed Checker', path: '/tools/website-speed-checker', desc: 'Analyze and improve your page load times.' },
+        { name: 'Mobile Friendly Test', path: '/tools/mobile-test', desc: 'Verify your UX across all mobile devices.' },
       ]
     }
   ];
@@ -44,15 +44,15 @@ const ToolsGuide = () => {
           "@graph": [
             {
               "@type": "WebPage",
-              "@id": "https://seoscore.io/tools-guide/#webpage",
-              "url": "https://seoscore.io/tools-guide",
+              "@id": "https://seoscore.site/tools-guide/#webpage",
+              "url": "https://seoscore.site/tools-guide",
               "name": "Complete SEO Tools Guide | SEOScore",
               "description": "The ultimate directory for all our free optimization utilities. Learn how each tool works and how to combine them for maximum search engine performance.",
               "breadcrumb": {
                 "@type": "BreadcrumbList",
                 "itemListElement": [
-                  { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://seoscore.io/" },
-                  { "@type": "ListItem", "position": 2, "name": "Tools Guide", "item": "https://seoscore.io/tools-guide" }
+                  { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://seoscore.site/" },
+                  { "@type": "ListItem", "position": 2, "name": "Tools Guide", "item": "https://seoscore.site/tools-guide" }
                 ]
               }
             },
@@ -74,7 +74,7 @@ const ToolsGuide = () => {
                     "position": tIdx + 1,
                     "name": tool.name,
                     "description": tool.desc,
-                    "url": `https://seoscore.io${tool.path}`
+                    "url": `https://seoscore.site${tool.path}`
                   }))
                 }
               }))

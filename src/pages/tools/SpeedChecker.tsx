@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Zap, Globe, Loader2, Search, Gauge, Cpu, Layout, Image as ImageIcon, Rocket, CheckCircle2, TrendingUp, HelpCircle, ArrowRight, Activity, Link as LinkIcon, BookOpen, Smartphone, BarChart3, Sparkles, AlertCircle, Clock } from 'lucide-react';
+import { Zap, Globe, Loader2, Search, Gauge, Cpu, Layout, Image as ImageIcon, Rocket, CheckCircle2, TrendingUp, HelpCircle, ArrowRight, Activity, Link as LinkIcon, BookOpen, Smartphone, BarChart3, Sparkles, AlertCircle, Clock, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+
+import { getRealPageSpeedData } from '../../services/geminiService';
 
 const trendData = [
   { date: 'Mon', fcp: 1.8, lcp: 2.9, cls: 0.05 },
@@ -57,21 +59,28 @@ const SpeedChecker = () => {
     }, 800);
     
     try {
-      // Simulate real-world speed test with random variations
-      await new Promise(r => setTimeout(r, 4500));
+      // API integration for real data
+      const speedData = await getRealPageSpeedData(url);
       
-      const randomScore = Math.floor(Math.random() * (98 - 65) + 65);
+      setLoadingStep(loadingSteps.length - 1);
+      await new Promise(r => setTimeout(r, 500));
+
       setResult({
-        score: randomScore,
-        fcp: (Math.random() * 2 + 0.5).toFixed(1),
-        lcp: (Math.random() * 3 + 1).toFixed(1),
-        cls: (Math.random() * 0.1).toFixed(3),
-        tbt: Math.floor(Math.random() * 200 + 50),
+        score: speedData.performance || 0,
+        accessibility: speedData.accessibility || 0,
+        bestPractices: speedData.bestPractices || 0,
+        seo: speedData.seo || 0,
+        fcp: speedData.metrics?.fcp || '0s',
+        lcp: speedData.metrics?.lcp || '0s',
+        cls: speedData.metrics?.cls || '0',
+        tbt: speedData.metrics?.tbt || '0ms',
+        metricsRaw: speedData.metrics,
+        recommendations: speedData.recommendations || [],
         breakdown: [
-          { name: 'Server Response Time', value: 92, icon: Globe },
-          { name: 'JavaScript Execution', value: randomScore - 5, icon: Cpu },
-          { name: 'Image Compression', value: randomScore + 2, icon: ImageIcon },
-          { name: 'Layout Stability', value: 98, icon: Layout },
+          { name: 'Performance', value: speedData.performance || 0, icon: Rocket },
+          { name: 'Accessibility', value: speedData.accessibility || 0, icon: Smartphone },
+          { name: 'Best Practices', value: speedData.bestPractices || 0, icon: ShieldCheck },
+          { name: 'SEO', value: speedData.seo || 0, icon: Search },
         ]
       });
     } catch (err) {
@@ -83,7 +92,7 @@ const SpeedChecker = () => {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-5xl mx-auto space-y-16 mb-20">
+    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto space-y-16 mb-20 overflow-x-hidden">
       {/* 🚀 SEO Schema Markup */}
       <script type="application/ld+json">
         {JSON.stringify({
@@ -94,8 +103,8 @@ const SpeedChecker = () => {
           "breadcrumb": {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://seoscore.io" },
-              { "@type": "ListItem", "position": 2, "name": "Website Speed Checker", "item": "https://seoscore.io/tools/website-speed-checker" }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://seoscore.site" },
+              { "@type": "ListItem", "position": 2, "name": "Website Speed Checker", "item": "https://seoscore.site/tools/website-speed-checker" }
             ]
           }
         })}
@@ -111,7 +120,7 @@ const SpeedChecker = () => {
       </div>
 
       {/* ⚙️ Tool Section */}
-      <section className="bg-zinc-900 shadow-2xl border border-white/5 p-8 lg:p-12 rounded-3xl space-y-8">
+      <section className="bg-zinc-900 shadow-2xl border border-white/5 p-4 md:p-8 lg:p-12 rounded-3xl space-y-8">
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="p-3 bg-brand-500/10 rounded-full text-brand-500">
             <Rocket size={32} />
@@ -155,10 +164,43 @@ const SpeedChecker = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-500 text-sm flex items-center gap-3"
+              className="mb-8 p-6 bg-zinc-900 border border-white/5 rounded-3xl"
             >
-              <CheckCircle2 size={18} />
-              Speed test complete! Performance score: {result.score}/100.
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3 text-emerald-500 font-bold">
+                  <CheckCircle2 size={24} />
+                  <span>Audit Complete for {new URL(url).hostname}</span>
+                </div>
+                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-zinc-800 px-3 py-1 rounded-full">
+                  Real-time Data Active
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  { label: 'Performance', value: result.score, color: 'text-brand-500' },
+                  { label: 'Accessibility', value: result.accessibility, color: 'text-blue-500' },
+                  { label: 'Best Practices', value: result.bestPractices, color: 'text-emerald-500' }
+                ].map((score, i) => (
+                  <div key={i} className="flex flex-col items-center p-6 bg-zinc-800/50 rounded-2xl border border-white/5">
+                    <div className="relative w-20 h-20 mb-4 flex items-center justify-center">
+                      <svg className="w-full h-full -rotate-90">
+                        <circle cx="40" cy="40" r="36" fill="transparent" stroke="currentColor" strokeWidth="4" className="text-zinc-800" />
+                        <motion.circle 
+                          cx="40" cy="40" r="36" fill="transparent" stroke="currentColor" strokeWidth="4" 
+                          strokeDasharray={226}
+                          initial={{ strokeDashoffset: 226 }}
+                          animate={{ strokeDashoffset: 226 - (226 * score.value) / 100 }}
+                          transition={{ duration: 1, delay: i * 0.2 }}
+                          className={score.color} 
+                        />
+                      </svg>
+                      <span className={`absolute text-xl font-black ${score.color}`}>{score.value}</span>
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{score.label}</span>
+                  </div>
+                ))}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -242,50 +284,89 @@ const SpeedChecker = () => {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-8 pt-8 border-t border-white/5"
             >
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { name: 'Performance', value: `${result.score}`, unit: '/100', color: result.score > 90 ? 'text-brand-500' : 'text-amber-500' },
-                  { name: 'FCP', value: `${result.fcp}`, unit: 's', color: 'text-white' },
-                  { name: 'LCP', value: `${result.lcp}`, unit: 's', color: 'text-white' },
-                  { name: 'CLS', value: result.cls, unit: '', color: 'text-white' },
+                  { name: 'FCP', value: result.fcp, desc: 'First Contentful Paint', color: 'text-white' },
+                  { name: 'LCP', value: result.lcp, desc: 'Largest Contentful Paint', color: 'text-white' },
+                  { name: 'CLS', value: result.cls, desc: 'Cumulative Layout Shift', color: 'text-white' },
+                  { name: 'TBT', value: result.tbt, desc: 'Total Blocking Time', color: 'text-white' },
                 ].map((stat, i) => (
                   <div key={i} className="bg-zinc-800/50 border border-white/5 p-6 rounded-2xl">
-                    <div className="micro-label mb-2">{stat.name}</div>
-                    <div className={`text-3xl font-light ${stat.color}`}>
-                      {stat.value}<span className="text-sm opacity-40 ml-0.5">{stat.unit}</span>
+                    <div className="micro-label mb-1">{stat.name}</div>
+                    <div className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter mb-2">{stat.desc}</div>
+                    <div className={`text-2xl font-black italic tracking-tighter ${stat.color}`}>
+                      {stat.value}
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="bg-zinc-800/30 border border-white/5 rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-white/5 bg-white/5">
-                  <h3 className="micro-label text-white">Advanced Performance Breakdown</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-zinc-800/30 border border-white/5 rounded-2xl overflow-hidden h-fit">
+                  <div className="p-6 border-b border-white/5 bg-white/5">
+                    <h3 className="micro-label text-white">Full Performance Audit</h3>
+                  </div>
+                  <div className="divide-y divide-white/5">
+                    {result.breakdown.map((item: any, i: number) => (
+                      <div key={i} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="flex items-center gap-4">
+                          <div className={`p-2.5 rounded-lg ${
+                            item.name === 'Performance' ? 'bg-red-500/10 text-red-400' :
+                            item.name === 'Accessibility' ? 'bg-blue-500/10 text-blue-400' :
+                            item.name === 'Best Practices' ? 'bg-emerald-500/10 text-emerald-400' :
+                            'bg-amber-500/10 text-amber-400'
+                          }`}>
+                            <item.icon size={20} />
+                          </div>
+                          <div>
+                            <div className="font-bold text-slate-200">{item.name}</div>
+                            <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-1">Audit Score</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 w-full md:w-1/2">
+                          <div className="flex-grow h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${item.value}%` }}
+                              className={`h-full rounded-full ${item.value > 85 ? 'bg-brand-500' : item.value > 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                            />
+                          </div>
+                          <span className="font-mono text-sm font-bold w-12 text-right text-slate-400">{item.value}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="divide-y divide-white/5">
-                  {result.breakdown.map((item: any, i: number) => (
-                    <div key={i} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                      <div className="flex items-center gap-4">
-                        <div className="p-2.5 bg-zinc-700/50 rounded-lg text-brand-400">
-                          <item.icon size={20} />
+
+                <div className="space-y-4">
+                  <h3 className="micro-label flex items-center gap-2 px-2">
+                    <Sparkles size={14} className="text-brand-500" />
+                    Speed Recommendations
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    {result.recommendations.map((rec: any, i: number) => (
+                      <div key={i} className="bg-zinc-900 border border-white/5 p-6 rounded-2xl flex items-start gap-4 hover:border-brand-500/20 transition-colors group">
+                        <div className={`mt-1 p-2 rounded-xl shrink-0 ${
+                          rec.impact === 'High' ? 'bg-red-500/10 text-red-500' : 
+                          rec.impact === 'Medium' ? 'bg-amber-500/10 text-amber-500' : 
+                          'bg-blue-500/10 text-blue-500'
+                        }`}>
+                          <AlertCircle size={16} />
                         </div>
                         <div>
-                          <div className="font-bold text-slate-200">{item.name}</div>
-                          <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-1">Optimization analysis</div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="text-white font-bold text-sm tracking-tight">{rec.title}</h4>
+                            <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded ${
+                              rec.impact === 'High' ? 'bg-red-500/10 text-red-400' : 
+                              rec.impact === 'Medium' ? 'bg-amber-500/10 text-amber-400' : 
+                              'bg-blue-500/10 text-blue-400'
+                            }`}>{rec.impact} Impact</span>
+                          </div>
+                          <p className="text-slate-500 text-xs leading-relaxed">{rec.desc}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4 w-full md:w-3/5">
-                        <div className="flex-grow h-1.5 bg-zinc-900 rounded-full overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${item.value}%` }}
-                            className={`h-full rounded-full ${item.value > 90 ? 'bg-brand-500' : 'bg-amber-500'} shadow-[0_0_8px_rgba(16,185,129,0.2)]`}
-                          />
-                        </div>
-                        <span className="font-mono text-sm font-bold w-12 text-right text-slate-400">{item.value}%</span>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
 

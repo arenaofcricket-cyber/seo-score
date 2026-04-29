@@ -12,7 +12,7 @@ const BlogPostPage = () => {
   if (!post) return <div className="text-center py-24 text-slate-500 font-mono text-sm">HTTP 404: Post Not Found</div>;
 
   return (
-    <div className="p-8 lg:p-12 max-w-3xl mx-auto">
+    <div className="p-4 md:p-8 lg:p-12 max-w-3xl mx-auto overflow-x-hidden">
       <Link 
         to="/blog" 
         className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-brand-400 mb-12 uppercase tracking-widest transition-colors group"

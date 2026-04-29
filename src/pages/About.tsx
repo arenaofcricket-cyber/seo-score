@@ -5,7 +5,7 @@ import { Zap, Globe, ArrowRight } from 'lucide-react';
 
 const About = () => {
   return (
-    <div className="p-8 lg:p-12 max-w-5xl mx-auto">
+    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto overflow-x-hidden">
       <div className="mb-16">
         <h1 className="text-4xl lg:text-5xl font-semibold text-white mb-4">Precision SEO.</h1>
         <p className="text-slate-400 text-lg max-w-2xl leading-relaxed">

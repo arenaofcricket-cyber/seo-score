@@ -2,7 +2,7 @@ import React from 'react';
 
 const Disclaimer = () => {
   return (
-    <div className="p-8 lg:p-12 max-w-5xl mx-auto space-y-8 text-slate-400">
+    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto space-y-8 text-slate-400 overflow-x-hidden">
       <h1 className="text-4xl font-bold text-white mb-8">Disclaimer</h1>
       
       <p className="border-l-4 border-brand-500 pl-6 py-2 italic text-lg text-white">
@@ -12,7 +12,7 @@ const Disclaimer = () => {
       <section className="space-y-4">
         <h2 className="text-2xl font-bold text-white">1. Introduction</h2>
         <p>
-          The information provided by SEOScore ("we," "us," or "our") on seoscore.io (the "Site") is for general informational purposes only. All information on the Site is provided in good faith, however, we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the Site.
+          The information provided by SEOScore ("we," "us," or "our") on seoscore.site (the "Site") is for general informational purposes only. All information on the Site is provided in good faith, however, we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the Site.
         </p>
       </section>
 
@@ -46,7 +46,7 @@ const Disclaimer = () => {
 
       <section className="space-y-4 pt-12 border-t border-white/5">
         <p className="text-sm">
-          If you have any questions regarding this disclaimer, please contact us at support@seoscore.io
+          If you have any questions regarding this disclaimer, please contact us at support@seoscore.site
         </p>
       </section>
     </div>

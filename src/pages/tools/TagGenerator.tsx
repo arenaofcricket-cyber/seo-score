@@ -61,7 +61,7 @@ const TagGenerator = () => {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-5xl mx-auto">
+    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto overflow-x-hidden">
       {/* 🚀 SEO Schema Markup */}
       <script type="application/ld+json">
         {JSON.stringify({
@@ -72,8 +72,8 @@ const TagGenerator = () => {
           "breadcrumb": {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://seoscore.io" },
-              { "@type": "ListItem", "position": 2, "name": "YouTube Tag Generator", "item": "https://seoscore.io/tools/youtube-tag-generator" }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://seoscore.site" },
+              { "@type": "ListItem", "position": 2, "name": "YouTube Tag Generator", "item": "https://seoscore.site/tools/youtube-tag-generator" }
             ]
           }
         })}

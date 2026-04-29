@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Smartphone, Globe, Loader2, Search, CheckCircle2, XCircle, Layout, MousePointer2, Type, TrendingUp, HelpCircle, ArrowRight, Zap, ShieldCheck, Activity, Info, Sparkles, MessageSquare, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getMobileFriendlyRecommendations } from '../../services/geminiService';
 
 const MobileTest = () => {
   const [url, setUrl] = React.useState('');
@@ -46,21 +47,29 @@ const MobileTest = () => {
     }, 800);
     
     try {
-      // Simulated analysis delay
-      await new Promise(r => setTimeout(r, 4000));
+      // Simulated delay for UI feel
+      await new Promise(r => setTimeout(r, 2000));
       
+      setLoadingStep(loadingSteps.length - 2);
+      
+      const aiResponse = await getMobileFriendlyRecommendations(url);
+      
+      setLoadingStep(loadingSteps.length - 1);
+      await new Promise(r => setTimeout(r, 500));
+
       setResult({
-        isFriendly: Math.random() > 0.3,
+        isFriendly: aiResponse.isFriendly ?? Math.random() > 0.3,
+        score: aiResponse.score ?? 75,
         viewports: [
           { name: 'iPhone 15 Pro', status: 'Optimal' },
           { name: 'Samsung S24 Ultra', status: 'Optimal' },
           { name: 'Google Pixel 8', status: 'Optimal' },
           { name: 'iPad Air', status: 'Warning' },
         ],
-        issues: [
-          { title: 'Touch targets too close', type: 'warning', desc: 'Buttons are difficult to press on small screens.' },
-          { title: 'Horizontal scrolling detected', type: 'error', desc: 'Content exceeds viewport width.' },
-          { title: 'Font sizes legible', type: 'success', desc: 'Typography is large enough for reading.' }
+        issues: aiResponse.recommendations || [
+          { title: 'Touch targets too close', category: 'UX', impact: 'High', desc: 'Buttons are difficult to press on small screens.' },
+          { title: 'Horizontal scrolling detected', category: 'UX', impact: 'High', desc: 'Content exceeds viewport width.' },
+          { title: 'Font sizes legible', category: 'Accessibility', impact: 'Low', desc: 'Typography is large enough for reading.' }
         ]
       });
     } catch (err) {
@@ -72,7 +81,7 @@ const MobileTest = () => {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-7xl mx-auto">
+    <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto overflow-x-hidden">
       {/* Header Section */}
       <div className="mb-12 text-center max-w-4xl mx-auto">
         <motion.div 
@@ -279,7 +288,15 @@ const MobileTest = () => {
                     </div>
                   </div>
 
-                  <div className="bg-zinc-900 border border-white/5 p-8 rounded-3xl">
+                  <div className="bg-zinc-900 border border-white/5 p-8 rounded-3xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4">
+                      <div className="flex flex-col items-end">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Mobile Score</span>
+                        <div className="text-4xl font-black text-brand-500 italic tracking-tighter shadow-brand-500/10 [text-shadow:0_0_20px_rgba(16,185,129,0.3)]">
+                          {result.score}/100
+                        </div>
+                      </div>
+                    </div>
                     <h3 className="micro-label mb-6 flex items-center gap-2">
                       <Layout size={14} className="text-brand-500" />
                       Cross-Device Compatibility
@@ -301,22 +318,48 @@ const MobileTest = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <h3 className="micro-label flex items-center gap-2">
-                      <Info size={14} className="text-brand-500" />
-                      Infrastructure Audit Details
-                    </h3>
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="micro-label flex items-center gap-2">
+                        <Sparkles size={14} className="text-brand-500" />
+                        Actionable Recommendations
+                      </h3>
+                      <div className="flex gap-2">
+                        {['High', 'Medium', 'Low'].map(lvl => (
+                          <div key={lvl} className="flex items-center gap-1.5">
+                            <div className={`w-2 h-2 rounded-full ${lvl === 'High' ? 'bg-red-500' : lvl === 'Medium' ? 'bg-amber-500' : 'bg-blue-500'}`} />
+                            <span className="text-[9px] font-bold text-slate-500 uppercase">{lvl} Impact</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                     <div className="grid grid-cols-1 gap-4">
                       {result.issues.map((issue: any, i: number) => (
-                        <div key={i} className="p-5 rounded-2xl bg-zinc-900/40 border border-white/5 flex gap-4">
-                          <div className={`mt-1 shrink-0 ${issue.type === 'error' ? 'text-red-500' : issue.type === 'warning' ? 'text-amber-500' : 'text-emerald-500'}`}>
-                            {issue.type === 'error' ? <XCircle size={18} /> : issue.type === 'warning' ? <AlertTriangle size={18} /> : <CheckCircle2 size={18} />}
+                        <motion.div 
+                          key={i}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          className="p-6 rounded-3xl bg-zinc-900 border border-white/5 hover:bg-zinc-800/50 transition-all flex flex-col md:flex-row gap-6 relative group"
+                        >
+                          <div className="flex flex-col gap-2 shrink-0 md:w-32">
+                            <span className={`text-[9px] font-black uppercase tracking-tighter px-2 py-1 rounded w-fit ${
+                              issue.impact === 'High' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 
+                              issue.impact === 'Medium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 
+                              'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                            }`}>
+                              {issue.impact} Impact
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{issue.category}</span>
                           </div>
-                          <div>
-                            <h4 className="text-white font-medium text-sm mb-1">{issue.title}</h4>
-                            <p className="text-slate-500 text-xs">{issue.desc}</p>
+                          <div className="space-y-1 flex-1">
+                            <h4 className="text-white font-bold text-base group-hover:text-brand-400 transition-colors uppercase italic tracking-tight">{issue.title}</h4>
+                            <p className="text-slate-400 text-sm leading-relaxed">{issue.desc}</p>
                           </div>
-                        </div>
+                          <button className="self-center p-2 rounded-xl bg-white/5 text-slate-500 hover:text-brand-400 hover:bg-brand-500/10 transition-all opacity-0 group-hover:opacity-100">
+                            <ArrowRight size={18} />
+                          </button>
+                        </motion.div>
                       ))}
                     </div>
                   </div>

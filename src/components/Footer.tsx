@@ -11,13 +11,13 @@ const Footer = () => {
       links: [
         { name: 'SEO Score Checker', path: '/tools/seo-score-checker', icon: Activity },
         { name: 'Backlink Checker', path: '/tools/backlink-checker', icon: Globe },
-        { name: 'Keyword Density', path: '/seo/keyword-density', icon: Hash },
+        { name: 'Keyword Density', path: '/tools/keyword-density', icon: Hash },
       ]
     },
     {
       title: 'YouTube SEO',
       links: [
-        { name: 'Title Generator', path: '/youtube/title-generator', icon: Youtube },
+        { name: 'Title Generator', path: '/tools/youtube-title-generator', icon: Youtube },
         { name: 'Tag Generator', path: '/tools/youtube-tag-generator', icon: Tag },
       ]
     },
@@ -25,7 +25,7 @@ const Footer = () => {
       title: 'Website Tools',
       links: [
         { name: 'Speed Checker', path: '/tools/website-speed-checker', icon: Zap },
-        { name: 'Mobile Friendly Test', path: '/website/mobile-test', icon: Smartphone },
+        { name: 'Mobile Friendly Test', path: '/tools/mobile-test', icon: Smartphone },
       ]
     },
     {
@@ -40,7 +40,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-zinc-950 border-t border-white/5 pt-20 pb-10 px-8">
+    <footer className="bg-zinc-950 border-t border-white/5 pt-20 pb-10 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           <div className="space-y-6">

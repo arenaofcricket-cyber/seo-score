@@ -31,6 +31,7 @@ import ToolsGuide from './pages/ToolsGuide';
 
 // Components
 import Footer from './components/Footer';
+import GlobalSearch from './components/GlobalSearch';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -49,14 +50,14 @@ const Sidebar = () => {
       title: 'SEO Tools',
       links: [
         { name: 'SEO Score Checker', path: '/tools/seo-score-checker', icon: Activity },
-        { name: 'Keyword Density', path: '/seo/keyword-density', icon: Hash },
+        { name: 'Keyword Density', path: '/tools/keyword-density', icon: Hash },
         { name: 'Backlink Checker', path: '/tools/backlink-checker', icon: Globe },
       ]
     },
     {
       title: 'YouTube Tools',
       links: [
-        { name: 'Title Generator', path: '/youtube/title-generator', icon: Youtube },
+        { name: 'Title Generator', path: '/tools/youtube-title-generator', icon: Youtube },
         { name: 'Tag Generator', path: '/tools/youtube-tag-generator', icon: Tag },
       ]
     },
@@ -64,7 +65,7 @@ const Sidebar = () => {
       title: 'Infrastructure',
       links: [
         { name: 'Speed Checker', path: '/tools/website-speed-checker', icon: Zap },
-        { name: 'Mobile Test', path: '/website/mobile-test', icon: Smartphone },
+        { name: 'Mobile Test', path: '/tools/mobile-test', icon: Smartphone },
       ]
     }
   ];
@@ -157,18 +158,20 @@ const Header = () => {
   };
 
   return (
-    <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-zinc-950/50 backdrop-blur-md sticky top-0 z-30">
-      <div className="flex items-center gap-6">
-        <span className="text-white font-medium">{getTitle()}</span>
-        <div className="h-4 w-[1px] bg-white/10 hidden md:block"></div>
-        <nav className="hidden md:flex gap-4 text-sm text-slate-400">
-          <Link to="/blog" className="hover:text-white transition-colors">Blog</Link>
-          <Link to="/blog/seo-guide" className="hover:text-white transition-colors">SEO Guide</Link>
-          <Link to="/blog/backlinks-guide" className="hover:text-white transition-colors">Backlinks</Link>
-        </nav>
+    <header className="h-20 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-zinc-950/50 backdrop-blur-md sticky top-0 z-30">
+      <div className="flex items-center gap-3 md:gap-6 flex-1 max-w-2xl min-w-0">
+        <span className="text-white font-bold text-lg hidden lg:block tracking-tighter italic uppercase whitespace-nowrap">{getTitle()}</span>
+        <div className="h-4 w-[1px] bg-white/10 hidden lg:block"></div>
+        <div className="flex-1 max-w-md min-w-0">
+          <GlobalSearch />
+        </div>
       </div>
-      <div className="flex items-center gap-3">
-        <div className="px-3 py-1.5 bg-zinc-800 rounded-full text-[10px] uppercase font-bold tracking-wider text-brand-400 border border-brand-500/20">Pro Account</div>
+      <div className="flex items-center gap-4 md:gap-6 ml-4 shrink-0">
+        <nav className="hidden xl:flex gap-6 text-xs font-bold uppercase tracking-widest text-slate-500">
+          <Link to="/blog" className="hover:text-brand-400 transition-colors">Resources</Link>
+          <Link to="/tools-guide" className="hover:text-brand-400 transition-colors">Tools Guide</Link>
+        </nav>
+        <div className="px-3 py-1.5 md:px-4 md:py-2 bg-brand-500 text-black rounded-xl text-[9px] md:text-[10px] uppercase font-black tracking-widest shadow-lg shadow-brand-500/20 active:scale-95 transition-all cursor-pointer whitespace-nowrap">Upgrade to Pro</div>
       </div>
     </header>
   );
@@ -186,18 +189,19 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/tools-guide" element={<ToolsGuide />} />
               <Route path="/tools/seo-score-checker" element={<ScoreChecker />} />
-              <Route path="/seo/keyword-density" element={<KeywordDensity />} />
+              <Route path="/tools/keyword-density" element={<KeywordDensity />} />
               <Route path="/tools/backlink-checker" element={<BacklinkChecker />} />
-              <Route path="/youtube/title-generator" element={<TitleGenerator />} />
+              <Route path="/tools/youtube-title-generator" element={<TitleGenerator />} />
               <Route path="/tools/youtube-tag-generator" element={<TagGenerator />} />
               <Route path="/tools/website-speed-checker" element={<SpeedChecker />} />
-              <Route path="/website/mobile-test" element={<MobileTest />} />
+              <Route path="/tools/mobile-test" element={<MobileTest />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:id" element={<BlogPostPage />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/disclaimer" element={<Disclaimer />} />
+              <Route path="*" element={<Home />} />
             </Routes>
           </main>
           <Footer />

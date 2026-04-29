@@ -53,7 +53,7 @@ const KeywordDensity = () => {
   }, [text]);
 
   return (
-    <div className="p-8 lg:p-12 max-w-5xl mx-auto">
+    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto overflow-x-hidden">
       {/* 🚀 SEO Schema Markup */}
       <script type="application/ld+json">
         {JSON.stringify({
@@ -61,8 +61,8 @@ const KeywordDensity = () => {
           "@graph": [
             {
               "@type": "WebPage",
-              "@id": "https://seoscore.io/seo/keyword-density/#webpage",
-              "url": "https://seoscore.io/seo/keyword-density",
+              "@id": "https://seoscore.site/seo/keyword-density/#webpage",
+              "url": "https://seoscore.site/seo/keyword-density",
               "name": "Free Keyword Density Checker Tool | SEOScore",
               "description": "Analyze keyword frequency and density on any webpage. Optimizing your content's keyword density is crucial for improving visibility and search rankings on Google.",
               "breadcrumb": {
@@ -72,28 +72,28 @@ const KeywordDensity = () => {
                     "@type": "ListItem",
                     "position": 1,
                     "name": "Home",
-                    "item": "https://seoscore.io/"
+                    "item": "https://seoscore.site/"
                   },
                   {
                     "@type": "ListItem",
                     "position": 2,
                     "name": "SEO Tools",
-                    "item": "https://seoscore.io/tools-guide"
+                    "item": "https://seoscore.site/tools-guide"
                   },
                   {
                     "@type": "ListItem",
                     "position": 3,
                     "name": "Keyword Density Tool",
-                    "item": "https://seoscore.io/seo/keyword-density"
+                    "item": "https://seoscore.site/seo/keyword-density"
                   }
                 ]
               }
             },
             {
               "@type": "SoftwareApplication",
-              "@id": "https://seoscore.io/seo/keyword-density/#software",
+              "@id": "https://seoscore.site/seo/keyword-density/#software",
               "name": "Keyword Density Checker",
-              "url": "https://seoscore.io/seo/keyword-density",
+              "url": "https://seoscore.site/seo/keyword-density",
               "operatingSystem": "All",
               "applicationCategory": "DeveloperApplication",
               "browserRequirements": "Requires JavaScript",

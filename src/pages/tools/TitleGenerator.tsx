@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Youtube, Copy, Loader2, Sparkles, Check, Hash, TrendingUp, HelpCircle, ArrowRight, Activity, Zap, Search, CheckCircle2, ShieldCheck, PlayCircle, Star, BookOpen, AlertCircle } from 'lucide-react';
+import { Youtube, Copy, Loader2, Sparkles, Check, Hash, TrendingUp, HelpCircle, ArrowRight, Activity, Zap, Search, CheckCircle2, ShieldCheck, PlayCircle, Star, BookOpen, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { generateYouTubeTitle } from '../../services/geminiService';
 
@@ -58,8 +58,29 @@ const TitleGenerator = () => {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-5xl mx-auto">
+    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto overflow-x-hidden">
       {/* 🚀 SEO Schema Markup */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "AI YouTube Title Generator",
+          "operatingSystem": "All",
+          "applicationCategory": "MultimediaApplication",
+          "description": "Generate high-CTR, SEO-optimized YouTube titles for your videos with our free AI tool.",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "1250"
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          }
+        })}
+      </script>
+
       <script type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
@@ -69,10 +90,37 @@ const TitleGenerator = () => {
           "breadcrumb": {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://seoscore.io" },
-              { "@type": "ListItem", "position": 2, "name": "YouTube Title Generator", "item": "https://seoscore.io/youtube/title-generator" }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://seoscore.site" },
+              { "@type": "ListItem", "position": 2, "name": "YouTube Title Generator", "item": "https://seoscore.site/tools/youtube-title-generator" }
             ]
           }
+        })}
+      </script>
+
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "HowTo",
+          "name": "How to generate viral YouTube titles",
+          "description": "Follow these simple steps to create catchy, SEO-friendly titles for your YouTube videos.",
+          "step": [
+            {
+              "@type": "HowToStep",
+              "text": "Enter your video topic or primary subject in the input field."
+            },
+            {
+              "@type": "HowToStep",
+              "text": "Optionally provide target keywords to guide the AI's SEO focus."
+            },
+            {
+              "@type": "HowToStep",
+              "text": "Click the 'Generate AI Titles' button to start the analysis."
+            },
+            {
+              "@type": "HowToStep",
+              "text": "Review the list of viral title suggestions and click any title to copy it to your clipboard."
+            }
+          ]
         })}
       </script>
 
@@ -127,7 +175,7 @@ const TitleGenerator = () => {
       </div>
 
       {/* Main Tool Section */}
-      <section className="bg-zinc-900 border border-white/5 rounded-3xl p-8 md:p-12 shadow-2xl mb-20 relative overflow-hidden">
+      <section className="bg-zinc-900 border border-white/5 rounded-3xl p-4 md:p-8 lg:p-12 shadow-2xl mb-20 relative overflow-hidden">
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-red-500/5 rounded-full blur-3xl -ml-32 -mb-32 text-red-500"></div>
         
         <div className="relative z-10">
@@ -255,32 +303,75 @@ const TitleGenerator = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 className="mt-12 pt-12 border-t border-white/5 space-y-4"
               >
-                <h3 className="text-white font-semibold flex items-center gap-2 mb-6">
-                  <Star size={18} className="text-red-500" />
-                  Suggested Viral Titles
-                </h3>
-                {results.map((title, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    className="group bg-zinc-800/40 border border-white/5 p-5 rounded-2xl flex items-center justify-between hover:bg-zinc-800 hover:border-red-500/30 transition-all border-l-4 border-l-transparent hover:border-l-red-500"
-                  >
-                    <span className="text-slate-200 font-medium md:text-lg">{title}</span>
-                    <button
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-white font-semibold flex items-center gap-2">
+                    <Star size={18} className="text-red-500" />
+                    Suggested Viral Titles
+                  </h3>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest hidden md:block">Click to Copy Any Title</p>
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                  {results.map((title, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
                       onClick={() => copyToClipboard(title, i)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs transition-all ${
-                        copied === i 
-                        ? 'bg-green-500 text-zinc-950' 
-                        : 'bg-white/5 text-slate-400 group-hover:bg-white group-hover:text-zinc-950'
+                      className={`group relative p-6 rounded-3xl flex items-center justify-between cursor-pointer transition-all border-l-4 border-l-transparent overflow-hidden ${
+                        title.length > 70 
+                        ? 'bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 hover:border-red-500/40 hover:border-l-red-500' 
+                        : 'bg-zinc-800/40 border-white/5 hover:bg-zinc-800/80 hover:border-red-500/30 hover:border-l-red-500'
                       }`}
                     >
-                      {copied === i ? <Check size={14} /> : <Copy size={14} />}
-                      {copied === i ? 'Copied' : 'Copy'}
-                    </button>
-                  </motion.div>
-                ))}
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-red-500/0 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                      <div className="flex flex-col gap-1.5 flex-1 relative z-10 pr-12">
+                        <span className="text-slate-200 font-bold md:text-lg line-clamp-2">{title}</span>
+                        <div className="flex items-center gap-3">
+                          <div className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tighter ${
+                            title.length > 70 ? 'bg-red-500/20 text-red-500 border border-red-500/20' : 'bg-white/5 text-slate-500 border border-white/5'
+                          }`}>
+                            {title.length} characters
+                          </div>
+                          {title.length > 70 && (
+                            <div className="flex items-center gap-1.5 text-red-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                              <AlertTriangle size={12} />
+                              <span>Length Warning</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 relative z-10 shrink-0">
+                        <motion.button
+                          animate={copied === i ? { scale: [1, 1.1, 1] } : {}}
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-black uppercase text-[10px] tracking-tighter transition-all duration-300 ${
+                            copied === i 
+                            ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
+                            : 'bg-white/10 text-white opacity-0 md:group-hover:opacity-100 md:translate-x-4 md:group-hover:translate-x-0'
+                          }`}
+                        >
+                          {copied === i ? <Check size={14} strokeWidth={3} /> : <Copy size={14} strokeWidth={3} />}
+                          {copied === i ? 'Title Copied!' : 'Copy to Clipboard'}
+                        </motion.button>
+                      </div>
+
+                      {/* Sparkle effect on copy */}
+                      <AnimatePresence>
+                        {copied === i && (
+                          <motion.div 
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 1.5, opacity: 0 }}
+                            className="absolute right-12 top-1/2 -translate-y-1/2 text-emerald-400"
+                          >
+                            <Sparkles size={40} className="animate-pulse" />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  ))}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

@@ -89,7 +89,7 @@ const ScoreChecker = () => {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-5xl mx-auto space-y-16 mb-20">
+    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto space-y-16 mb-20 overflow-x-hidden">
       {/* 🚀 SEO Schema Markup */}
       <script type="application/ld+json">
         {JSON.stringify({
@@ -97,8 +97,8 @@ const ScoreChecker = () => {
           "@graph": [
             {
               "@type": "WebPage",
-              "@id": "https://seoscore.io/seo/score-checker/#webpage",
-              "url": "https://seoscore.io/seo/score-checker",
+              "@id": "https://seoscore.site/seo/score-checker/#webpage",
+              "url": "https://seoscore.site/seo/score-checker",
               "name": "Free SEO Score Checker Online – Analyze Your Website SEO",
               "description": "Check your website performance with our free SEO score checker online. Get instant SEO analysis and improve your rankings today.",
               "keywords": "free seo score checker online, check seo score of website, website seo checker free, seo analyzer tool free, SEO score, website audit",
@@ -109,28 +109,28 @@ const ScoreChecker = () => {
                     "@type": "ListItem",
                     "position": 1,
                     "name": "Home",
-                    "item": "https://seoscore.io/"
+                    "item": "https://seoscore.site/"
                   },
                   {
                     "@type": "ListItem",
                     "position": 2,
                     "name": "SEO Tools",
-                    "item": "https://seoscore.io/tools-guide"
+                    "item": "https://seoscore.site/tools-guide"
                   },
                   {
                     "@type": "ListItem",
                     "position": 3,
                     "name": "SEO Score Checker",
-                    "item": "https://seoscore.io/seo/score-checker"
+                    "item": "https://seoscore.site/seo/score-checker"
                   }
                 ]
               }
             },
             {
               "@type": "SoftwareApplication",
-              "@id": "https://seoscore.io/seo/score-checker/#software",
+              "@id": "https://seoscore.site/seo/score-checker/#software",
               "name": "SEO Score Checker",
-              "url": "https://seoscore.io/seo/score-checker",
+              "url": "https://seoscore.site/seo/score-checker",
               "operatingSystem": "Windows, macOS, Linux, Android, iOS",
               "applicationCategory": "DeveloperApplication",
               "applicationSuite": "SEOScore SEO Suite",
@@ -233,7 +233,7 @@ const ScoreChecker = () => {
       </div>
 
       {/* ⚙️ Tool Section */}
-      <section className="bg-zinc-900 shadow-2xl border border-white/5 p-8 lg:p-12 rounded-3xl space-y-8">
+      <section className="bg-zinc-900 shadow-2xl border border-white/5 p-4 md:p-8 lg:p-12 rounded-3xl space-y-8">
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="p-3 bg-brand-500/10 rounded-full text-brand-500">
             <Search size={32} />

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Calendar, User, ChevronRight, Search, Tag as TagIcon, X, Filter } from 'lucide-react';
+import { BookOpen, Calendar, User, ChevronRight, Search, Tag as TagIcon, X, Filter, ArrowRight } from 'lucide-react';
 import { BLOG_POSTS } from '../constants';
 
 const Blog = () => {
@@ -31,34 +31,34 @@ const Blog = () => {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-7xl mx-auto flex flex-col lg:flex-row gap-12">
+    <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto flex flex-col lg:flex-row gap-12 overflow-x-hidden">
       {/* 🚀 SEO Schema Markup */}
       <script type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
           "@graph": BLOG_POSTS.map((post) => ({
             "@type": "Article",
-            "@id": `https://seoscore.io/blog/${post.id}/#article`,
-            "url": `https://seoscore.io/blog/${post.id}`,
+            "@id": `https://seoscore.site/blog/${post.id}/#article`,
+            "url": `https://seoscore.site/blog/${post.id}`,
             "headline": post.title,
             "description": post.excerpt,
             "datePublished": new Date(post.date).toISOString(),
             "author": {
               "@type": "Organization",
               "name": "SEOScore",
-              "url": "https://seoscore.io"
+              "url": "https://seoscore.site"
             },
             "publisher": {
               "@type": "Organization",
               "name": "SEOScore",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://seoscore.io/logo.png"
+                "url": "https://seoscore.site/logo.png"
               }
             },
             "image": {
               "@type": "ImageObject",
-              "url": `https://seoscore.io/blog-placeholders/${post.id}.jpg`
+              "url": `https://seoscore.site/blog-placeholders/${post.id}.jpg`
             }
           }))
         })}
@@ -123,9 +123,10 @@ const Blog = () => {
                   layout
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
+                  whileHover={{ scale: 1.02, y: -5 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2, delay: i * 0.05 }}
-                  className="group flex flex-col h-full bg-zinc-900/40 border border-white/5 rounded-3xl overflow-hidden hover:bg-zinc-900/60 transition-all hover:border-brand-500/30"
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                  className="group flex flex-col h-full bg-zinc-900/40 border border-white/5 rounded-3xl overflow-hidden hover:bg-zinc-900/60 transition-all hover:border-brand-500/40 hover:shadow-2xl hover:shadow-brand-500/10"
                 >
                   <div className="aspect-video bg-zinc-950 flex items-center justify-center overflow-hidden">
                     <div className="text-white/5 transform group-hover:scale-110 transition-transform duration-500 group-hover:text-brand-500/10">
@@ -143,21 +144,22 @@ const Blog = () => {
                     <p className="text-sm text-slate-400 mb-6 line-clamp-3 leading-relaxed">
                       {post.excerpt}
                     </p>
-                    <div className="mt-auto flex items-center justify-between">
-                      <Link
-                        to={`/blog/${post.id}`}
-                        className="inline-flex items-center gap-2 text-xs font-bold text-white group-hover:translate-x-1 transition-transform"
-                      >
-                        Read Full Guide <ChevronRight size={14} className="text-brand-500" />
-                      </Link>
+                    <div className="mt-auto flex items-center justify-between min-h-[40px]">
                       {/* @ts-ignore */}
                       <button 
                         onClick={() => setSelectedCategory(post.category)}
-                        className="text-[9px] font-black uppercase tracking-tighter bg-zinc-800 text-slate-400 px-2 py-1 rounded border border-white/5 hover:text-brand-400 transition-colors"
+                        className="text-[9px] font-black uppercase tracking-tighter bg-zinc-800 text-slate-400 px-3 py-1.5 rounded-lg border border-white/5 hover:text-brand-400 transition-colors"
                       >
                         {/* @ts-ignore */}
                         {post.category}
                       </button>
+
+                      <Link
+                        to={`/blog/${post.id}`}
+                        className="opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-brand-500 text-black px-4 py-2 rounded-xl transition-all duration-300 shadow-xl shadow-brand-500/20 active:scale-95"
+                      >
+                        Read More <ArrowRight size={14} strokeWidth={3} />
+                      </Link>
                     </div>
                   </div>
                 </motion.article>

@@ -2,7 +2,7 @@ import React from 'react';
 
 const Privacy = () => {
   return (
-    <div className="p-8 lg:p-12 max-w-4xl mx-auto">
+    <div className="p-4 md:p-8 lg:p-12 max-w-4xl mx-auto overflow-x-hidden">
       <div className="mb-16">
         <h1 className="text-4xl lg:text-5xl font-semibold text-white mb-4">Privacy Standards</h1>
         <p className="text-slate-500 font-mono text-xs uppercase tracking-[0.2em] mb-12">Security Protocol Version 2.0</p>

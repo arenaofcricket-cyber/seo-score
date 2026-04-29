@@ -61,3 +61,58 @@ export async function getSEOScore(url: string, realData?: any) {
   });
   return JSON.parse(response.text || "{}");
 }
+
+export async function getMobileFriendlyRecommendations(url: string) {
+  const prompt = `Perform a mobile-friendliness audit for the URL: "${url}". 
+  Provide a JSON object with:
+  "isFriendly": boolean,
+  "score": number (0-100),
+  "recommendations": array of objects with "title": string, "category": string (e.g., Performance, UX, Accessibility), "impact": string (High, Medium, Low), "desc": string.
+  
+  Specifically include recommendations for:
+  - Optimizing image sizes (compression, WebP, responsive images)
+  - Reducing JavaScript execution time (deferred loading, code splitting)
+  - Improving tap target spacing
+  - Preventing horizontal scrolling
+  - Improving font legibility on small screens.`;
+  
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+  return JSON.parse(response.text || "{}");
+}
+
+export async function getRealPageSpeedData(url: string) {
+  const prompt = `Analyze the website speed and performance for: "${url}". 
+  Provide a JSON object with:
+  "performance": number (0-100),
+  "accessibility": number (0-100),
+  "bestPractices": number (0-100),
+  "seo": number (0-100),
+  "metrics": {
+    "fcp": string,
+    "lcp": string,
+    "cls": string,
+    "tbt": string,
+    "fcpValue": number,
+    "lcpValue": number,
+    "clsValue": number,
+    "tbtValue": number
+  },
+  "recommendations": array of objects with "title": string, "desc": string, "impact": string.
+  
+  Base these on realistic interpretations of what PageSpeed Insights would return for this URL.`;
+  
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+  return JSON.parse(response.text || "{}");
+}

@@ -11,7 +11,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="p-8 lg:p-12 max-w-5xl mx-auto">
+    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto overflow-x-hidden">
       <div className="mb-16">
         <h1 className="text-4xl lg:text-5xl font-semibold text-white mb-4">Contact System</h1>
         <p className="text-slate-400 text-lg max-w-2xl">
