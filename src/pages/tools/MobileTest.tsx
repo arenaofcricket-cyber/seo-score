@@ -67,13 +67,14 @@ const MobileTest = () => {
           { name: 'iPad Air', status: 'Warning' },
         ],
         issues: aiResponse.recommendations || [
-          { title: 'Touch targets too close', category: 'UX', impact: 'High', desc: 'Buttons are difficult to press on small screens.' },
+          { title: 'Touch targets too close', category: 'UX', impact: 'High', desc: 'Buttons are difficult to press on small screens. Include: .your-button-class { min-width: 48px; min-height: 48px; } to meet mobile usability standards.' },
           { title: 'Horizontal scrolling detected', category: 'UX', impact: 'High', desc: 'Content exceeds viewport width.' },
           { title: 'Font sizes legible', category: 'Accessibility', impact: 'Low', desc: 'Typography is large enough for reading.' }
         ]
       });
     } catch (err) {
       console.error(err);
+      setError('Mobile analysis failed. Please try again with a different URL.');
     } finally {
       clearInterval(interval);
       setLoading(false);
@@ -354,7 +355,23 @@ const MobileTest = () => {
                           </div>
                           <div className="space-y-1 flex-1">
                             <h4 className="text-white font-bold text-base group-hover:text-brand-400 transition-colors uppercase italic tracking-tight">{issue.title}</h4>
-                            <p className="text-slate-400 text-sm leading-relaxed">{issue.desc}</p>
+                            <p className="text-slate-400 text-sm leading-relaxed">
+                              {issue.desc.includes('Include:') ? (
+                                <>
+                                  {issue.desc.split('Include:')[0]}
+                                  <span className="block mt-2 p-3 bg-zinc-950 rounded-lg border border-white/5 font-mono text-xs text-brand-400">
+                                    {issue.desc.split('Include:')[1].split(' to meet')[0]}
+                                  </span>
+                                  {issue.desc.includes('to meet') && (
+                                    <span className="block mt-2 text-slate-500">
+                                      to meet{issue.desc.split('to meet')[1]}
+                                    </span>
+                                  )}
+                                </>
+                              ) : (
+                                issue.desc
+                              )}
+                            </p>
                           </div>
                           <button className="self-center p-2 rounded-xl bg-white/5 text-slate-500 hover:text-brand-400 hover:bg-brand-500/10 transition-all opacity-0 group-hover:opacity-100">
                             <ArrowRight size={18} />

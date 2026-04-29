@@ -6,6 +6,7 @@ import { generateYouTubeTags } from '../../services/geminiService';
 
 const TagGenerator = () => {
   const [topic, setTopic] = React.useState('');
+  const [keywords, setKeywords] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [results, setResults] = React.useState<string[]>([]);
@@ -38,7 +39,7 @@ const TagGenerator = () => {
     }, 1000);
 
     try {
-      const tags = await generateYouTubeTags(topic);
+      const tags = await generateYouTubeTags(topic, keywords);
       if (!tags || tags.length === 0) {
         throw new Error('No tags could be generated for this topic.');
       }
@@ -62,7 +63,6 @@ const TagGenerator = () => {
 
   return (
     <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto overflow-x-hidden">
-      {/* 🚀 SEO Schema Markup */}
       <script type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
@@ -111,7 +111,7 @@ const TagGenerator = () => {
           ]
         })}
       </script>
-      {/* Header Section */}
+
       <div className="mb-12 text-center">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -134,22 +134,39 @@ const TagGenerator = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
         
         <div className="relative z-10">
-          <form onSubmit={handleGenerate} className="max-w-2xl mx-auto space-y-6">
-            <div className="space-y-4">
-              <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-                <Search size={16} className="text-red-500" />
-                Enter your video topic or keywords
-              </label>
-              <div className="relative group">
-                <input
-                  type="text"
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  placeholder="e.g. How to start a travel blog in 2026"
-                  className="w-full bg-zinc-950/50 px-6 py-5 rounded-2xl border border-white/10 focus:border-red-500/50 outline-none transition-all text-white placeholder:text-slate-600 text-lg shadow-inner"
-                  required
-                />
-                <div className="absolute inset-0 rounded-2xl bg-red-500/5 opacity-0 group-hover:opacity-100 pointer-events-none transition-all"></div>
+          <form onSubmit={handleGenerate} className="max-w-2xl mx-auto space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
+                  <Search size={16} className="text-red-500" />
+                  Video Topic
+                </label>
+                <div className="relative group">
+                  <input
+                    type="text"
+                    value={topic}
+                    onChange={(e) => setTopic(e.target.value)}
+                    placeholder="e.g. Starting a Travel Blog"
+                    className="w-full bg-zinc-950/50 px-5 py-4 rounded-xl border border-white/10 focus:border-red-500/50 outline-none transition-all text-white placeholder:text-slate-600 text-base shadow-inner"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
+                  <Hash size={16} className="text-red-500" />
+                  Extra Keywords (Optional)
+                </label>
+                <div className="relative group">
+                  <input
+                    type="text"
+                    value={keywords}
+                    onChange={(e) => setKeywords(e.target.value)}
+                    placeholder="e.g. 2026, budget, tutorial"
+                    className="w-full bg-zinc-950/50 px-5 py-4 rounded-xl border border-white/10 focus:border-red-500/50 outline-none transition-all text-white placeholder:text-slate-600 text-base shadow-inner"
+                  />
+                </div>
               </div>
             </div>
 
@@ -170,6 +187,7 @@ const TagGenerator = () => {
                 </>
               )}
             </button>
+
 
             <AnimatePresence>
               {error && (

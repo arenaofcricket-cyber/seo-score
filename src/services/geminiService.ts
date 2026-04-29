@@ -19,8 +19,8 @@ export async function generateYouTubeTitle(topic: string, keywords: string) {
   return JSON.parse(response.text || "[]");
 }
 
-export async function generateYouTubeTags(topic: string) {
-  const prompt = `Generate 15 highly relevant YouTube tags for the topic: "${topic}". Return as a comma-separated list of strings in a JSON array.`;
+export async function generateYouTubeTags(topic: string, keywords: string) {
+  const prompt = `Generate 20 highly relevant, SEO-optimized YouTube tags for a video about "${topic}". Target keywords to include: ${keywords}. Return as a JSON array of strings. Maximum tag length should be 50 characters each.`;
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: prompt,
@@ -72,7 +72,7 @@ export async function getMobileFriendlyRecommendations(url: string) {
   Specifically include recommendations for:
   - Optimizing image sizes (compression, WebP, responsive images)
   - Reducing JavaScript execution time (deferred loading, code splitting)
-  - Improving tap target spacing
+  - Improving tap target spacing (If "Touch targets too close" is detected, explicitly provide this CSS recommendation in the description: "Include: .your-button-class { min-width: 48px; min-height: 48px; } to meet mobile usability standards.")
   - Preventing horizontal scrolling
   - Improving font legibility on small screens.`;
   

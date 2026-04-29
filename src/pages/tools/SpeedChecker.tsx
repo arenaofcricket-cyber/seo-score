@@ -4,7 +4,8 @@ import { Zap, Globe, Loader2, Search, Gauge, Cpu, Layout, Image as ImageIcon, Ro
 import { Link } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
-import { getRealPageSpeedData } from '../../services/geminiService';
+import { getRealPageSpeedData as getAiSpeedData } from '../../services/geminiService';
+import { getRealPageSpeedData as getRealApiData } from '../../services/pageSpeedService';
 
 const trendData = [
   { date: 'Mon', fcp: 1.8, lcp: 2.9, cls: 0.05 },
@@ -59,8 +60,36 @@ const SpeedChecker = () => {
     }, 800);
     
     try {
-      // API integration for real data
-      const speedData = await getRealPageSpeedData(url);
+      // 1. Try real API first
+      const realData = await getRealApiData(url);
+      let speedData;
+
+      if (realData) {
+        // Map real data to our expected format
+        speedData = {
+          performance: realData.performanceScore,
+          accessibility: realData.accessibilityScore,
+          bestPractices: realData.bestPracticesScore,
+          seo: realData.seoScore,
+          metrics: {
+            fcp: realData.metrics.fcp,
+            lcp: realData.metrics.lcp,
+            cls: realData.metrics.cls,
+            tbt: realData.metrics.fid // TBT mapping
+          },
+          recommendations: realData.audits
+            .filter(a => a.score < 0.9)
+            .slice(0, 5)
+            .map(a => ({
+              title: a.title,
+              desc: a.description.split('.')[0] + '.',
+              impact: a.score < 0.5 ? 'High' : 'Medium'
+            }))
+        };
+      } else {
+        // 2. Fallback to Gemini AI simulation
+        speedData = await getAiSpeedData(url);
+      }
       
       setLoadingStep(loadingSteps.length - 1);
       await new Promise(r => setTimeout(r, 500));
@@ -85,6 +114,7 @@ const SpeedChecker = () => {
       });
     } catch (err) {
       console.error(err);
+      setError('Could not analyze the URL. Please ensure it is publicly accessible and try again.');
     } finally {
       clearInterval(interval);
       setLoading(false);
