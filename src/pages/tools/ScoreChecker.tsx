@@ -90,7 +90,11 @@ const ScoreChecker = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto space-y-16 mb-20 overflow-x-hidden">
+    <div 
+      itemScope 
+      itemType="https://schema.org/WebPage"
+      className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto space-y-16 mb-20 overflow-x-hidden"
+    >
       {/* 🚀 SEO Schema Markup */}
       <script type="application/ld+json">
         {JSON.stringify({
@@ -223,9 +227,17 @@ const ScoreChecker = () => {
 
       {/* 🟢 H1 & 📌 Intro */}
       <div className="space-y-6">
-        <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2">Free SEO Score Checker Tool</h1>
+        <h1 
+          itemProp="name" 
+          className="text-4xl lg:text-5xl font-bold text-white mb-2"
+        >
+          Free SEO Score Checker Tool
+        </h1>
         <div className="h-1 w-20 bg-brand-500 rounded-full"></div>
-        <p className="text-slate-400 text-lg leading-relaxed max-w-4xl">
+        <p 
+          itemProp="description"
+          className="text-slate-400 text-lg leading-relaxed max-w-4xl"
+        >
           Use our **free SEO score checker online** to analyze your website performance and identify critical areas for improvement. Simply enter your website URL and get an instant SEO score along with actionable insights to **improve website seo**.
         </p>
         <p className="text-slate-400 text-lg leading-relaxed max-w-4xl">
