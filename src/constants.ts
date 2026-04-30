@@ -13,17 +13,17 @@ export const TOOLS: Tool[] = [
     id: 'keyword-density',
     name: 'Keyword Density Tool',
     description: 'Check how often keywords appear in your content to avoid over-optimization.',
-    path: '/seo/keyword-density',
+    path: '/tools/keyword-density',
     category: 'seo',
     icon: 'Hash'
   },
   {
-    id: 'yt-title',
-    name: 'YouTube Title Generator',
-    description: 'Generate catchy and SEO-friendly titles for your YouTube videos using AI.',
-    path: '/youtube/title-generator',
-    category: 'youtube',
-    icon: 'Youtube'
+    id: 'serp-preview',
+    name: 'SERP Preview Tool',
+    description: 'Visualize how your meta title and description appear in Google search results.',
+    path: '/tools/serp-preview',
+    category: 'seo',
+    icon: 'Search'
   },
   {
     id: 'yt-tag',
@@ -45,7 +45,7 @@ export const TOOLS: Tool[] = [
     id: 'mobile-test',
     name: 'Mobile Friendly Test',
     description: 'Ensure your website looks great and functions well on all mobile devices.',
-    path: '/website/mobile-test',
+    path: '/tools/mobile-test',
     category: 'website',
     icon: 'Smartphone'
   }

@@ -52,12 +52,12 @@ const Sidebar = () => {
         { name: 'SEO Score Checker', path: '/tools/seo-score-checker', icon: Activity },
         { name: 'Keyword Density', path: '/tools/keyword-density', icon: Hash },
         { name: 'Backlink Checker', path: '/tools/backlink-checker', icon: Globe },
+        { name: 'SERP Preview Tool', path: '/tools/serp-preview', icon: Search },
       ]
     },
     {
       title: 'YouTube Tools',
       links: [
-        { name: 'Title Generator', path: '/tools/youtube-title-generator', icon: Youtube },
         { name: 'Tag Generator', path: '/tools/youtube-tag-generator', icon: Tag },
       ]
     },
@@ -149,7 +149,7 @@ const Header = () => {
     if (location.pathname === '/') return 'Overview Dashboard';
     if (location.pathname.includes('seo-score-checker')) return 'SEO Score Checker';
     if (location.pathname.includes('keyword-density')) return 'Keyword Density';
-    if (location.pathname.includes('title-generator')) return 'YT Title Generator';
+    if (location.pathname.includes('serp-preview')) return 'SERP Preview Tool';
     if (location.pathname.includes('youtube-tag-generator')) return 'YT Tag Generator';
     if (location.pathname.includes('website-speed-checker')) return 'Speed Checker';
     if (location.pathname.includes('mobile-test')) return 'Mobile Friendly Test';
@@ -191,7 +191,7 @@ export default function App() {
               <Route path="/tools/seo-score-checker" element={<ScoreChecker />} />
               <Route path="/tools/keyword-density" element={<KeywordDensity />} />
               <Route path="/tools/backlink-checker" element={<BacklinkChecker />} />
-              <Route path="/tools/youtube-title-generator" element={<TitleGenerator />} />
+              <Route path="/tools/serp-preview" element={<TitleGenerator />} />
               <Route path="/tools/youtube-tag-generator" element={<TagGenerator />} />
               <Route path="/tools/website-speed-checker" element={<SpeedChecker />} />
               <Route path="/tools/mobile-test" element={<MobileTest />} />

@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Smartphone, Globe, Loader2, Search, CheckCircle2, XCircle, Layout, MousePointer2, Type, TrendingUp, HelpCircle, ArrowRight, Zap, ShieldCheck, Activity, Info, Sparkles, MessageSquare, BookOpen } from 'lucide-react';
+import { Smartphone, Globe, Loader2, Search, CheckCircle2, XCircle, Layout, MousePointer2, Type, TrendingUp, HelpCircle, ArrowRight, Zap, ShieldCheck, Activity, Info, Sparkles, MessageSquare, BookOpen, Monitor, ShieldAlert, Code, AlertCircle, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { getMobileFriendlyRecommendations } from '../../services/geminiService';
+import { getMobileAudit } from '../../services/geminiService';
 
 const MobileTest = () => {
   const [url, setUrl] = React.useState('');
@@ -47,30 +47,31 @@ const MobileTest = () => {
     }, 800);
     
     try {
-      // Simulated delay for UI feel
-      await new Promise(r => setTimeout(r, 2000));
-      
-      setLoadingStep(loadingSteps.length - 2);
-      
-      const aiResponse = await getMobileFriendlyRecommendations(url);
+      // Use the comprehensive mobile audit service
+      const aiAudit = await getMobileAudit(url);
       
       setLoadingStep(loadingSteps.length - 1);
       await new Promise(r => setTimeout(r, 500));
 
       setResult({
-        isFriendly: aiResponse.isFriendly ?? Math.random() > 0.3,
-        score: aiResponse.score ?? 75,
+        isFriendly: aiAudit.isMobileFriendly ?? true,
+        score: aiAudit.overallScore ?? 85,
+        viewport: aiAudit.viewport || { status: 'Found', content: 'width=device-width, initial-scale=1', suggestion: '' },
+        touchTargets: aiAudit.touchTargets || { score: 90, status: 'Good', issues: [] },
+        contentWidth: aiAudit.contentWidth || { status: 'Correct', description: 'Content fits screen width.' },
+        readability: aiAudit.readability || { fontSize: 'Good', description: 'Text is easy to read.' },
         viewports: [
           { name: 'iPhone 15 Pro', status: 'Optimal' },
           { name: 'Samsung S24 Ultra', status: 'Optimal' },
           { name: 'Google Pixel 8', status: 'Optimal' },
           { name: 'iPad Air', status: 'Warning' },
         ],
-        issues: aiResponse.recommendations || [
-          { title: 'Touch targets too close', category: 'UX', impact: 'High', desc: 'Buttons are difficult to press on small screens. Include: .your-button-class { min-width: 48px; min-height: 48px; } to meet mobile usability standards.' },
-          { title: 'Horizontal scrolling detected', category: 'UX', impact: 'High', desc: 'Content exceeds viewport width.' },
-          { title: 'Font sizes legible', category: 'Accessibility', impact: 'Low', desc: 'Typography is large enough for reading.' }
-        ]
+        issues: aiAudit.touchTargets?.issues?.map((title: string) => ({ 
+          title, 
+          category: 'UX', 
+          impact: 'High', 
+          desc: 'This element is too small or too close to others for reliable touch interaction.' 
+        })) || []
       });
     } catch (err) {
       console.error(err);
@@ -238,69 +239,123 @@ const MobileTest = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="grid grid-cols-1 lg:grid-cols-12 gap-12 pt-12 border-t border-white/5"
               >
-                {/* Visual Simulation */}
-                <div className="lg:col-span-5 flex justify-center">
-                  <div className="relative w-[300px] h-[600px] bg-zinc-950 border-[12px] border-zinc-800 rounded-[3rem] shadow-[0_0_60px_rgba(0,0,0,0.6)] overflow-hidden scale-90 md:scale-100 origin-top">
+                {/* Visual Simulation & Preview */}
+                <div className="lg:col-span-5 space-y-8">
+                  <div className="flex items-center justify-between px-4">
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Live Preview</h3>
+                    <div className="flex items-center gap-2">
+                       <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                       <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">Safe Rendering</span>
+                    </div>
+                  </div>
+                  
+                  <div className="relative w-full aspect-[9/18.5] max-w-[320px] mx-auto bg-zinc-950 border-[12px] border-zinc-800 rounded-[3rem] shadow-[0_0_60px_rgba(0,0,0,0.6)] overflow-hidden">
                     {/* Phone Notch */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-zinc-800 rounded-b-3xl z-20 flex items-center justify-center">
                       <div className="w-10 h-1 bg-zinc-900 rounded-full" />
                     </div>
                     
-                    {/* Simulated Content */}
-                    <div className="w-full h-full bg-zinc-950 flex flex-col overflow-y-auto no-scrollbar">
-                      <div className="pt-10 px-4 pb-4 border-b border-white/5 bg-zinc-900/40 sticky top-0 backdrop-blur-md z-10">
-                        <div className="h-5 bg-zinc-800 rounded-lg w-1/3 mb-2" />
-                        <div className="h-3 bg-zinc-800 rounded-lg w-full" />
-                      </div>
-                      <div className="p-4 space-y-6">
-                        <div className="h-40 bg-zinc-900/50 rounded-2xl border border-white/5 animate-pulse" />
-                        <div className="space-y-3">
-                          <div className="h-4 bg-zinc-900/50 rounded-lg w-5/6" />
-                          <div className="h-4 bg-zinc-900/50 rounded-lg w-2/3" />
-                          <div className="h-4 bg-zinc-900/50 rounded-lg w-full" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="h-24 bg-zinc-900/50 rounded-2xl border border-white/5" />
-                          <div className="h-24 bg-zinc-900/50 rounded-2xl border border-white/5" />
-                        </div>
-                        <div className="h-32 bg-zinc-900/50 rounded-2xl border border-white/5" />
-                      </div>
-                    </div>
+                    {/* Live Mobile Frame Preview */}
+                    <iframe 
+                      src={url}
+                      className="w-full h-full border-none"
+                      title="Mobile Preview"
+                      referrerPolicy="no-referrer"
+                    />
+
+                    {/* Overlay if Frame Fails or to ensure interaction protection */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 to-transparent pointer-events-none" />
                   </div>
+
+                  <p className="text-[10px] text-center text-slate-500 italic px-8 leading-relaxed">
+                    Note: some websites may not load in preview due to "X-Frame-Options" security headers.
+                  </p>
                 </div>
 
                 {/* Analysis Results */}
                 <div className="lg:col-span-7 space-y-8">
                   <div className={`p-8 rounded-3xl border transition-all ${result.isFriendly ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.05)]'}`}>
                     <div className="flex items-center gap-6">
-                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 ${result.isFriendly ? 'bg-emerald-500 text-zinc-950 shadow-lg shadow-emerald-500/20' : 'bg-red-500 text-white shadow-lg shadow-red-500/20'}`}>
-                        {result.isFriendly ? <CheckCircle2 size={32} /> : <XCircle size={32} />}
+                      <div className={`w-20 h-20 rounded-2xl flex items-center justify-center shrink-0 ${result.isFriendly ? 'bg-emerald-500 text-zinc-950 shadow-lg shadow-emerald-500/20' : 'bg-red-500 text-white shadow-lg shadow-red-500/20'}`}>
+                        {result.isFriendly ? <CheckCircle2 size={40} /> : <ShieldAlert size={40} />}
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-white mb-2">
-                          {result.isFriendly ? 'Site is Mobile Friendly' : 'Technical Issues Found'}
+                        <h2 className="text-2xl font-black text-white mb-2 italic tracking-tight uppercase">
+                          {result.isFriendly ? 'Mobile Ready' : 'Issues Detected'}
                         </h2>
-                        <p className="text-sm text-slate-400">
+                        <p className="text-sm text-slate-400 leading-relaxed">
                           {result.isFriendly 
-                            ? 'Excellent! Your website follows best practices for mobile usability and indexing.' 
-                            : 'We detected several critical infrastructure issues that may hurt your mobile ranking.'}
+                            ? 'Excellent performance! Your website is fully optimized for mobile crawlers and human touch.' 
+                            : 'Found critical mobile usability issues. These must be fixed to maintain search rankings.'}
                         </p>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Core Mobile Metrics */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Tap Target Checker */}
+                    <div className="bg-zinc-900 border border-white/5 p-6 rounded-3xl space-y-4">
+                       <div className="flex items-center justify-between">
+                          <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                            <MousePointer2 size={12} className="text-brand-500" /> Tap Health
+                          </h3>
+                          <span className={`text-[10px] font-black italic ${result.touchTargets.score > 80 ? 'text-brand-400' : 'text-amber-500'}`}>
+                            {result.touchTargets.score}%
+                          </span>
+                       </div>
+                       <p className="text-sm font-bold text-white tracking-tight">{result.touchTargets.status}</p>
+                       <div className="h-1.5 bg-zinc-950 rounded-full overflow-hidden border border-white/5">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${result.touchTargets.score}%` }}
+                            className={`h-full ${result.touchTargets.score > 80 ? 'bg-brand-500' : 'bg-amber-500'}`}
+                          />
+                       </div>
+                    </div>
+
+                    {/* Viewport Meta Check */}
+                    <div className="bg-zinc-900 border border-white/5 p-6 rounded-3xl space-y-4">
+                       <div className="flex items-center justify-between">
+                          <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                             <Layout size={12} className="text-blue-500" /> Viewport Meta
+                          </h3>
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${result.viewport.status === 'Found' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-500'}`}>
+                             {result.viewport.status}
+                          </span>
+                       </div>
+                       <p className="text-[11px] text-slate-400 truncate font-mono bg-zinc-950/50 p-2 rounded-lg border border-white/5">
+                          {result.viewport.content || 'No viewport found'}
+                       </p>
+                       {result.viewport.suggestion && (
+                         <div className="space-y-2">
+                            <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Suggested Fix:</p>
+                            <div className="flex items-center gap-2 bg-zinc-950 p-2 rounded-xl border border-white/10">
+                               <code className="text-[9px] text-brand-400 font-mono flex-1">{result.viewport.suggestion}</code>
+                               <button 
+                                 onClick={() => navigator.clipboard.writeText(result.viewport.suggestion)}
+                                 className="p-1.5 hover:bg-white/5 rounded text-slate-500"
+                               >
+                                 <Code size={12} />
+                               </button>
+                            </div>
+                         </div>
+                       )}
                     </div>
                   </div>
 
                   <div className="bg-zinc-900 border border-white/5 p-8 rounded-3xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4">
                       <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Mobile Score</span>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Usability Score</span>
                         <div className="text-4xl font-black text-brand-500 italic tracking-tighter shadow-brand-500/10 [text-shadow:0_0_20px_rgba(16,185,129,0.3)]">
                           {result.score}/100
                         </div>
                       </div>
                     </div>
                     <h3 className="micro-label mb-6 flex items-center gap-2">
-                      <Layout size={14} className="text-brand-500" />
-                      Cross-Device Compatibility
+                      <TrendingUp size={14} className="text-brand-500" />
+                      Domain Visibility Impact
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {result.viewports.map((v: any, i: number) => (

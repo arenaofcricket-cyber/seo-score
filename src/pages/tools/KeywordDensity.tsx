@@ -1,13 +1,29 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Hash, FileText, AlertTriangle, CheckCircle2, Search, TrendingUp, HelpCircle, ArrowRight, Zap, ShieldCheck, Activity, Info, Sparkles, MessageSquare, BookOpen, Loader2 } from 'lucide-react';
+import { Hash, FileText, AlertTriangle, CheckCircle2, Search, TrendingUp, HelpCircle, ArrowRight, Zap, ShieldCheck, Activity, Info, Sparkles, MessageSquare, BookOpen, Loader2, List, Lightbulb } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getLSIKeywords } from '../../services/geminiService';
 
 const KeywordDensity = () => {
   const [text, setText] = React.useState('');
   const [results, setResults] = React.useState<{word: string, count: number, density: number}[]>([]);
+  const [lsiKeywords, setLsiKeywords] = React.useState<{word: string, reason: string}[]>([]);
+  const [isLSILoading, setIsLSILoading] = React.useState(false);
 
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+
+  const fetchLSI = async (content: string) => {
+    if (content.length < 100) return;
+    setIsLSILoading(true);
+    try {
+      const data = await getLSIKeywords(content);
+      setLsiKeywords(data);
+    } catch (error) {
+      console.error('Failed to fetch LSI keywords:', error);
+    } finally {
+      setIsLSILoading(false);
+    }
+  };
 
   const analyze = () => {
     if (!text) {
@@ -202,26 +218,41 @@ const KeywordDensity = () => {
                             <span className="font-bold text-white tracking-tight text-lg leading-none uppercase italic">{res.word}</span>
                             <span className="text-[10px] text-slate-500 font-bold tracking-widest mt-1 uppercase">{res.count} Occurrences</span>
                           </div>
-                          <span className={`font-mono text-lg ${res.density > 2.5 ? 'text-red-500 font-black' : 'text-brand-400'}`}>
-                            {res.density.toFixed(1)}%
-                          </span>
-                        </div>
-                        <div className="h-2 bg-white/5 rounded-full overflow-hidden relative">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.min(res.density * 20, 100)}%` }}
-                            className={`h-full rounded-full transition-all duration-500 ${
-                              res.density > 2.5 
-                              ? 'bg-gradient-to-r from-red-600 to-rose-400' 
-                              : 'bg-gradient-to-r from-brand-600 to-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                            }`}
-                          />
-                        </div>
-                        {res.density > 2.5 && (
-                          <div className="flex items-center gap-1.5 text-[9px] text-red-400 mt-2 uppercase font-bold tracking-widest animate-pulse">
-                            <AlertTriangle size={12} /> Stuffing Risk Detected
+                            <span className={`font-mono text-lg ${
+                              res.density > 3 ? 'text-red-500 font-black' : 
+                              res.density > 2 ? 'text-amber-500' : 
+                              'text-brand-400'
+                            }`}>
+                              {res.density.toFixed(1)}%
+                            </span>
                           </div>
-                        )}
+                          <div className="h-2.5 bg-zinc-950 rounded-full overflow-hidden relative border border-white/5 shadow-inner">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.min(res.density * 25, 100)}%` }}
+                              className={`h-full rounded-full transition-all duration-700 ${
+                                res.density > 3 
+                                ? 'bg-gradient-to-r from-red-600 to-rose-400 shadow-[0_0_15px_rgba(239,68,68,0.4)]' 
+                                : res.density > 2
+                                ? 'bg-gradient-to-r from-amber-500 to-yellow-300 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
+                                : 'bg-gradient-to-r from-brand-600 to-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                              }`}
+                            />
+                          </div>
+                          {res.density > 3 && (
+                            <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl mt-3">
+                              <AlertTriangle size={14} className="text-red-500 animate-pulse shrink-0" />
+                              <div className="flex flex-col">
+                                <span className="text-[10px] text-red-500 font-black uppercase tracking-widest">Keyword Stuffing Detected</span>
+                                <p className="text-[9px] text-red-400/80 leading-tight">This word appears too frequently. Try using synonyms to improve readability and avoid Google penalties.</p>
+                              </div>
+                            </div>
+                          )}
+                          {res.density > 2 && res.density <= 3 && (
+                            <div className="flex items-center gap-1.5 text-[9px] text-amber-400 mt-2 uppercase font-bold tracking-widest bg-amber-500/5 px-2 py-0.5 rounded-full w-fit border border-amber-500/10">
+                              <HelpCircle size={10} /> High Density Alert
+                            </div>
+                          )}
                       </motion.div>
                     ))}
                   </div>
@@ -253,9 +284,79 @@ const KeywordDensity = () => {
               <CheckCircle2 size={12} /> Pro Tip
             </h4>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Aim for a primary keyword density between <strong className="text-white">1% and 2.5%</strong>. If you exceed 3%, Google may flag your content as "spammy." Use synonyms to naturally reduce density.
+              Aim for a primary keyword density between <strong className="text-white">1% and 2%</strong>. If you exceed 3%, Google may flag your content as "spammy." Use semantic synonyms and LSI keywords to naturally reduce primary density while strengthening topic relevance.
             </p>
           </motion.div>
+
+          <div className="bg-zinc-900 border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl flex flex-col min-h-[400px]">
+             <div className="flex items-center justify-between mb-8">
+                <h3 className="micro-label flex items-center gap-2">
+                  <Lightbulb size={14} className="text-brand-500" />
+                  Semantic (LSI) Suggestions
+                </h3>
+                {text.length >= 100 && (
+                  <button 
+                    onClick={() => fetchLSI(text)}
+                    disabled={isLSILoading}
+                    className="text-[10px] font-black uppercase tracking-widest text-brand-400 hover:text-brand-300 disabled:opacity-50 transition-colors flex items-center gap-1.5 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20"
+                  >
+                    {isLSILoading ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
+                    {lsiKeywords.length > 0 ? 'Regenerate' : 'Get Suggestions'}
+                  </button>
+                )}
+             </div>
+
+             <div className="flex-1 relative">
+                {isLSILoading && (
+                  <div className="absolute inset-0 z-20 bg-zinc-900/60 backdrop-blur-[2px] flex items-center justify-center rounded-2xl">
+                     <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="animate-spin text-brand-400" size={24} />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-brand-400">AI Analyzing Semantics...</span>
+                     </div>
+                  </div>
+                )}
+
+                <AnimatePresence mode="wait">
+                  {lsiKeywords.length > 0 ? (
+                    <motion.div 
+                      key="lsi-list"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="space-y-4"
+                    >
+                      {lsiKeywords.map((lsi, i) => (
+                        <motion.div 
+                          key={lsi.word}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: i * 0.05 }}
+                          className="p-4 bg-zinc-950/40 border border-white/5 rounded-2xl group hover:border-brand-500/20 transition-all"
+                        >
+                           <div className="flex items-center gap-2 mb-1.5">
+                              <div className="w-1.5 h-1.5 rounded-full bg-brand-500/40 group-hover:bg-brand-500 transition-colors" />
+                              <span className="text-sm font-bold text-white uppercase italic">{lsi.word}</span>
+                           </div>
+                           <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
+                              {lsi.reason}
+                           </p>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  ) : (
+                    <div className="h-full min-h-[200px] flex flex-col items-center justify-center text-center p-8 opacity-40">
+                      <div className="p-4 bg-zinc-800 rounded-full mb-4">
+                        <Sparkles size={32} className="text-brand-400" />
+                      </div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Unlock Semantic Power</p>
+                      <p className="text-[10px] text-slate-500 leading-relaxed max-w-[200px]">
+                        Add at least 100 characters of text to unlock AI-powered LSI keyword suggestions for better topical authority.
+                      </p>
+                    </div>
+                  )}
+                </AnimatePresence>
+             </div>
+          </div>
         </div>
       </section>
 

@@ -45,12 +45,15 @@ export async function getSEOScore(url: string, realData?: any) {
   const prompt = `Analyze the website URL: "${url}". 
   ${context}
   Provide a JSON object with:
-  "score": number (0-100),
-  "pros": array of strings,
-  "cons": array of strings,
+  "score": number (Overall SEO Score, 0-100),
+  "onPageScore": number (0-100),
+  "technicalScore": number (0-100),
+  "contentScore": number (0-100),
+  "pros": array of objects with "title" (string) and "description" (string),
+  "cons": array of objects with "title" (string), "impact" (High|Medium|Low), "howToFix" (detailed instruction string),
   "recommendations": array of strings.
   
-  Focus on actionable steps to improve the SEO score and technical performance.`;
+  Focus on actionable steps and ensuring "howToFix" is practical for a developer or site owner.`;
   
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
@@ -116,3 +119,193 @@ export async function getRealPageSpeedData(url: string) {
   });
   return JSON.parse(response.text || "{}");
 }
+
+export async function getLSIKeywords(text: string) {
+  const prompt = `Analyze this content and suggest 8-10 LSI (Latent Semantic Indexing) keywords that should be included for better Semantic SEO. For each keyword, provide a brief reason why it fits.
+  
+  Content: "${text.substring(0, 2000)}"
+  
+  Provide a JSON array of objects with:
+  "word": string,
+  "reason": string.
+  
+  Return ONLY the JSON array.`;
+  
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+  return JSON.parse(response.text || "[]");
+}
+
+export async function getBacklinkData(url: string) {
+  const prompt = `Analyze the backlink profile for the URL: "${url}". 
+  Provide a JSON object with:
+  "totalBacklinks": number,
+  "referringDomains": number,
+  "domainAuthority": number (0-100),
+  "spamScore": number (0-100),
+  "doFollowPercent": number,
+  "noFollowPercent": number,
+  "qualityBreakdown": {
+    "highAuthority": number,
+    "lowQuality": number,
+    "toxic": number
+  },
+  "recentLinks": array of objects with:
+    "url": string,
+    "platform": string,
+    "anchor": string,
+    "da": number (Domain Authority of the linking site),
+    "type": "Do-follow" | "No-follow",
+    "status": "Quality" | "Toxic" | "High Authority"
+  };
+
+  Generate realistic, simulated backlink data for this domain as if you were an SEO audit tool like Ahrefs or Semrush.`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+  return JSON.parse(response.text || "{}");
+}
+
+export async function generateTitleVariations(keyword: string, type: 'blog' | 'product' | 'page' = 'blog') {
+  const prompt = `Generate 6 high-performing SEO title tags and meta descriptions for the keyword: "${keyword}". 
+  The focus is a ${type}.
+  
+  Provide a JSON array of objects, each with:
+  "title": string (try to stay between 50-60 characters for SEO),
+  "description": string (try to stay between 120-160 characters),
+  "category": "Clickbait" | "Educational" | "Direct" | "Question" | "Listicle",
+  "ctr_score": number (estimated CTR importance 0-100).
+
+  Return ONLY the JSON array.`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+  return JSON.parse(response.text || "[]");
+}
+
+export async function generateDetailedTags(topic: string, platform: 'YouTube' | 'Blog' | 'Instagram' = 'YouTube') {
+  const prompt = `Generate 15 highly relevant tags for a ${platform} content about "${topic}". 
+  
+  For ${platform === 'Instagram' ? 'Hashtags' : 'Tags'}, provide a JSON array of objects, each with:
+  "tag": string (including '#' for Instagram),
+  "volume": "High" | "Medium" | "Low" (estimated search volume or popularity),
+  "relevance": number (0-100).
+
+  Return ONLY the JSON array.`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+  return JSON.parse(response.text || "[]");
+}
+
+export async function getSpeedAudit(url: string) {
+  const prompt = `Analyze the website speed and performance for: "${url}". 
+  Provide a JSON object with separate mobile and desktop audits.
+  
+  Each audit (mobile and desktop) should include:
+  "score": number (0-100),
+  "coreWebVitals": {
+    "lcp": { "value": string, "status": "Good" | "Needs Improvement" | "Poor" },
+    "fid": { "value": string, "status": "Good" | "Needs Improvement" | "Poor" },
+    "cls": { "value": string, "status": "Good" | "Needs Improvement" | "Poor" }
+  },
+  "metrics": {
+    "fcp": string,
+    "tti": string,
+    "speedIndex": string
+  },
+  "issues": array of objects with:
+    "title": string,
+    "impact": "High" | "Medium" | "Low",
+    "description": string
+  };
+
+  Generate realistic, simulated performance data as if from Google PageSpeed Insights.`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+  return JSON.parse(response.text || "{}");
+}
+
+export async function getMobileAudit(url: string) {
+  const prompt = `Analyze the mobile friendliness for: "${url}". 
+  Provide a JSON object with:
+  "overallScore": number (0-100),
+  "isMobileFriendly": boolean,
+  "viewport": {
+    "status": "Found" | "Missing" | "Invalid",
+    "content": string,
+    "suggestion": string (HTML snippet if missing/invalid)
+  },
+  "touchTargets": {
+    "score": number (0-100),
+    "status": "Good" | "Needs Improvement" | "Poor",
+    "issues": array of strings
+  },
+  "contentWidth": {
+    "status": "Correct" | "Overflows",
+    "description": string
+  },
+  "readability": {
+    "fontSize": "Good" | "Small",
+    "description": string
+  }
+  };
+
+  Generate a realistic SEO audit for this domain's mobile usability.`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+  return JSON.parse(response.text || "{}");
+}
+
+export async function generateTitleSuggestions(title: string) {
+  const prompt = `Analyze this SEO meta title: "${title}".
+  Provide 3 specific improvements based on:
+  1. Character count (ideal is 50-60).
+  2. Keyword placement (front-loading keywords).
+  3. Compelling language (action words, USP).
+
+  Return a JSON array of 3 strings, each being a short, actionable suggestion.`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+  return JSON.parse(response.text || "[]");
+}
+
+

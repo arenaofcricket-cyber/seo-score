@@ -81,6 +81,7 @@ const GlobalSearch = () => {
   const getIcon = (item: any) => {
     if (item.type === 'blog') return <BookOpen size={16} className="text-brand-500" />;
     switch (item.icon) {
+      case 'Search': return <Search size={16} className="text-blue-400" />;
       case 'Activity': return <Activity size={16} className="text-blue-500" />;
       case 'Hash': return <Hash size={16} className="text-orange-500" />;
       case 'Youtube': return <Youtube size={16} className="text-red-500" />;

@@ -1,28 +1,29 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Tag, Copy, Loader2, Sparkles, Check, Hash, Youtube, TrendingUp, HelpCircle, ArrowRight, Activity, Zap, Search, CheckCircle2, ShieldCheck, PlayCircle, BookOpen, AlertCircle } from 'lucide-react';
+import { Tag, Copy, Loader2, Sparkles, Check, Hash, Youtube, TrendingUp, HelpCircle, ArrowRight, Activity, Zap, Search, CheckCircle2, ShieldCheck, PlayCircle, BookOpen, AlertCircle, Instagram, FileText, ListChecks } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { generateYouTubeTags } from '../../services/geminiService';
+import { generateDetailedTags } from '../../services/geminiService';
 
 const TagGenerator = () => {
   const [topic, setTopic] = React.useState('');
   const [keywords, setKeywords] = React.useState('');
+  const [platform, setPlatform] = React.useState<'YouTube' | 'Blog' | 'Instagram'>('YouTube');
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [results, setResults] = React.useState<string[]>([]);
+  const [results, setResults] = React.useState<{tag: string, volume: string, relevance: number}[]>([]);
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
-    document.title = "Free YouTube Tag Generator Tool – Get Video Tags Free | SEOScore";
-  }, []);
+    document.title = `Free ${platform} Tag Generator Tool – Get Tags Free | SEOScore`;
+  }, [platform]);
 
   const [loadingStep, setLoadingStep] = React.useState(0);
 
   const loadingSteps = [
-    'Analyzing video topic...',
+    `Analyzing ${platform.toLowerCase()} topic...`,
     'Identifying target audience...',
     'Scanning high-volume keywords...',
-    'Evaluating competitor tags...',
+    'Evaluating competitor strategies...',
     'Refining tag list for maximum reach...'
   ];
 
@@ -39,7 +40,7 @@ const TagGenerator = () => {
     }, 1000);
 
     try {
-      const tags = await generateYouTubeTags(topic, keywords);
+      const tags = await generateDetailedTags(topic, platform);
       if (!tags || tags.length === 0) {
         throw new Error('No tags could be generated for this topic.');
       }
@@ -56,7 +57,8 @@ const TagGenerator = () => {
   };
 
   const copyAll = () => {
-    navigator.clipboard.writeText(results.join(', '));
+    const text = results.map(r => r.tag).join(', ');
+    navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -118,53 +120,70 @@ const TagGenerator = () => {
           animate={{ opacity: 1, y: 0 }}
           className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 mb-6"
         >
-          <Youtube size={14} />
-          <span className="text-xs font-bold uppercase tracking-wider">YouTube SEO Tool</span>
+          {platform === 'YouTube' ? <Youtube size={14} /> : 
+           platform === 'Instagram' ? <Instagram size={14} /> : 
+           <FileText size={14} />}
+          <span className="text-xs font-bold uppercase tracking-wider">{platform} Optimization Tool</span>
         </motion.div>
         <h1 className="text-4xl md:text-5xl font-semibold text-white mb-6">
-          Free YouTube Tag Generator Tool
+          Free {platform} Tag Generator Tool
         </h1>
         <p className="text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
-          Want more views on your YouTube videos? Our YouTube Tag Generator Tool helps you generate SEO-optimized tags that improve your video ranking and visibility.
+          Generate SEO-optimized {platform === 'Instagram' ? 'hashtags' : 'tags'} that improve your content visibility and reach. Simple, fast, and free.
         </p>
       </div>
 
       {/* Main Tool Section */}
       <section className="bg-zinc-900 border border-white/5 rounded-3xl p-8 md:p-12 shadow-2xl mb-20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
+        <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl -mr-32 -mt-32 ${
+          platform === 'YouTube' ? 'bg-red-500/5' : 
+          platform === 'Instagram' ? 'bg-pink-500/5' : 
+          'bg-blue-500/5'
+        }`}></div>
         
         <div className="relative z-10">
-          <form onSubmit={handleGenerate} className="max-w-2xl mx-auto space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form onSubmit={handleGenerate} className="max-w-3xl mx-auto space-y-10">
+            {/* Platform Selection */}
+            <div className="space-y-4">
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
+                <ListChecks size={16} className="text-brand-500" />
+                Select Platform
+              </label>
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { id: 'YouTube', icon: Youtube, color: 'hover:border-red-500/50 hover:bg-red-500/5', active: 'border-red-500 bg-red-500/10 text-white' },
+                  { id: 'Blog', icon: FileText, color: 'hover:border-blue-500/50 hover:bg-blue-500/5', active: 'border-blue-500 bg-blue-500/10 text-white' },
+                  { id: 'Instagram', icon: Instagram, color: 'hover:border-pink-500/50 hover:bg-pink-500/5', active: 'border-pink-500 bg-pink-500/10 text-white' }
+                ].map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setPlatform(p.id as any)}
+                    className={`flex flex-col items-center gap-3 p-4 rounded-2xl border border-white/5 transition-all group ${
+                      platform === p.id ? p.active : `bg-zinc-950/30 text-slate-400 ${p.color}`
+                    }`}
+                  >
+                    <p.icon size={20} className={platform === p.id ? 'text-inherit' : 'group-hover:text-inherit'} />
+                    <span className="text-xs font-bold uppercase tracking-widest">{p.id}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-8">
               <div className="space-y-4">
                 <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-                  <Search size={16} className="text-red-500" />
-                  Video Topic
+                  <Search size={16} className="text-brand-500" />
+                  Your Topic / Niche
                 </label>
                 <div className="relative group">
                   <input
                     type="text"
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
-                    placeholder="e.g. Starting a Travel Blog"
-                    className="w-full bg-zinc-950/50 px-5 py-4 rounded-xl border border-white/10 focus:border-red-500/50 outline-none transition-all text-white placeholder:text-slate-600 text-base shadow-inner"
+                    placeholder={`e.g. ${platform === 'YouTube' ? 'Budget Travel Tips' : platform === 'Blog' ? 'Next.js 15 Tutorial' : 'Minimalist Workspace'}`}
+                    className="w-full bg-zinc-950/50 px-6 py-5 rounded-2xl border border-white/10 focus:border-brand-500/50 outline-none transition-all text-white placeholder:text-slate-600 text-lg shadow-inner"
                     required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-                  <Hash size={16} className="text-red-500" />
-                  Extra Keywords (Optional)
-                </label>
-                <div className="relative group">
-                  <input
-                    type="text"
-                    value={keywords}
-                    onChange={(e) => setKeywords(e.target.value)}
-                    placeholder="e.g. 2026, budget, tutorial"
-                    className="w-full bg-zinc-950/50 px-5 py-4 rounded-xl border border-white/10 focus:border-red-500/50 outline-none transition-all text-white placeholder:text-slate-600 text-base shadow-inner"
                   />
                 </div>
               </div>
@@ -173,17 +192,21 @@ const TagGenerator = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-16 bg-red-600 hover:bg-red-500 disabled:bg-red-900/50 text-white rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-3 shadow-lg shadow-red-900/20 active:scale-95 border-b-4 border-red-800 active:border-b-0"
+              className={`w-full h-16 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-3 shadow-lg active:scale-95 border-b-4 active:border-b-0 ${
+                platform === 'YouTube' ? 'bg-red-600 hover:bg-red-500 border-red-800 shadow-red-900/20' :
+                platform === 'Instagram' ? 'bg-gradient-to-r from-pink-600 to-purple-600 border-purple-800 shadow-pink-900/20' :
+                'bg-blue-600 hover:bg-blue-500 border-blue-800 shadow-blue-900/20'
+              }`}
             >
               {loading ? (
                 <>
                   <Loader2 className="animate-spin" size={24} />
-                  <span>Generating Optimized Tags...</span>
+                  <span>AI is Crafting High-Reach Tags...</span>
                 </>
               ) : (
                 <>
                   <Sparkles size={24} />
-                  <span>Generate Tags</span>
+                  <span>Generate AI {platform === 'Instagram' ? 'Hashtags' : 'Tags'}</span>
                 </>
               )}
             </button>
@@ -272,12 +295,12 @@ const TagGenerator = () => {
               >
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
+                    <div className="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center text-brand-400">
                       <Hash size={20} />
                     </div>
                     <div>
-                      <h3 className="text-white font-semibold">Generated SEO Tags</h3>
-                      <p className="text-xs text-slate-500">Boost your video metadata with these keywords</p>
+                      <h3 className="text-white font-semibold">Generated {platform === 'Instagram' ? 'Hashtags' : 'SEO Tags'}</h3>
+                      <p className="text-xs text-slate-500">Boost your metadata with these high-intent keywords</p>
                     </div>
                   </div>
                   <button
@@ -289,23 +312,46 @@ const TagGenerator = () => {
                     }`}
                   >
                     {copied ? <Check size={16} /> : <Copy size={16} />}
-                    {copied ? 'Copied Tags' : 'Copy All Tags'}
+                    {copied ? 'Copied All' : 'Copy All Tags'}
                   </button>
                 </div>
 
-                <div className="flex flex-wrap gap-3">
-                  {results.map((tag, i) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {results.map((res, i) => (
                     <motion.div
                       key={i}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: i * 0.02 }}
-                      className="group relative"
+                      className="group p-4 bg-zinc-950/50 hover:bg-zinc-800/80 border border-white/5 hover:border-brand-500/30 rounded-2xl transition-all cursor-default relative overflow-hidden"
                     >
-                      <div className="px-4 py-2.5 bg-zinc-800/50 hover:bg-zinc-800 text-slate-300 hover:text-white rounded-xl border border-white/5 hover:border-red-500/30 transition-all cursor-default flex items-center gap-2">
-                        <span className="text-red-500/50">#</span>
-                        {tag}
+                      <div className="flex items-center justify-between gap-3 relative z-10">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-brand-500/50 font-bold">#</span>
+                          <span className="text-white text-sm font-bold truncate">{res.tag.replace(/^#/, '')}</span>
+                        </div>
+                        <div className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest ${
+                          res.volume === 'High' ? 'bg-red-500/10 text-red-400' :
+                          res.volume === 'Medium' ? 'bg-amber-500/10 text-amber-400' :
+                          'bg-blue-500/10 text-blue-400'
+                        }`}>
+                          {res.volume} Vol
+                        </div>
                       </div>
+                      
+                      <div className="mt-3 flex items-center justify-between relative z-10">
+                         <div className="flex-1 bg-white/5 h-1 rounded-full overflow-hidden mr-3">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${res.relevance}%` }}
+                              className="h-full bg-brand-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]"
+                            />
+                         </div>
+                         <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap">{res.relevance}% Rel</span>
+                      </div>
+
+                      {/* Hover background effect */}
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-2xl -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </motion.div>
                   ))}
                 </div>
@@ -470,19 +516,22 @@ const TagGenerator = () => {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-gradient-to-br from-red-600 to-red-800 rounded-3xl p-12 text-center relative overflow-hidden shadow-2xl shadow-red-900/20">
+      <section className={`rounded-3xl p-12 text-center relative overflow-hidden shadow-2xl transition-all duration-500 ${
+        platform === 'YouTube' ? 'bg-gradient-to-br from-red-600 to-red-800 shadow-red-900/20' :
+        platform === 'Instagram' ? 'bg-gradient-to-br from-pink-600 to-purple-800 shadow-pink-900/20' :
+        'bg-gradient-to-br from-blue-600 to-blue-800 shadow-blue-900/20'
+      }`}>
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1),transparent)]"></div>
         <div className="relative z-10">
-          <h2 className="text-4xl font-bold text-white mb-6">Grow Your Channel Faster</h2>
-          <p className="text-red-100 mb-10 text-lg max-w-2xl mx-auto opacity-90">
-            Generate powerful YouTube tags and grow your channel faster. Start optimizing your metadata today.
+          <h2 className="text-4xl font-bold text-white mb-6">Grow Your {platform} Reach</h2>
+          <p className="text-white/90 mb-10 text-lg max-w-2xl mx-auto opacity-90">
+            Generate powerful AI-optimized {platform === 'Instagram' ? 'hashtags' : 'tags'} and scale your content today. Join thousands of creators.
           </p>
           <button 
             onClick={() => {
               window.scrollTo({ top: 0, behavior: 'smooth' });
-              // Set focus to the input if we wanted to be fancy, but scroll is enough usually
             }}
-            className="px-10 py-4 bg-white text-red-600 rounded-2xl font-bold text-lg hover:bg-red-50 hover:scale-105 transition-all shadow-xl active:scale-95"
+            className="px-10 py-4 bg-white text-zinc-950 rounded-2xl font-bold text-lg hover:bg-slate-50 hover:scale-105 transition-all shadow-xl active:scale-95"
           >
             Start Generating Now
           </button>

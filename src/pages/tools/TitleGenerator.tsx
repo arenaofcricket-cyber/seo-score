@@ -1,587 +1,844 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Youtube, Copy, Loader2, Sparkles, Check, Hash, TrendingUp, HelpCircle, ArrowRight, Activity, Zap, Search, CheckCircle2, ShieldCheck, PlayCircle, Star, BookOpen, AlertCircle, AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { generateYouTubeTitle } from '../../services/geminiService';
+import { 
+  Globe, 
+  Search, 
+  Monitor, 
+  Smartphone, 
+  Copy, 
+  Check, 
+  Info, 
+  AlertTriangle, 
+  CheckCircle2, 
+  HelpCircle,
+  Hash,
+  Sparkles,
+  Wifi,
+  BatteryMedium,
+  Signal,
+  RefreshCw,
+  Loader2,
+  List,
+  Type
+} from 'lucide-react';
+import { generateTitleVariations, generateTitleSuggestions } from '../../services/geminiService';
 
 const TitleGenerator = () => {
-  const [topic, setTopic] = React.useState('');
-  const [keywords, setKeywords] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [results, setResults] = React.useState<{title: string, description: string}[]>([]);
-  const [copied, setCopied] = React.useState<{index: number, type: 'title' | 'description'} | null>(null);
+  const [url, setUrl] = React.useState('');
+  const [keyword, setKeyword] = React.useState('');
+  const [urlError, setUrlError] = React.useState('');
+  const [title, setTitle] = React.useState('');
+  const [description, setDescription] = React.useState('');
+  const [device, setDevice] = React.useState<'desktop' | 'mobile'>('desktop');
+  const [copied, setCopied] = React.useState(false);
+  const [faviconError, setFaviconError] = React.useState(false);
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [variations, setVariations] = React.useState<any[]>([]);
+  const [selectedVariation, setSelectedVariation] = React.useState<number | null>(null);
+  const [suggestions, setSuggestions] = React.useState<string[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
 
-  const [loadingStep, setLoadingStep] = React.useState(0);
-
-  const loadingSteps = [
-    'Analyzing video topic...',
-    'Researching high-CTR patterns...',
-    'Incorporating target keywords...',
-    'Evaluating emotional triggers...',
-    'Drafting viral titles & descriptions...'
-  ];
-
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!topic) return;
-    setLoading(true);
-    setError(null);
-    setResults([]);
-    setLoadingStep(0);
-
-    const interval = setInterval(() => {
-      setLoadingStep(prev => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
-    }, 1000);
-
+  const getSuggestions = async () => {
+    if (!title || title.length < 5) return;
+    setIsAnalyzing(true);
     try {
-      const titles = await generateYouTubeTitle(topic, keywords);
-      if (!titles || titles.length === 0) {
-        throw new Error('No titles could be generated.');
-      }
-      setLoadingStep(loadingSteps.length - 1);
-      await new Promise(r => setTimeout(r, 500));
-      setResults(titles);
+      const data = await generateTitleSuggestions(title);
+      setSuggestions(data);
     } catch (error) {
-      console.error(error);
-      setError('Something went wrong. Please check your topic and try again.');
+      console.error('Failed to get suggestions:', error);
     } finally {
-      clearInterval(interval);
-      setLoading(false);
+      setIsAnalyzing(false);
     }
   };
 
-  const copyToClipboard = (text: string, index: number, type: 'title' | 'description') => {
-    navigator.clipboard.writeText(text);
-    setCopied({ index, type });
-    setTimeout(() => setCopied(null), 2000);
+  const handleGenerate = async () => {
+    if (!keyword) return;
+    setIsGenerating(true);
+    try {
+      const data = await generateTitleVariations(keyword);
+      setVariations(data);
+    } catch (error) {
+      console.error('Failed to generate titles:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const applyVariation = (v: any, index: number) => {
+    setTitle(v.title);
+    setDescription(v.description);
+    setSelectedVariation(index);
+  };
+
+  const TITLE_IDEAL_MIN = 30;
+  const TITLE_IDEAL_MAX = 60;
+  const DESC_IDEAL_MIN = 120;
+  const DESC_IDEAL_MAX = 160;
+
+  const getDomain = (inputUrl: string) => {
+    try {
+      const u = new URL(inputUrl.startsWith('http') ? inputUrl : 'https://' + inputUrl);
+      return u.hostname.replace('www.', '');
+    } catch {
+      return 'yoursite.com';
+    }
+  };
+
+  const getPath = (inputUrl: string) => {
+    try {
+      const u = new URL(inputUrl.startsWith('http') ? inputUrl : 'https://' + inputUrl);
+      const parts = u.pathname.split('/').filter(Boolean);
+      const domain = u.hostname.replace('www.', '');
+      return parts.length ? `${domain} › ${parts.join(' › ')}` : domain;
+    } catch {
+      return 'yoursite.com › your-page';
+    }
+  };
+
+  const domain = getDomain(url);
+  const path = getPath(url);
+  const initial = domain ? domain[0].toUpperCase() : 'S';
+
+  const validateUrl = (value: string) => {
+    if (!value) {
+      setUrlError('');
+      return;
+    }
+    try {
+      const u = new URL(value.startsWith('http') ? value : 'https://' + value);
+      const parts = u.hostname.split('.');
+      // Basic check for TLD existence
+      if (parts.length < 2 || parts[parts.length - 1].length < 2) {
+        throw new Error();
+      }
+      setUrlError('');
+    } catch {
+      setUrlError('Invalid URL format (e.g. example.com)');
+    }
+  };
+
+  React.useEffect(() => {
+    setFaviconError(false);
+  }, [domain]);
+
+  const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+
+  const [showTitleTips, setShowTitleTips] = React.useState(false);
+  const [showDescTips, setShowDescTips] = React.useState(false);
+
+  const renderFavicon = (containerSize: string, textSize: string) => {
+    if (faviconError || !url || domain === 'yoursite.com') {
+      return (
+        <div className={`${containerSize} rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center text-slate-600 shrink-0`}>
+          <Globe className={textSize === 'text-[6px]' ? 'w-2 h-2' : 'w-3.5 h-3.5'} />
+        </div>
+      );
+    }
+    return (
+      <img 
+        src={faviconUrl} 
+        alt=""
+        onError={() => setFaviconError(true)}
+        referrerPolicy="no-referrer"
+        className={`${containerSize} rounded-sm object-contain shrink-0`}
+      />
+    );
+  };
+
+  const titleStatus = title.length === 0 ? 'empty' : title.length < TITLE_IDEAL_MIN ? 'short' : title.length <= TITLE_IDEAL_MAX ? 'perfect' : 'long';
+  const descStatus = description.length === 0 ? 'empty' : description.length < DESC_IDEAL_MIN ? 'short' : description.length <= DESC_IDEAL_MAX ? 'perfect' : 'long';
+
+  const copyMetaTags = () => {
+    const metaHtml = `<title>${title || 'Your Page Title'}</title>\n<meta name="description" content="${description || 'Your meta description'}">`;
+    navigator.clipboard.writeText(metaHtml);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const renderTruncatedTitle = (text: string) => {
+    const display = text || 'Your page title will appear here';
+    if (display.length > 60) {
+      return (
+        <span>
+          {display.slice(0, 57)}<span className="text-amber-600 font-bold">...</span>
+        </span>
+      );
+    }
+    return display;
   };
 
   return (
-    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto overflow-x-hidden">
+    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto space-y-12 mb-20 overflow-x-hidden">
       {/* 🚀 SEO Schema Markup */}
       <script type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "SoftwareApplication",
-          "name": "AI YouTube Title Generator",
-          "operatingSystem": "All",
-          "applicationCategory": "MultimediaApplication",
-          "description": "Generate high-CTR, SEO-optimized YouTube titles for your videos with our free AI tool.",
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "reviewCount": "1250"
-          },
-          "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-          }
-        })}
-      </script>
-
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
           "@type": "WebPage",
-          "name": "Free YouTube Title Generator Tool – Generate Catchy Titles",
-          "description": "Generate high-CTR, SEO-optimized YouTube titles for your videos with our free AI tool.",
+          "name": "Free SERP Preview Tool",
+          "description": "Visualize how your meta title and description appear in Google search results with our free preview tool.",
           "breadcrumb": {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://seoscore.site" },
-              { "@type": "ListItem", "position": 2, "name": "YouTube Title Generator", "item": "https://seoscore.site/tools/youtube-title-generator" }
+              { "@type": "ListItem", "position": 1, "name": "Tools", "item": "https://seoscore.site/tools" },
+              { "@type": "ListItem", "position": 2, "name": "SERP Preview Tool", "item": "https://seoscore.site/tools/serp-preview" }
             ]
           }
         })}
       </script>
 
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "HowTo",
-          "name": "How to generate viral YouTube titles",
-          "description": "Follow these simple steps to create catchy, SEO-friendly titles for your YouTube videos.",
-          "step": [
-            {
-              "@type": "HowToStep",
-              "text": "Enter your video topic or primary subject in the input field."
-            },
-            {
-              "@type": "HowToStep",
-              "text": "Optionally provide target keywords to guide the AI's SEO focus."
-            },
-            {
-              "@type": "HowToStep",
-              "text": "Click the 'Generate AI Titles' button to start the analysis."
-            },
-            {
-              "@type": "HowToStep",
-              "text": "Review the list of viral title suggestions and click any title to copy it to your clipboard."
-            }
-          ]
-        })}
-      </script>
-
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "Why is the YouTube title important?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "The title is one of the most important factors for Click-Through Rate (CTR) and SEO, helping users and the algorithm understand what your video is about."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "What makes a good YouTube title?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "A good title is catchy, contains relevant keywords, is under 60-70 characters, and creates curiosity without being clickbait."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Does the YouTube title help in ranking?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Yes, including your primary keyword near the beginning of your title significantly helps your video rank in YouTube search results."
-              }
-            }
-          ]
-        })}
-      </script>
-      {/* Header Section */}
-      <div className="mb-12 text-center">
+      {/* Header */}
+      <div className="space-y-4 text-center md:text-left">
         <motion.div 
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 mb-6"
+          className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 mb-2"
         >
-          <Youtube size={14} />
-          <span className="text-xs font-bold uppercase tracking-wider">Viral SEO Tool</span>
+          <Globe size={14} />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400">SERP PREVIEW</span>
         </motion.div>
-        <h1 className="text-4xl md:text-5xl font-semibold text-white mb-6">
-          Free YouTube Title Generator Tool
+        <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+          Google SERP Preview Tool
         </h1>
-        <p className="text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
-          Struggling to find the perfect title? Our AI-powered YouTube Title Generator helps you create catchy, SEO-optimized titles that drive clicks and increase views.
+        <p className="text-slate-400 text-lg max-w-2xl leading-relaxed">
+          Dekhein ki aapka page Google Search Result mein kaisa dikhta hai. Clicks aur CTR badhane ke liye optimize karein.
         </p>
       </div>
 
-      {/* Main Tool Section */}
-      <section className="bg-zinc-900 border border-white/5 rounded-3xl p-4 md:p-8 lg:p-12 shadow-2xl mb-20 relative overflow-hidden">
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-red-500/5 rounded-full blur-3xl -ml-32 -mb-32 text-red-500"></div>
-        
-        <div className="relative z-10">
-          <form onSubmit={handleGenerate} className="max-w-2xl mx-auto space-y-6">
-            <div className="grid grid-cols-1 gap-6">
-              <div className="space-y-4">
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-                  <Search size={16} className="text-red-500" />
-                  What is your video about?
-                </label>
-                <input
-                  type="text"
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  placeholder="e.g. Best budget cameras for vlogging in 2026"
-                  className="w-full bg-zinc-950/50 px-6 py-4 rounded-2xl border border-white/10 focus:border-red-500/50 outline-none transition-all text-white placeholder:text-slate-600 text-lg shadow-inner"
-                  required
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        {/* Left Column: Inputs */}
+        <div className="xl:col-span-5 space-y-6 order-2 xl:order-1">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-zinc-900 border border-white/5 rounded-3xl p-6 shadow-xl space-y-6 sticky top-8"
+          >
+            {/* AI Generator Input */}
+            <div className="space-y-3 p-4 bg-brand-500/5 border border-brand-500/10 rounded-2xl">
+              <label className="text-[10px] font-black uppercase tracking-widest text-brand-400 flex items-center gap-2">
+                <Sparkles size={12} /> AI Title Generator
+              </label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+                  <input
+                    type="text"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    placeholder="Enter Keyword (e.g. SEO Tips 2026)"
+                    className="w-full bg-zinc-950/50 pl-10 pr-4 py-2.5 rounded-xl border border-white/5 outline-none focus:border-brand-500/30 text-white text-xs"
+                    onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+                  />
+                </div>
+                <button
+                  onClick={handleGenerate}
+                  disabled={isGenerating || !keyword}
+                  className="bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-brand-500/20 active:scale-95"
+                >
+                  {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between items-center px-1">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Page URL</label>
+                <AnimatePresence mode="wait">
+                  {urlError ? (
+                    <motion.span 
+                      key="error"
+                      initial={{ opacity: 0, scale: 0.9, y: 5 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: -5 }}
+                      className="text-[10px] text-red-500 font-bold bg-red-500/10 px-2 py-0.5 rounded flex items-center gap-1"
+                    >
+                      <AlertTriangle size={10} />
+                      {urlError}
+                    </motion.span>
+                  ) : url.length > 0 && (
+                    <motion.span 
+                      key="success"
+                      initial={{ opacity: 0, scale: 0.9, y: 5 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: -5 }}
+                      className="text-[10px] text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded flex items-center gap-1"
+                    >
+                      <CheckCircle2 size={10} />
+                      Valid URL
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </div>
+              <input
+                type="text"
+                value={url}
+                onChange={(e) => {
+                  setUrl(e.target.value);
+                  validateUrl(e.target.value);
+                }}
+                placeholder="https://yoursite.com/your-page"
+                className={`w-full bg-zinc-950/50 px-4 py-3 rounded-xl border outline-none transition-all text-white placeholder:text-slate-700 text-sm ${
+                  urlError ? 'border-red-500/50 focus:border-red-500' : 
+                  url.length > 0 ? 'border-emerald-500/30 focus:border-emerald-500/50' :
+                  'border-white/10 focus:border-blue-500/50'
+                }`}
+              />
+            </div>
+
+            <div className="space-y-2 relative">
+              <div className="flex justify-between items-center px-1">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Meta Title</label>
+                <motion.div 
+                  animate={titleStatus === 'long' ? { scale: [1, 1.1, 1] } : {}}
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded transition-colors ${
+                    titleStatus === 'perfect' ? 'bg-emerald-500/10 text-emerald-500' :
+                    titleStatus === 'long' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' :
+                    'bg-amber-500/10 text-amber-500'
+                  }`}
+                >
+                  {title.length} / 60
+                </motion.div>
+              </div>
+              
+              <AnimatePresence>
+                {showTitleTips && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute z-20 bottom-full left-0 right-0 mb-3 bg-zinc-800 border border-white/10 rounded-2xl p-4 shadow-2xl pointer-events-none"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                        <Sparkles size={16} />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-white">Title Best Practices</p>
+                        <ul className="text-[10px] text-slate-400 space-y-1 leading-relaxed">
+                          <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Keep it between 50–60 characters</li>
+                          <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Place primary keyword near the beginning</li>
+                          <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Include your brand name if possible</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="absolute -bottom-1 left-6 w-2 h-2 bg-zinc-800 border-r border-b border-white/10 rotate-45" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <input
+                type="text"
+                value={title}
+                onFocus={() => setShowTitleTips(true)}
+                onBlur={() => setShowTitleTips(false)}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  if (e.target.value.length === 0) setSuggestions([]);
+                }}
+                placeholder="Enter your page title here..."
+                maxLength={100}
+                className={`w-full bg-zinc-950/50 px-4 py-3 rounded-xl border outline-none transition-all text-white placeholder:text-slate-700 text-sm ${
+                  titleStatus === 'perfect' ? 'border-emerald-500/30 focus:border-emerald-500/50' :
+                  titleStatus === 'long' ? 'border-red-500/30 focus:border-red-500/50' :
+                  titleStatus === 'short' && title.length > 0 ? 'border-amber-500/30 focus:border-amber-500/50' :
+                  'border-white/10 focus:border-blue-500/50'
+                }`}
+              />
+              <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min((title.length / 60) * 100, 100)}%` }}
+                  className={`h-full ${
+                    titleStatus === 'perfect' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
+                    titleStatus === 'long' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' :
+                    'bg-amber-500'
+                  }`}
                 />
               </div>
-              <div className="space-y-4">
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
-                  <Star size={16} className="text-brand-400" />
-                  Target Keywords (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={keywords}
-                  onChange={(e) => setKeywords(e.target.value)}
-                  placeholder="e.g. vlogging, tech review, 4k"
-                  className="w-full bg-zinc-950/50 px-6 py-4 rounded-2xl border border-white/10 focus:border-brand-500/50 outline-none transition-all text-white placeholder:text-slate-600 shadow-inner"
+
+              {/* Smart Suggestions */}
+              {title.length > 5 && (
+                <div className="mt-2 text-right">
+                  <button
+                    onClick={getSuggestions}
+                    disabled={isAnalyzing}
+                    className="text-[9px] font-black uppercase tracking-widest text-brand-500 hover:text-brand-400 flex items-center gap-1.5 ml-auto transition-colors disabled:opacity-50"
+                  >
+                    {isAnalyzing ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
+                    Get SEO Tips
+                  </button>
+                </div>
+              )}
+
+              <AnimatePresence>
+                {suggestions.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="p-3 bg-brand-500/5 border border-brand-500/10 rounded-xl space-y-2 mt-2"
+                  >
+                    <p className="text-[8px] font-black uppercase tracking-widest text-brand-400">SEO Improvements</p>
+                    <div className="space-y-1.5">
+                      {suggestions.map((s, i) => (
+                        <div key={i} className="flex gap-2 text-[10px] text-slate-300 leading-tight">
+                          <span className="text-brand-500 font-bold">•</span>
+                          {s}
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div className="space-y-2 relative">
+              <div className="flex justify-between items-center px-1">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Meta Description</label>
+                <motion.div 
+                  animate={descStatus === 'long' ? { scale: [1, 1.05, 1] } : {}}
+                  className={`flex items-center gap-2 px-2.5 py-1 rounded-lg transition-all border ${
+                    descStatus === 'perfect' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                    descStatus === 'long' ? 'bg-red-500 text-white border-red-600 shadow-lg shadow-red-900/40' :
+                    descStatus === 'short' && description.length > 0 ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                    'bg-zinc-800/50 text-slate-500 border-white/5'
+                  }`}
+                >
+                  <span className="text-[9px] font-black uppercase tracking-[0.1em]">
+                    {descStatus === 'perfect' ? 'Ideal Length' : 
+                     descStatus === 'long' ? 'Too Long' : 
+                     descStatus === 'short' ? 'Too Short' : 'Empty'}
+                  </span>
+                  <div className={`w-1 h-1 rounded-full ${
+                    descStatus === 'perfect' ? 'bg-emerald-500 animate-pulse' :
+                    descStatus === 'long' ? 'bg-white' :
+                    descStatus === 'short' ? 'bg-amber-500' : 'bg-slate-600'
+                  }`} />
+                  <span className="text-[10px] font-bold tabular-nums">
+                    {description.length} / 160
+                  </span>
+                </motion.div>
+              </div>
+
+              <AnimatePresence>
+                {showDescTips && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute z-20 bottom-full left-0 right-0 mb-3 bg-zinc-800 border border-white/10 rounded-2xl p-4 shadow-2xl pointer-events-none"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
+                        <Sparkles size={16} />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-white">Description Best Practices</p>
+                        <ul className="text-[10px] text-slate-400 space-y-1 leading-relaxed">
+                          <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Aim for 150–160 characters</li>
+                          <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Use a clear call-to-action (CTA)</li>
+                          <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Include relevant secondary keywords</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="absolute -bottom-1 left-6 w-2 h-2 bg-zinc-800 border-r border-b border-white/10 rotate-45" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <textarea
+                value={description}
+                onFocus={() => setShowDescTips(true)}
+                onBlur={() => setShowDescTips(false)}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe what this page is about in 150–160 characters..."
+                rows={4}
+                maxLength={300}
+                className={`w-full bg-zinc-950/50 px-4 py-3 rounded-xl border outline-none transition-all text-white placeholder:text-slate-700 text-sm resize-none leading-relaxed ${
+                  descStatus === 'perfect' ? 'border-emerald-500/30 focus:border-emerald-500/50' :
+                  descStatus === 'long' ? 'border-red-500/30 focus:border-red-500/50' :
+                  descStatus === 'short' && description.length > 0 ? 'border-amber-500/30 focus:border-amber-500/50' :
+                  'border-white/10 focus:border-blue-500/50'
+                }`}
+              />
+              <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min((description.length / 160) * 100, 100)}%` }}
+                  className={`h-full ${
+                    descStatus === 'perfect' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
+                    descStatus === 'long' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' :
+                    'bg-amber-500'
+                  }`}
                 />
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-16 bg-red-600 hover:bg-red-500 disabled:bg-red-900/50 text-white rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-3 shadow-lg shadow-red-900/20 active:scale-95 border-b-4 border-red-800 active:border-b-0"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="animate-spin" size={24} />
-                  <span>AI Thinking...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles size={24} />
-                  <span>Generate AI Titles</span>
-                </>
-              )}
-            </button>
-
+            {/* AI Variations List */}
             <AnimatePresence>
-              {error && (
+              {variations.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
-                  className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm flex items-center gap-3 mt-6"
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-3 pt-2"
                 >
-                  <AlertCircle size={18} />
-                  {error}
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                    <List size={12} /> Variations ({variations.length})
+                  </label>
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                    {variations.map((v, i) => (
+                      <motion.button
+                        key={i}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        onClick={() => applyVariation(v, i)}
+                        className={`w-full text-left p-3 rounded-xl border transition-all group ${
+                          selectedVariation === i 
+                            ? 'bg-brand-500/10 border-brand-500/30' 
+                            : 'bg-zinc-950/30 border-white/5 hover:border-white/10'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
+                            v.category === 'Clickbait' ? 'bg-orange-500/10 text-orange-400' :
+                            v.category === 'Listicle' ? 'bg-purple-500/10 text-purple-400' :
+                            'bg-blue-500/10 text-blue-400'
+                          }`}>
+                            {v.category}
+                          </span>
+                          <span className="text-[9px] font-bold text-slate-500">{v.title.length} chars</span>
+                        </div>
+                        <p className="text-xs font-bold text-white group-hover:text-brand-400 transition-colors line-clamp-2 leading-snug">
+                          {v.title}
+                        </p>
+                      </motion.button>
+                    ))}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
-          </form>
 
-          <AnimatePresence mode="wait">
-            {loading && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="mt-12 space-y-12 pt-12 border-t border-white/5 text-center"
-              >
-                <div className="flex flex-col items-center space-y-6">
-                  <div className="relative w-20 h-20">
-                    <div className="absolute inset-0 border-4 border-zinc-800 rounded-full"></div>
-                    <motion.div 
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      className="absolute inset-0 border-4 border-red-500 border-t-transparent rounded-full"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Sparkles className="text-red-500 animate-pulse" size={28} />
+            <button
+              onClick={copyMetaTags}
+              className={`w-full py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 border ${
+                copied 
+                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' 
+                  : 'bg-white/5 border-white/5 hover:bg-white/10 text-white shadow-lg'
+              }`}
+            >
+              {copied ? <Check size={16} /> : <Copy size={16} />}
+              {copied ? 'Meta Tags Copied!' : 'Copy Tags as HTML'}
+            </button>
+          </motion.div>
+
+          <div className="bg-blue-500/5 border border-blue-500/10 p-6 rounded-3xl space-y-4">
+            <h3 className="text-white font-bold text-sm flex items-center gap-2">
+              <Info size={16} className="text-blue-400" />
+              Power Tip
+            </h3>
+            <p className="text-slate-400 text-xs leading-relaxed">
+              Google sirf letters hi nahi check karta balki pixel width bhi. Aam taur par uppercase letters zyada space lete hain isliye standard sentence case use karein.
+            </p>
+          </div>
+        </div>
+
+        {/* Right Column: Preview & Analysis */}
+        <div className="xl:col-span-7 space-y-8 order-1 xl:order-2">
+          <div className="bg-zinc-900 border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="bg-zinc-950 px-6 py-4 border-b border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 italic">Google Snippet Preview</span>
+              <div className="flex bg-zinc-900 p-1 rounded-2xl gap-1 shadow-inner border border-white/5">
+                <button 
+                  onClick={() => setDevice('desktop')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-xs ${device === 'desktop' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                >
+                  <Monitor size={14} />
+                  Desktop
+                </button>
+                <button 
+                  onClick={() => setDevice('mobile')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-xs ${device === 'mobile' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                >
+                  <Smartphone size={14} />
+                  Mobile
+                </button>
+              </div>
+            </div>
+
+            <div className="p-4 md:p-8 bg-zinc-950/20 relative min-h-[500px] flex items-center justify-center overflow-x-auto">
+              <AnimatePresence mode="wait">
+                {device === 'desktop' ? (
+                  <motion.div
+                    key="desktop"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="w-full max-w-[600px] bg-white rounded-xl overflow-hidden shadow-2xl border border-slate-200 shrink-0"
+                  >
+                    <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 flex items-center gap-3">
+                      <div className="flex gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
+                      </div>
+                      <div className="flex-1 bg-white border border-slate-200 rounded-full px-3 py-1 flex items-center gap-2">
+                        {renderFavicon('w-3 h-3', 'text-[6px]')}
+                        <span className="text-[10px] text-slate-400 truncate tracking-tight">{domain}</span>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-white transition-all duration-300">
-                      {loadingSteps[loadingStep]}
-                    </h3>
-                    <p className="text-slate-500 text-sm italic">Our AI is drafting high-engagement titles for "{topic}"</p>
-                  </div>
-
-                  <div className="w-full max-w-md bg-zinc-800 h-1.5 rounded-full overflow-hidden mx-auto">
-                    <motion.div 
-                      initial={{ width: "0%" }}
-                      animate={{ width: `${((loadingStep + 1) / loadingSteps.length) * 100}%` }}
-                      className="h-full bg-red-500"
-                    />
-                  </div>
-
-                  <div className="flex flex-wrap justify-center gap-3">
-                    {loadingSteps.map((_, idx) => (
-                      <div key={idx} className={`w-2.5 h-2.5 rounded-full transition-colors duration-500 ${loadingStep >= idx ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-zinc-800'}`} />
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Skeleton Titles */}
-                <div className="space-y-4 opacity-40 pointer-events-none">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="h-16 bg-zinc-800/40 border border-white/5 rounded-2xl w-full animate-pulse flex items-center justify-between px-6">
-                      <div className="h-4 w-2/3 bg-zinc-700/50 rounded" />
-                      <div className="h-6 w-16 bg-zinc-700/30 rounded-lg" />
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
-            {results.length > 0 && !loading && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="mt-12 pt-12 border-t border-white/5 space-y-4"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-white font-semibold flex items-center gap-2">
-                    <Star size={18} className="text-red-500" />
-                    Suggested AI Content Packages
-                  </h3>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest hidden md:block">Optimized for Viral Reach</p>
-                </div>
-                <div className="grid grid-cols-1 gap-6">
-                  {results.map((item, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className={`group relative p-8 rounded-[2rem] transition-all border-l-4 border-l-transparent overflow-hidden ${
-                        item.title.length > 70 
-                        ? 'bg-red-500/5 border border-red-500/20' 
-                        : 'bg-zinc-800/40 border border-white/5'
-                      }`}
-                    >
-                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-red-500/0 to-red-500/[0.03] pointer-events-none" />
-                      
-                      <div className="relative z-10 space-y-6">
-                        {/* Title Section */}
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between gap-4">
-                            <span className="text-slate-200 font-bold text-xl leading-tight line-clamp-2">{item.title}</span>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => copyToClipboard(item.title, i, 'title')}
-                              className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl font-black uppercase text-[10px] tracking-tighter transition-all duration-300 ${
-                                copied?.index === i && copied?.type === 'title'
-                                ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
-                                : 'bg-white/10 text-white hover:bg-white/20'
-                              }`}
-                            >
-                              {copied?.index === i && copied?.type === 'title' ? <Check size={14} strokeWidth={3} /> : <Copy size={14} strokeWidth={3} />}
-                              {copied?.index === i && copied?.type === 'title' ? 'Title Copied!' : 'Copy Title'}
-                            </motion.button>
-                          </div>
-                          
-                          <div className="flex items-center gap-3">
-                            <div className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tighter ${
-                              item.title.length > 70 ? 'bg-red-500/20 text-red-500 border border-red-500/20' : 'bg-zinc-950 text-slate-500 border border-white/5'
-                            }`}>
-                              {item.title.length} characters
-                            </div>
-                            {item.title.length > 70 && (
-                              <div className="flex items-center gap-1.5 text-red-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
-                                <AlertTriangle size={12} />
-                                <span>Optimization Warning</span>
-                              </div>
-                            )}
+                    
+                    <div className="p-6">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3 mb-1">
+                          {renderFavicon('w-7 h-7', 'text-xs')}
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-[#202124] leading-tight">{domain}</span>
+                            <span className="text-xs text-[#4d5156] leading-tight truncate max-w-[400px]">{path}</span>
                           </div>
                         </div>
+                        <h3 className="text-[20px] text-[#1a0dab] hover:underline cursor-pointer font-normal leading-tight font-sans">
+                          {renderTruncatedTitle(title)}
+                        </h3>
+                        <p className="text-[14px] text-[#4d5156] leading-[1.58] max-w-[600px] mt-1 break-words">
+                          {description || 'Your meta description will appear here. Make it compelling to improve click-through rates from search results.'}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                    <motion.div
+                    key="mobile"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="w-[360px] mx-auto bg-zinc-50 rounded-[3.5rem] overflow-hidden border-[10px] border-zinc-950 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] h-[760px] relative ring-1 ring-white/10 shrink-0 select-none"
+                  >
+                    {/* Hardware Buttons - More Realistic */}
+                    <div className="absolute top-24 -left-[11px] w-[3px] h-10 bg-zinc-800 rounded-r-sm z-30" /> {/* Action Button */}
+                    <div className="absolute top-40 -left-[11px] w-[3px] h-16 bg-zinc-800 rounded-r-sm z-30" /> {/* Vol Up */}
+                    <div className="absolute top-60 -left-[11px] w-[3px] h-16 bg-zinc-800 rounded-r-sm z-30" /> {/* Vol Down */}
+                    <div className="absolute top-44 -right-[11px] w-[3px] h-24 bg-zinc-800 rounded-l-sm z-30" /> {/* Power */}
 
-                        {/* Divider */}
-                        <div className="h-px bg-white/5 w-full" />
+                    {/* Antenna Bands */}
+                    <div className="absolute top-16 -left-[10px] w-full h-[1px] bg-zinc-900/10 pointer-events-none" />
+                    <div className="absolute bottom-16 -left-[10px] w-full h-[1px] bg-zinc-900/10 pointer-events-none" />
 
-                        {/* Description Section */}
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-2 text-slate-500">
-                              <BookOpen size={14} />
-                              <span className="text-[10px] font-black uppercase tracking-widest">Suggested Description</span>
-                            </div>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => copyToClipboard(item.description, i, 'description')}
-                              className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl font-black uppercase text-[10px] tracking-tighter transition-all duration-300 ${
-                                copied?.index === i && copied?.type === 'description'
-                                ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
-                                : 'bg-brand-500/10 text-brand-400 hover:bg-brand-500/20'
-                              }`}
-                            >
-                              {copied?.index === i && copied?.type === 'description' ? <Check size={14} strokeWidth={3} /> : <Copy size={14} strokeWidth={3} />}
-                              {copied?.index === i && copied?.type === 'description' ? 'Desc Copied!' : 'Copy description'}
-                            </motion.button>
-                          </div>
-                          <p className="text-slate-400 text-sm leading-relaxed bg-zinc-950/40 p-5 rounded-2xl border border-white/5 italic">
-                            "{item.description}"
-                          </p>
+                    {/* Status Bar - Improved spacing */}
+                    <div className="h-12 w-full bg-white flex justify-between items-end px-12 pb-2 relative z-10">
+                      <span className="text-[14px] font-bold text-zinc-900 tracking-tight">9:41</span>
+                      
+                      {/* Dynamic Island - More Precise */}
+                      <div className="absolute left-1/2 -translate-x-1/2 top-3 h-7 w-[100px] bg-zinc-950 rounded-[1.25rem] flex items-center justify-between px-3.5 group shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+                         <div className="w-[18px] h-3 bg-zinc-900/50 rounded-full" />
+                         <div className="flex gap-1.5 items-center">
+                            <div className="w-1 h-1 rounded-full bg-blue-500/80 animate-pulse" />
+                            <div className="w-1.5 h-1.5 rounded-full bg-zinc-800/80 ring-1 ring-white/10" />
+                         </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-zinc-900 mb-0.5">
+                        <Signal size={15} strokeWidth={2.5} />
+                        <Wifi size={15} strokeWidth={2.5} />
+                        <div className="w-5.5 h-2.5 border-[1.5px] border-zinc-900 rounded-[3px] p-[1px] relative flex items-center">
+                          <div className="w-full h-full bg-zinc-900 rounded-[1px]" />
+                          <div className="absolute -right-[3.5px] w-[2px] h-[4px] bg-zinc-900 rounded-r-full" />
                         </div>
                       </div>
-                      
-                      {/* Sparkle effect on copy */}
-                      <AnimatePresence>
-                        {copied?.index === i && (
-                          <motion.div 
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 1.5, opacity: 0 }}
-                            className="absolute right-8 top-8 text-emerald-400 pointer-events-none"
-                          >
-                            <Sparkles size={40} className="animate-pulse" />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </section>
+                    </div>
+                    
+                    {/* Browser Toolbar / URL Field - Safari Style */}
+                    <div className="bg-[#f8f9fa] pt-0.5 pb-2 px-4 border-b border-slate-200/50">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 bg-zinc-200/40 rounded-xl py-2 px-3 flex items-center gap-2">
+                           <RefreshCw size={11} className="text-slate-400 rotate-90" />
+                           <div className="flex-1 text-[12px] text-slate-700 font-medium truncate tracking-tight text-center">
+                             {domain}
+                           </div>
+                           <div className="text-[10px] font-black text-slate-400 tracking-tighter">
+                              AA
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Main Viewport Content with Correct Scaling */}
+                    <div className="h-[calc(100%-100px)] overflow-y-auto scrollbar-none bg-white">
+                      <div className="p-4 pb-24 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-1000">
+                        {/* Current Result with Premium Styling */}
+                        <div className="space-y-2 mt-2">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-0.5 bg-slate-50 border border-slate-200 rounded-lg shadow-sm">
+                              {renderFavicon('w-6 h-6', 'text-xs')}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-xs font-bold text-[#202124] leading-tight truncate">{domain}</span>
+                              <span className="text-[10px] text-[#4d5156] leading-tight truncate max-w-[240px] italic">{path}</span>
+                            </div>
+                          </div>
+                          <h3 className="text-[20px] text-[#1558d6] font-medium leading-[1.3] break-words g-title active:text-[#1a0dab] tracking-tight">
+                            {title || "Your page title will appear here"}
+                          </h3>
+                          <p className="text-[14px] text-[#4d5156] leading-[1.5] line-clamp-4 break-words g-desc font-sans">
+                            {description || 'Your meta description will appear here. Mobile previews highlight the first 120 characters most clearly.'}
+                          </p>
+                        </div>
+                        
+                        {/* Ad / Knowledge Panel Mock (Skeleton) */}
+                        <div className="pt-2">
+                           <div className="p-4 bg-slate-50/50 rounded-2xl border border-dotted border-slate-200 flex items-center gap-4 group cursor-default">
+                              <div className="w-12 h-12 bg-white rounded-xl border border-slate-100 flex items-center justify-center text-slate-200">
+                                 <Sparkles size={20} />
+                              </div>
+                              <div className="space-y-1.5 flex-1">
+                                 <div className="h-2 w-1/3 bg-slate-200/50 rounded" />
+                                 <div className="h-2 w-3/4 bg-slate-100 rounded" />
+                              </div>
+                           </div>
+                        </div>
 
-      {/* Educational Content Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
-        <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20">
-            <PlayCircle size={14} />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Growth Guide</span>
+                        {/* Other Results Skeleton */}
+                        <div className="pt-2 space-y-8">
+                          {[1, 2, 3].map((i) => (
+                             <div key={i} className="space-y-3 opacity-30">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-6 h-6 bg-slate-100 rounded-full" />
+                                  <div className="flex flex-col gap-1">
+                                    <div className="h-2 w-20 bg-slate-100 rounded" />
+                                    <div className="h-1.5 w-32 bg-slate-50 rounded" />
+                                  </div>
+                                </div>
+                                <div className="h-4 w-5/6 bg-slate-100/40 rounded-md" />
+                                <div className="h-16 w-full bg-slate-50/30 rounded-xl border border-dashed border-slate-200" />
+                             </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Home Indicator Safe Area */}
+                    <div className="absolute bottom-1 w-full flex justify-center py-2 pointer-events-none z-20">
+                      <div className="w-32 h-1.5 bg-zinc-950/20 rounded-full" />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
-          <h2 className="text-3xl font-semibold text-white">Why a Great Title Matters?</h2>
-          <p className="text-slate-400 leading-relaxed text-lg">
-            Your title is the first thing a potential viewer sees. It works along with your thumbnail to determine your Click-Through Rate (CTR). A high-ranking title tells both the user and the algorithm exactly what to expect.
-          </p>
-          <div className="bg-zinc-900/50 border border-white/5 p-6 rounded-2xl">
-            <h3 className="text-white font-medium mb-4 flex items-center gap-2">
-              <TrendingUp size={18} className="text-green-400" />
-              Ranking Factors
-            </h3>
-            <ul className="space-y-3">
-              {[
-                'Hooks potential viewers in the first 3 seconds',
-                'Contains high-volume search keywords',
-                'Increases organic browse feature reach',
-                'Improves indexing in YouTube and Google Search'
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-slate-400 text-sm">
-                  <CheckCircle2 size={16} className="text-brand-500 mt-0.5 shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
 
-        <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20">
-            <Zap size={14} />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Process</span>
-          </div>
-          <h2 className="text-3xl font-semibold text-white">How AI Generates Titles</h2>
-          <p className="text-slate-400 leading-relaxed text-lg">
-            Our system analyzes thousands of high-performing YouTube videos to understand the psychological triggers that lead to clicks.
-          </p>
-          <div className="grid grid-cols-1 gap-4">
-            {[
-              { title: 'Sentiment Analysis', text: 'Uses emotional triggers like curiosity, excitement, or urgency.', icon: Sparkles },
-              { title: 'CTR Optimization', text: 'Patterns known to yield higher click-through rates.', icon: Zap },
-              { title: 'Search Intent', text: 'Matching the specific problem your viewer is solving.', icon: Search }
-            ].map((item, i) => (
-              <div key={i} className="flex gap-4 p-4 rounded-2xl bg-zinc-900/30 border border-white/5">
-                <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-brand-400 shrink-0">
-                  <item.icon size={20} />
-                </div>
-                <div>
-                  <h4 className="text-white font-medium text-sm">{item.title}</h4>
-                  <p className="text-slate-500 text-xs">{item.text}</p>
-                </div>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <StatusCard 
+                label="Title Score"
+                value={title.length}
+                status={titleStatus}
+                ideal="50-60"
+                hint={titleStatus === 'long' ? 'Too long' : titleStatus === 'short' ? 'Too short' : 'Perfect'}
+            />
+            <StatusCard 
+                label="Meta Score"
+                value={description.length}
+                status={descStatus}
+                ideal="120-160"
+                hint={descStatus === 'long' ? 'Too long' : descStatus === 'short' ? 'Too short' : descStatus === 'perfect' ? 'Perfect' : 'Empty'}
+            />
           </div>
         </div>
       </div>
 
-      {/* SEO Tips Section */}
-      <section className="mb-20">
-        <h2 className="text-3xl font-semibold text-white mb-8 flex items-center gap-3">
-          <Star className="text-brand-400" />
-          Pro Tips for Viral Titles
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { title: 'Keep it Under 70', desc: 'YouTube truncates titles after 70 characters on many devices.' },
-            { title: 'Use Numbers', desc: 'Lists and years (e.g., 2026) perform 20% better on average.' },
-            { title: 'Emotional Hook', desc: 'Words like "Shocking," "Ultimate," or "Proven" drive curiosity.' },
-            { title: 'Key Word at Start', desc: 'Put your most important keyword in the first 2-3 words.' }
-          ].map((tip, i) => (
-            <div key={i} className="p-6 rounded-2xl bg-zinc-900 border border-white/5 hover:border-brand-500/30 transition-all">
-              <h4 className="text-white font-semibold mb-2">{tip.title}</h4>
-              <p className="text-slate-400 text-xs leading-relaxed">{tip.desc}</p>
+      <section className="bg-zinc-900 border border-white/5 rounded-[2.5rem] p-10 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-16 -mt-16" />
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+                <h2 className="text-3xl font-bold text-white italic tracking-tight underline underline-offset-8 decoration-blue-500">How to write high-CTR Titles?</h2>
+                <p className="text-slate-400 leading-relaxed">
+                    Aapka main target keyword pehle 3 words mein hona chahiye. Aisa karne se algorithm aur user dono ko turant context mil jata hai. Numbers aur emotional hooks (e.g. "Free", "Limited", "Confirmed") use karein taaki user rukk jaaye.
+                </p>
+                <div className="bg-zinc-950/40 p-5 rounded-2xl border border-white/5 space-y-4">
+                    {[
+                        'Use power words like "Essential", "Complete Guide"',
+                        'Include current year if relevant (e.g. 2026)',
+                        'Keep it naturally readable, not just robotic keywords'
+                    ].map((step, idx) => (
+                        <div key={idx} className="flex gap-3 text-sm text-slate-300">
+                             <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                             {step}
+                        </div>
+                    ))}
+                </div>
             </div>
-          ))}
+            <div className="space-y-6">
+                <h2 className="text-3xl font-bold text-white italic tracking-tight underline underline-offset-8 decoration-amber-500">Meta Description Secrets</h2>
+                <p className="text-slate-400 leading-relaxed">
+                    Description mein end mein ek "Call to Action" zaroor add karein. Jaise ki "Click here to learn more" ya "Download for free". Isse conversion rate badhta hai. Duplicate meta descriptions kabhi mat rakhein.
+                </p>
+                <div className="grid grid-cols-1 gap-3">
+                    <div className="p-4 bg-zinc-950/50 border border-white/5 rounded-xl flex items-center gap-4 group hover:border-blue-500/30 transition-all">
+                        <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold group-hover:scale-110 transition-transform">1.</div>
+                        <span className="text-sm text-slate-300">Target main intent clearly</span>
+                    </div>
+                    <div className="p-4 bg-zinc-950/50 border border-white/5 rounded-xl flex items-center gap-4 group hover:border-blue-500/30 transition-all">
+                        <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold group-hover:scale-110 transition-transform">2.</div>
+                        <span className="text-sm text-slate-300">Address a specific pain point</span>
+                    </div>
+                </div>
+            </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="mb-20">
-        <h2 className="text-3xl font-semibold text-white mb-8 flex items-center gap-3">
-          <HelpCircle className="text-brand-400" />
-          Title Optimization FAQs
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[
-            { q: 'Can I change my title after uploading?', a: 'Yes! In fact, changing a title on a slow-performing video can sometimes give it a new life in the algorithm.' },
-            { q: 'Should I use Caps Lock?', a: 'Use it sparingly for emphasis on 1-2 words. ALL CAPS can sometimes look like spam and hurting trust.' },
-            { q: 'Does title matter more than thumbnail?', a: 'They work together. The title provides the context, and the thumbnail provides the visual punch.' }
-          ].map((faq, i) => (
-            <div key={i} className="p-6 rounded-2xl bg-zinc-900/50 border border-white/5">
-              <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-                <span className="text-brand-500">Q:</span> {faq.q}
-              </h4>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                <span className="text-emerald-500 font-bold mr-2 italic">A:</span> {faq.a}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 📖 Learn More (Guide) */}
-      <section className="bg-brand-500/5 border border-brand-500/10 rounded-3xl p-10 space-y-6 mb-20">
+      {/* FAQs */}
+      <section className="space-y-8">
         <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-          <BookOpen className="text-brand-500" size={24} />
-          Learn More About YT SEO
+          <HelpCircle className="text-blue-500" />
+          Common SEO Snippet Questions
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Link to="/blog/yt-seo-2026" className="p-6 bg-zinc-900 border border-white/5 rounded-2xl hover:border-brand-500/30 transition-all group">
-            <h3 className="text-white font-bold mb-2 group-hover:text-brand-400 transition-colors">How to Rank YouTube Videos in 2026</h3>
-            <p className="text-slate-500 text-sm">Master the algorithm and get more organic views.</p>
-          </Link>
-          <Link to="/blog/what-is-seo" className="p-6 bg-zinc-900 border border-white/5 rounded-2xl hover:border-brand-500/30 transition-all group">
-            <h3 className="text-white font-bold mb-2 group-hover:text-brand-400 transition-colors">Title & Thumbnail Strategy</h3>
-            <p className="text-slate-500 text-sm">How to increase your Click-Through Rate (CTR).</p>
-          </Link>
-        </div>
-      </section>
-
-      {/* Related Tools */}
-      <section className="mb-20">
-        <h2 className="text-2xl font-semibold text-white mb-8">Related Video Tools</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[
-            { name: 'YouTube Tag Generator', path: '/youtube/tag-generator', icon: Hash },
-            { name: 'Keyword Density Tool', path: '/seo/keyword-density', icon: Activity },
-          ].map((tool, i) => (
-            <Link 
-              key={i} 
-              to={tool.path}
-              className="group p-6 rounded-2xl bg-zinc-900 border border-white/5 hover:border-brand-500/20 hover:bg-zinc-800/50 transition-all flex items-center justify-between"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-zinc-800 group-hover:bg-brand-500/10 flex items-center justify-center text-slate-400 group-hover:text-brand-400 transition-all">
-                  <tool.icon size={24} />
-                </div>
-                <div>
-                  <h4 className="text-white font-medium group-hover:text-brand-400 transition-all">{tool.name}</h4>
-                  <p className="text-slate-500 text-xs mt-1">Boost your visibility</p>
-                </div>
-              </div>
-              <ArrowRight size={20} className="text-slate-700 group-hover:text-brand-400 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all" />
-            </Link>
+            { q: 'Is it bad to exceed 60 chars?', a: 'Yes, because Google will likely cut it off, and sometimes users might find it unprofessional if key info is missing.' },
+            { q: 'Can I use Emojis?', a: 'Yes! Emojis can increase CTR significantly, but use them sparingly and test if they display correctly in our preview.' },
+            { q: 'Does URL impact snippet?', a: 'Definitely. Short, readable URLs with keywords (slugs) are more trusted by users and have better visibility.' }
+          ].map((f, i) => (
+            <div key={i} className="p-8 bg-zinc-900 border border-white/10 rounded-[2rem] hover:bg-zinc-800/50 transition-all">
+                <h4 className="text-white font-bold mb-3 flex items-center gap-2">
+                    <Hash size={16} className="text-blue-500" />
+                    {f.q}
+                </h4>
+                <p className="text-slate-500 text-xs leading-relaxed">
+                    {f.a}
+                </p>
+            </div>
           ))}
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="bg-gradient-to-br from-indigo-600 to-brand-700 rounded-3xl p-12 text-center relative overflow-hidden shadow-2xl shadow-brand-900/20">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1),transparent)]"></div>
-        <div className="relative z-10">
-          <h2 className="text-4xl font-bold text-white mb-6">Master Your Video SEO</h2>
-          <p className="text-brand-100 mb-10 text-lg max-w-2xl mx-auto opacity-90">
-            Stop guessing and start ranking. Use our AI tools to craft the perfect YouTube experience for your viewers.
-          </p>
-          <button 
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="px-10 py-4 bg-white text-brand-600 rounded-2xl font-bold text-lg hover:bg-brand-50 hover:scale-105 transition-all shadow-xl active:scale-95"
-          >
-            Create Your Next Viral Title
-          </button>
         </div>
       </section>
     </div>
   );
 };
+
+const StatusCard = ({ label, value, status, ideal, hint }: any) => (
+    <div className={`p-6 rounded-3xl border transition-all ${
+        status === 'perfect' ? 'bg-emerald-500/5 border-emerald-500/20' :
+        status === 'long' ? 'bg-red-500/5 border-red-500/20' :
+        status === 'empty' ? 'bg-zinc-900/50 border-white/5' :
+        'bg-amber-500/5 border-amber-500/20'
+    }`}>
+        <div className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">{label}</div>
+        <div className="flex items-baseline gap-2">
+            <span className={`text-3xl font-black italic tracking-tighter ${
+                status === 'perfect' ? 'text-emerald-500' :
+                status === 'empty' ? 'text-slate-400' :
+                status === 'long' ? 'text-red-500' : 'text-amber-500'
+            }`}>{value}</span>
+            <span className="text-slate-500 text-xs font-mono">chars</span>
+        </div>
+        <div className="mt-4 flex items-center justify-between">
+            <div className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Ideal: {ideal}</div>
+            <div className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${
+                status === 'perfect' ? 'bg-emerald-500 text-white' :
+                status === 'long' ? 'bg-red-500 text-white' :
+                status === 'empty' ? 'bg-zinc-800 text-slate-500' :
+                'bg-amber-500 text-white'
+            }`}>{hint}</div>
+        </div>
+    </div>
+);
 
 export default TitleGenerator;

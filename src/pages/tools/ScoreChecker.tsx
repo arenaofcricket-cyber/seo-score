@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Activity, Globe, Loader2, Search, CheckCircle2, XCircle, RefreshCw, Sparkles, HelpCircle, ArrowRight, BookOpen, Gauge, Hash, Link as LinkIcon, Smartphone, Zap } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import { Activity, Globe, Loader2, Search, CheckCircle2, XCircle, RefreshCw, Sparkles, HelpCircle, ArrowRight, BookOpen, Gauge, Hash, Link as LinkIcon, Smartphone, Zap, Download, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getSEOScore } from '../../services/geminiService';
 import { getRealPageSpeedData } from '../../services/pageSpeedService';
@@ -12,6 +13,177 @@ const ScoreChecker = () => {
   const [loadingStep, setLoadingStep] = React.useState(0);
   const [result, setResult] = React.useState<any>(null);
   const [previewDevice, setPreviewDevice] = React.useState<'desktop' | 'mobile'>('desktop');
+  const [isGeneratingPdf, setIsGeneratingPdf] = React.useState(false);
+
+  const downloadPDF = async () => {
+    if (!result) return;
+    setIsGeneratingPdf(true);
+
+    try {
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const W = 210;
+      const domain = new URL(url.startsWith('http') ? url : 'https://' + url).hostname.replace('www.', '');
+      const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      // Helper for colors
+      const getGradeColor = (score: number) => {
+        if (score >= 90) return [16, 185, 129]; // Emerald
+        if (score >= 50) return [245, 158, 11]; // Amber
+        return [239, 68, 68]; // Red
+      };
+
+      let y = 0;
+
+      // Header
+      doc.setFillColor(14, 14, 14);
+      doc.rect(0, 0, W, 40, 'F');
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.setTextColor(16, 185, 129); // Brand Green
+      doc.text('SEOSCORE AUDIT', 60, 22);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(136, 136, 136);
+      doc.text('PROFESSIONAL SEO ANALYSIS REPORT', 60, 30);
+      
+      doc.setTextColor(200, 200, 200);
+      doc.text(dateStr, W - 15, 18, { align: 'right' });
+      doc.text(domain, W - 15, 26, { align: 'right' });
+
+      y = 55;
+
+      // Score Section
+      doc.setFillColor(24, 24, 27);
+      doc.roundedRect(15, y, 60, 50, 4, 4, 'F');
+      
+      const mainScore = result.seoScore || result.score || 0;
+      doc.setFontSize(42);
+      const [r, g, b] = getGradeColor(mainScore);
+      doc.setTextColor(r, g, b);
+      doc.text(String(mainScore), 45, y + 25, { align: 'center' });
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text('OVERALL SCORE', 45, y + 35, { align: 'center' });
+
+      // Metrics Summary
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(20, 20, 20); // Using darker for header in body
+      doc.text(domain, 85, y + 10);
+      
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Analysis for: ${url}`, 85, y + 18);
+
+      const metrics = [
+        { label: 'Performance', val: result.performanceScore || 0 },
+        { label: 'On-Page', val: result.onPageScore || 85 },
+        { label: 'Technical', val: result.technicalScore || 70 },
+        { label: 'Content', val: result.contentScore || 80 },
+      ];
+
+      y += 65;
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(80, 80, 80);
+      doc.text('CRITICAL BREAKDOWN', 15, y);
+      
+      y += 8;
+      metrics.forEach((m, idx) => {
+        const mx = 15 + (idx * 48);
+        doc.setFillColor(245, 245, 245);
+        doc.roundedRect(mx, y, 42, 25, 2, 2, 'F');
+        
+        doc.setFontSize(8);
+        doc.setTextColor(100, 100, 100);
+        doc.text(m.label.toUpperCase(), mx + 21, y + 8, { align: 'center' });
+        
+        doc.setFontSize(14);
+        const [mr, mg, mb] = getGradeColor(m.val);
+        doc.setTextColor(mr, mg, mb);
+        doc.text(String(m.val), mx + 21, y + 18, { align: 'center' });
+      });
+
+      // Core Web Vitals
+      y += 45;
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(80, 80, 80);
+      doc.text('CORE WEB VITALS', 15, y);
+      
+      y += 8;
+      const vitals = [
+        { l: 'FCP', v: result.metrics?.fcp || 'N/A' },
+        { l: 'LCP', v: result.metrics?.lcp || 'N/A' },
+        { l: 'CLS', v: result.metrics?.cls || 'N/A' },
+        { l: 'TBT', v: result.metrics?.fid || 'N/A' },
+      ];
+
+      vitals.forEach((v, idx) => {
+        const vx = 15 + (idx * 48);
+        doc.setFillColor(250, 250, 250);
+        doc.rect(vx, y, 42, 15, 'F');
+        doc.setFontSize(7);
+        doc.setTextColor(136, 136, 136);
+        doc.text(v.l, vx + 5, y + 6);
+        doc.setFontSize(10);
+        doc.setTextColor(30, 30, 30);
+        doc.text(String(v.v), vx + 5, y + 12);
+      });
+
+      // AI Recommendations
+      y += 35;
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(16, 185, 129); // Green
+      doc.text('AI RECOMMENDATIONS & FIXES', 15, y);
+      
+      y += 8;
+      const recs = result.recommendations?.slice(0, 8) || [];
+      recs.forEach((rec: string, idx: number) => {
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(15, y, W - 30, 10, 1, 1, 'F');
+        
+        doc.setFontSize(8);
+        doc.setTextColor(16, 185, 129);
+        doc.text(`${idx + 1}.`, 18, y + 6.5);
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(50, 50, 50);
+        
+        const safeText = rec.length > 90 ? rec.substring(0, 87) + '...' : rec;
+        doc.text(safeText, 25, y + 6.5);
+        y += 12;
+
+        if (y > 270) {
+            doc.addPage();
+            y = 25;
+        }
+      });
+
+      // Footer
+      const totalPages = doc.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFillColor(14, 14, 14);
+        doc.rect(0, 285, W, 12, 'F');
+        doc.setFontSize(8);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Generated by SEOScore.site Audit Tool • Page ${i} of ${totalPages}`, 15, 292);
+      }
+
+      doc.save(`SEO-Report-${domain}.pdf`);
+    } catch (err) {
+      console.error('PDF Generation Failed:', err);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   React.useEffect(() => {
     document.title = "Free SEO Score Checker Tool – Analyze Website Score | SEOScore";
@@ -64,17 +236,16 @@ const ScoreChecker = () => {
       await new Promise(r => setTimeout(r, 500));
 
       if (realData) {
-        // Merge real metrics with AI recommendations
+        // Merge real metrics with AI deep analysis
         setResult({
+          ...aiData,
           score: realData.score,
           performanceScore: realData.performanceScore,
           accessibilityScore: realData.accessibilityScore,
           bestPracticesScore: realData.bestPracticesScore,
           seoScore: realData.seoScore,
-          pros: realData.audits.filter(a => a.score >= 0.9).slice(0, 8),
-          cons: realData.audits.filter(a => a.score < 0.9).slice(0, 8),
-          recommendations: aiData.recommendations,
           metrics: realData.metrics,
+          // Merge real audit data points if AI missed any, but prioritize AI's structured fix suggestions
           isRealData: true
         });
       } else {
@@ -396,34 +567,76 @@ const ScoreChecker = () => {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-10 pt-8 border-t border-white/5"
             >
+              {/* 📊 Score Breakdown Header */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                 <div className="bg-gradient-to-br from-brand-500/20 to-transparent border border-brand-500/20 p-8 rounded-3xl flex flex-col items-center justify-center relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="relative w-32 h-32 flex items-center justify-center mb-4">
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
+                        <circle
+                          cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent"
+                          strokeDasharray={364.4}
+                          strokeDashoffset={364.4 - (364.4 * (result.score || 0)) / 100}
+                          className={`${(result.score || 0) >= 90 ? 'text-brand-500' : (result.score || 0) >= 50 ? 'text-amber-500' : 'text-red-500'} transition-all duration-1000`}
+                        />
+                      </svg>
+                      <span className="absolute text-4xl font-black text-white">{result.score}</span>
+                    </div>
+                    <div className="text-xs uppercase font-black tracking-[0.2em] text-brand-400">Overall Score</div>
+                 </div>
+
+                 <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {[
+                      { label: 'On-Page SEO', score: result.onPageScore || 85, icon: Search, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+                      { label: 'Technical SEO', score: result.technicalScore || 70, icon: Zap, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+                      { label: 'Content Score', score: result.contentScore || 80, icon: BookOpen, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+                    ].map((cat, i) => (
+                      <div key={i} className="bg-zinc-800/50 border border-white/5 p-6 rounded-2xl flex flex-col justify-between group hover:border-white/10 transition-colors">
+                        <div className="flex justify-between items-start mb-6">
+                           <div className={`p-3 rounded-xl ${cat.bg} ${cat.color}`}>
+                              <cat.icon size={20} />
+                           </div>
+                           <div className="text-3xl font-black text-white">{cat.score}%</div>
+                        </div>
+                        <div>
+                          <div className="text-xs uppercase font-bold tracking-widest text-slate-500 mb-2">{cat.label}</div>
+                          <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
+                             <motion.div 
+                               initial={{ width: 0 }}
+                               animate={{ width: `${cat.score}%` }}
+                               className={`h-full ${cat.score >= 90 ? 'bg-emerald-500' : cat.score >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                             />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-10">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {[
                       { label: 'Performance', score: result.performanceScore },
                       { label: 'Accessibility', score: result.accessibilityScore },
                       { label: 'Best Practices', score: result.bestPracticesScore },
-                      { label: 'SEO', score: result.seoScore },
+                      { label: 'SEO Quality', score: result.seoScore },
                     ].map((cat, i) => (
-                      <div key={i} className="bg-zinc-800/50 border border-white/5 p-6 rounded-2xl text-center flex flex-col items-center">
-                        <div className="relative w-20 h-20 flex items-center justify-center mb-3">
+                      <div key={i} className="bg-zinc-900/50 border border-white/5 p-6 rounded-2xl text-center flex flex-col items-center">
+                        <div className="relative w-16 h-16 flex items-center justify-center mb-3">
                           <svg className="w-full h-full transform -rotate-90">
+                            <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-white/5" />
                             <circle
-                              cx="40" cy="40" r="36"
-                              stroke="currentColor" strokeWidth="4" fill="transparent"
-                              className="text-white/5"
-                            />
-                            <circle
-                              cx="40" cy="40" r="36"
-                              stroke="currentColor" strokeWidth="4" fill="transparent"
-                              strokeDasharray={226.2}
-                              strokeDashoffset={226.2 - (226.2 * (cat.score || 0)) / 100}
+                              cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="4" fill="transparent"
+                              strokeDasharray={175.9}
+                              strokeDashoffset={175.9 - (175.9 * (cat.score || 0)) / 100}
                               className={`${(cat.score || 0) >= 90 ? 'text-emerald-500' : (cat.score || 0) >= 50 ? 'text-amber-500' : 'text-red-500'} transition-all duration-1000`}
                             />
                           </svg>
-                          <span className="absolute text-xl font-bold text-white">{cat.score}</span>
+                          <span className="absolute text-sm font-bold text-white">{cat.score}</span>
                         </div>
-                        <div className="text-[10px] uppercase font-black tracking-widest text-slate-500">{cat.label}</div>
+                        <div className="text-[9px] uppercase font-black tracking-widest text-slate-500">{cat.label}</div>
                       </div>
                     ))}
                   </div>
@@ -457,19 +670,24 @@ const ScoreChecker = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-zinc-800/30 p-8 rounded-2xl border border-emerald-500/10">
-                      <h3 className="micro-label text-brand-400 mb-6 flex items-center gap-2">
-                        <CheckCircle2 size={16} /> Points of Success
-                      </h3>
-                      <div className="space-y-6">
-                        {result.pros.map((pro: any, i: number) => (
-                          <div key={i} className="space-y-1">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="micro-label text-emerald-400 flex items-center gap-2">
+                          <CheckCircle2 size={16} /> Points of Success
+                        </h3>
+                        <span className="text-[10px] font-bold text-slate-500 bg-emerald-500/5 px-2 py-0.5 rounded-full border border-emerald-500/10">
+                          {result.pros?.length || 0} PASSING
+                        </span>
+                      </div>
+                      <div className="space-y-4">
+                        {result.pros?.map((pro: any, i: number) => (
+                          <div key={i} className="group p-4 bg-zinc-950/20 border border-white/5 rounded-xl hover:border-emerald-500/20 transition-all">
                             <div className="flex gap-3 text-sm font-bold text-emerald-400">
                               <CheckCircle2 size={14} className="mt-0.5 shrink-0" />
                               {typeof pro === 'string' ? pro : pro.title}
                             </div>
-                            {pro.description && (
-                              <p className="text-[11px] text-slate-500 ml-6 leading-relaxed bg-zinc-950/30 p-2 rounded-lg border border-white/5">
-                                {pro.description.replace(/\[Learn more\]\(.*\)/g, '').split('. ')[0]}.
+                            {(pro.description || pro.desc) && (
+                              <p className="text-[10px] text-slate-500 mt-2 leading-relaxed opacity-70">
+                                {(pro.description || pro.desc).replace(/\[Learn more\]\(.*\)/g, '').split('. ')[0]}.
                               </p>
                             )}
                           </div>
@@ -478,32 +696,36 @@ const ScoreChecker = () => {
                     </div>
 
                     <div className="bg-zinc-800/30 p-8 rounded-2xl border border-red-500/10">
-                      <h3 className="micro-label text-red-400 mb-6 flex items-center gap-2">
-                        <XCircle size={16} /> Issues to Fix
-                      </h3>
-                      <div className="space-y-6">
-                        {result.cons.map((con: any, i: number) => (
-                          <div key={i} className="space-y-1">
-                            <div className="flex gap-3 text-sm font-bold text-red-400">
-                              <XCircle size={14} className="mt-0.5 shrink-0" />
-                              {typeof con === 'string' ? con : con.title}
-                              {con.displayValue && <span className="text-[10px] opacity-70 ml-auto bg-red-500/10 px-1.5 rounded">({con.displayValue})</span>}
-                            </div>
-                            {con.description && (
-                              <p className="text-[11px] text-slate-500 ml-6 leading-relaxed bg-zinc-950/30 p-2 rounded-lg border border-white/5">
-                                {con.description.replace(/\[Learn more\]\(.*\)/g, '').split('. ')[0]}.
-                              </p>
-                            )}
-                          </div>
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="micro-label text-red-400 flex items-center gap-2">
+                          <AlertTriangle size={16} /> Issues to Fix
+                        </h3>
+                        <span className="text-[10px] font-bold text-slate-500 bg-red-500/5 px-2 py-0.5 rounded-full border border-red-500/10">
+                          {result.cons?.length || 0} FAILED
+                        </span>
+                      </div>
+                      <div className="space-y-4">
+                        {result.cons?.map((con: any, i: number) => (
+                          <IssueAccordion key={i} issue={con} index={i} />
                         ))}
                       </div>
                     </div>
                   </div>
 
                   <div className="bg-zinc-800/50 border border-white/5 p-8 rounded-2xl">
-                    <h3 className="font-bold text-xl text-white mb-6 flex items-center gap-2">
-                      <Sparkles size={20} className="text-brand-400" /> Actionable Recommendations
-                    </h3>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                      <h3 className="font-bold text-xl text-white flex items-center gap-2">
+                        <Sparkles size={20} className="text-brand-400" /> Actionable Recommendations
+                      </h3>
+                      <button
+                        onClick={downloadPDF}
+                        disabled={isGeneratingPdf}
+                        className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-500 text-black font-bold rounded-xl hover:bg-brand-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                      >
+                        {isGeneratingPdf ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+                        {isGeneratingPdf ? 'Generating PDF...' : 'Download PDF Report'}
+                      </button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {result.recommendations.map((rec: string, i: number) => (
                         <div key={i} className="flex gap-4 p-4 bg-zinc-900 border border-white/5 rounded-xl text-slate-300 text-sm leading-relaxed hover:border-brand-500/30 transition-colors">
@@ -732,6 +954,77 @@ const ScoreChecker = () => {
           </button>
         </div>
       </section>
+    </div>
+  );
+};
+
+const IssueAccordion = ({ issue, index }: { issue: any; index: number }) => {
+  const [isOpen, setIsOpen] = React.useState(index === 0);
+  
+  return (
+    <div className={`overflow-hidden border rounded-xl transition-all ${
+        isOpen ? 'bg-zinc-900 border-red-500/30' : 'bg-zinc-950/40 border-white/5 hover:border-white/10'
+    }`}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-4 text-left group"
+      >
+        <div className="flex gap-3 items-start min-w-0">
+          <div className={`mt-1 p-1 rounded ${
+            issue.impact === 'High' ? 'bg-red-500/20 text-red-400' : 
+            issue.impact === 'Medium' ? 'bg-amber-500/20 text-amber-400' : 
+            'bg-blue-500/20 text-blue-400'
+          }`}>
+             <XCircle size={12} />
+          </div>
+          <div className="min-w-0">
+            <div className={`text-sm font-bold truncate transition-colors ${isOpen ? 'text-white' : 'text-slate-300'}`}>
+               {issue.title}
+            </div>
+            {!isOpen && (
+               <div className="text-[10px] text-slate-500 mt-0.5 flex gap-2">
+                  <span className={`uppercase font-black ${
+                    issue.impact === 'High' ? 'text-red-500/70' : 
+                    issue.impact === 'Medium' ? 'text-amber-500/70' : 
+                    'text-blue-500/70'
+                  }`}>{issue.impact || 'Impact'} Impact</span>
+               </div>
+            )}
+          </div>
+        </div>
+        <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-300 ${isOpen ? 'rotate-180 text-white' : ''}`} />
+      </button>
+
+      <AnimatePresence mode="wait">
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="px-4 pb-4 space-y-4"
+          >
+            <div className="h-px bg-white/5" />
+            <div className="space-y-3">
+               <div>
+                  <div className="text-[9px] uppercase font-black tracking-widest text-slate-500 mb-1">Problem</div>
+                  <p className="text-xs text-slate-400 leading-relaxed italic">
+                    {issue.description || issue.desc || 'Optimizing this factor will help search engines better understand your content and improve ranking.'}
+                  </p>
+               </div>
+               
+               <div className="bg-brand-500/5 border border-brand-500/10 p-4 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles size={14} className="text-brand-400" />
+                    <div className="text-[9px] uppercase font-black tracking-widest text-brand-400">How to Fix</div>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    {issue.howToFix || 'Follow structured data guidelines and ensure all technical tags are correctly implemented.'}
+                  </p>
+               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
