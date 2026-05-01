@@ -155,12 +155,31 @@ const TitleGenerator = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const renderTruncatedTitle = (text: string) => {
+  const renderTruncatedTitle = (text: string, isMobile: boolean = false) => {
     const display = text || 'Your page title will appear here';
-    if (display.length > 60) {
+    const limit = isMobile ? 70 : 60;
+    if (display.length > limit) {
       return (
         <span>
-          {display.slice(0, 57)}<span className="text-amber-600 font-bold">...</span>
+          {display.slice(0, limit - 3)}<span className={isMobile ? "" : "text-amber-600 font-bold"}>...</span>
+        </span>
+      );
+    }
+    return display;
+  };
+
+  const renderTruncatedDescription = (text: string, isMobile: boolean = false) => {
+    const defaultText = isMobile 
+      ? 'Your meta description will appear here. Mobile previews highlight the first 120 characters most clearly.'
+      : 'Your meta description will appear here. Make it compelling to improve click-through rates from search results.';
+    
+    const display = text || defaultText;
+    const limit = isMobile ? 120 : 160;
+    
+    if (display.length > limit) {
+      return (
+        <span>
+          {display.slice(0, limit - 3)}<span className={isMobile ? "" : "text-amber-600 font-bold"}>...</span>
         </span>
       );
     }
@@ -370,14 +389,14 @@ const TitleGenerator = () => {
 
               {/* Smart Suggestions */}
               {title.length > 5 && (
-                <div className="mt-2 text-right">
+                <div className="mt-3">
                   <button
                     onClick={getSuggestions}
                     disabled={isAnalyzing}
-                    className="text-[9px] font-black uppercase tracking-widest text-brand-500 hover:text-brand-400 flex items-center gap-1.5 ml-auto transition-colors disabled:opacity-50"
+                    className="w-full py-2.5 rounded-xl border border-brand-500/20 bg-brand-500/5 text-brand-400 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-brand-500/10 transition-all disabled:opacity-50 shadow-sm"
                   >
-                    {isAnalyzing ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
-                    Get SEO Tips
+                    {isAnalyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                    {isAnalyzing ? 'Analyzing Title...' : 'Get SEO Tips for Title'}
                   </button>
                 </div>
               )}
@@ -505,11 +524,12 @@ const TitleGenerator = () => {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.1 }}
+                        whileHover={{ scale: 1.02, x: 0, transition: { delay: 0 } }}
                         onClick={() => applyVariation(v, i)}
                         className={`w-full text-left p-3 rounded-xl border transition-all group ${
                           selectedVariation === i 
-                            ? 'bg-brand-500/10 border-brand-500/30' 
-                            : 'bg-zinc-950/30 border-white/5 hover:border-white/10'
+                            ? 'bg-brand-500/10 border-brand-500/30 shadow-lg shadow-brand-500/5' 
+                            : 'bg-zinc-950/30 border-white/5 hover:border-white/10 hover:shadow-xl'
                         }`}
                       >
                         <div className="flex justify-between items-start mb-1">
@@ -612,10 +632,10 @@ const TitleGenerator = () => {
                           </div>
                         </div>
                         <h3 className="text-[20px] text-[#1a0dab] hover:underline cursor-pointer font-normal leading-tight font-sans">
-                          {renderTruncatedTitle(title)}
+                          {renderTruncatedTitle(title, false)}
                         </h3>
                         <p className="text-[14px] text-[#4d5156] leading-[1.58] max-w-[600px] mt-1 break-words">
-                          {description || 'Your meta description will appear here. Make it compelling to improve click-through rates from search results.'}
+                          {renderTruncatedDescription(description, false)}
                         </p>
                       </div>
                     </div>
@@ -692,10 +712,10 @@ const TitleGenerator = () => {
                             </div>
                           </div>
                           <h3 className="text-[20px] text-[#1558d6] font-medium leading-[1.3] break-words g-title active:text-[#1a0dab] tracking-tight">
-                            {title || "Your page title will appear here"}
+                            {renderTruncatedTitle(title, true)}
                           </h3>
                           <p className="text-[14px] text-[#4d5156] leading-[1.5] line-clamp-4 break-words g-desc font-sans">
-                            {description || 'Your meta description will appear here. Mobile previews highlight the first 120 characters most clearly.'}
+                            {renderTruncatedDescription(description, true)}
                           </p>
                         </div>
                         
@@ -829,11 +849,13 @@ const TitleGenerator = () => {
 };
 
 const StatusCard = ({ label, value, status, ideal, hint }: any) => (
-    <div className={`p-6 rounded-3xl border transition-all ${
-        status === 'perfect' ? 'bg-emerald-500/5 border-emerald-500/20' :
-        status === 'long' ? 'bg-red-500/5 border-red-500/20' :
-        status === 'empty' ? 'bg-zinc-900/50 border-white/5' :
-        'bg-amber-500/5 border-amber-500/20'
+    <motion.div 
+        whileHover={{ scale: 1.02, y: -2 }}
+        className={`p-6 rounded-3xl border transition-all cursor-default shadow-lg hover:shadow-2xl ${
+        status === 'perfect' ? 'bg-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40 hover:shadow-emerald-500/10' :
+        status === 'long' ? 'bg-red-500/5 border-red-500/20 hover:border-red-500/40 hover:shadow-red-500/10' :
+        status === 'empty' ? 'bg-zinc-900/50 border-white/5 hover:border-white/10' :
+        'bg-amber-500/5 border-amber-500/20 hover:border-amber-500/40 hover:shadow-amber-500/10'
     }`}>
         <div className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">{label}</div>
         <div className="flex items-baseline gap-2">
@@ -853,7 +875,7 @@ const StatusCard = ({ label, value, status, ideal, hint }: any) => (
                 'bg-amber-500 text-white'
             }`}>{hint}</div>
         </div>
-    </div>
+    </motion.div>
 );
 
 export default TitleGenerator;
