@@ -23,6 +23,7 @@ import SpeedChecker from './pages/tools/SpeedChecker';
 import MobileTest from './pages/tools/MobileTest';
 import AdsTxtValidator from './pages/tools/AdsTxtValidator';
 import RenderBlockingAudit from './pages/tools/RenderBlockingAudit';
+import CDNCrawler from './pages/tools/CDNCrawler';
 import Blog from './pages/Blog';
 import BlogPostPage from './pages/BlogPostPage';
 import About from './pages/About';
@@ -158,6 +159,7 @@ const Header = () => {
     if (location.pathname.includes('mobile-test')) return 'Mobile Friendly Test';
     if (location.pathname.includes('ads-txt-validator')) return 'Ads.txt Validator';
     if (location.pathname.includes('render-blocking-audit')) return 'Render Blocking Audit';
+    if (location.pathname.includes('cdn-usage-test')) return 'CDN Usage Test';
     if (location.pathname.includes('blog')) return 'Learning Center';
     return 'SEOScore';
   };
@@ -202,6 +204,7 @@ export default function App() {
               <Route path="/tools/mobile-test" element={<MobileTest />} />
               <Route path="/tools/ads-txt-validator" element={<AdsTxtValidator />} />
               <Route path="/tools/render-blocking-audit" element={<RenderBlockingAudit />} />
+              <Route path="/tools/cdn-usage-test" element={<CDNCrawler />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:id" element={<BlogPostPage />} />
               <Route path="/about" element={<About />} />

@@ -342,6 +342,34 @@ export async function getAdsTxtAudit(domain: string) {
   return JSON.parse(response.text || "{}");
 }
 
+export async function getCDNAudit(url: string) {
+  const prompt = `Analyze CDN usage for the website: "${url}".
+  
+  Provide a JSON object with:
+  "overallScore": number (0-100),
+  "cdnFound": boolean,
+  "detectedCDNs": array of strings (e.g., Cloudflare, Akamai, Fastly),
+  "resourceBreakdown": {
+    "images": { "onCDN": number, "total": number },
+    "scripts": { "onCDN": number, "total": number },
+    "styles": { "onCDN": number, "total": number }
+  },
+  "recommendations": array of { "title": string, "desc": string, "impact": "High" | "Medium" },
+  "unoptimizedResources": array of { "url": string, "type": "Image" | "Script" | "CSS", "size": string }
+  };
+
+  Generate a realistic audit of how many of this domain's resources are served through a CDN.`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+  return JSON.parse(response.text || "{}");
+}
+
 export async function generateTitleSuggestions(title: string) {
   const prompt = `Analyze this SEO meta title: "${title}".
   Provide 3 specific improvements based on:

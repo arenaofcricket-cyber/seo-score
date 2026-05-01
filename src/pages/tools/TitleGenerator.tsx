@@ -288,14 +288,27 @@ const TitleGenerator = () => {
               <div className="flex justify-between items-center px-1">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Meta Title</label>
                 <motion.div 
-                  animate={titleStatus === 'long' ? { scale: [1, 1.1, 1] } : {}}
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded transition-colors ${
-                    titleStatus === 'perfect' ? 'bg-emerald-500/10 text-emerald-500' :
-                    titleStatus === 'long' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' :
-                    'bg-amber-500/10 text-amber-500'
+                  animate={titleStatus === 'long' ? { scale: [1, 1.05, 1] } : {}}
+                  className={`flex items-center gap-2 px-2.5 py-1 rounded-lg transition-all border ${
+                    titleStatus === 'perfect' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                    titleStatus === 'long' ? 'bg-red-500 text-white border-red-600 shadow-lg shadow-red-900/40' :
+                    titleStatus === 'short' && title.length > 0 ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                    'bg-zinc-800/50 text-slate-500 border-white/5'
                   }`}
                 >
-                  {title.length} / 60
+                  <span className="text-[9px] font-black uppercase tracking-[0.1em]">
+                    {titleStatus === 'perfect' ? 'Ideal' : 
+                     titleStatus === 'long' ? 'Too Long' : 
+                     titleStatus === 'short' ? 'Too Short' : 'Empty'}
+                  </span>
+                  <div className={`w-1 h-1 rounded-full ${
+                    titleStatus === 'perfect' ? 'bg-emerald-500 animate-pulse' :
+                    titleStatus === 'long' ? 'bg-white' :
+                    titleStatus === 'short' ? 'bg-amber-500' : 'bg-slate-600'
+                  }`} />
+                  <span className="text-[10px] font-bold tabular-nums">
+                    {title.length} / 60
+                  </span>
                 </motion.div>
               </div>
               
@@ -574,7 +587,8 @@ const TitleGenerator = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="w-full max-w-[600px] bg-white rounded-xl overflow-hidden shadow-2xl border border-slate-200 shrink-0"
+                    whileHover={{ scale: 1.01, y: -5, boxShadow: "0 30px 60px -12px rgba(0,0,0,0.25)" }}
+                    className="w-full max-w-[600px] bg-white rounded-xl overflow-hidden shadow-2xl border border-slate-200 shrink-0 transition-all duration-300"
                   >
                     <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 flex items-center gap-3">
                       <div className="flex gap-1.5">
@@ -612,7 +626,8 @@ const TitleGenerator = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="w-[360px] mx-auto bg-zinc-50 rounded-[3.5rem] overflow-hidden border-[10px] border-zinc-950 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] h-[760px] relative ring-1 ring-white/10 shrink-0 select-none"
+                    whileHover={{ scale: 1.01, y: -5, boxShadow: "0 50px 100px -20px rgba(0,0,0,0.5)" }}
+                    className="w-[360px] mx-auto bg-zinc-50 rounded-[3.5rem] overflow-hidden border-[10px] border-zinc-950 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] h-[760px] relative ring-1 ring-white/10 shrink-0 select-none transition-all duration-300"
                   >
                     {/* Hardware Buttons - More Realistic */}
                     <div className="absolute top-24 -left-[11px] w-[3px] h-10 bg-zinc-800 rounded-r-sm z-30" /> {/* Action Button */}

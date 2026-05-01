@@ -5,7 +5,7 @@ import {
   Activity, Zap, 
   ArrowRight, BookOpen, 
   CheckCircle2, TrendingUp, Globe, Youtube, ShieldCheck, RefreshCw,
-  Gauge, Tag, ShieldAlert, Layers
+  Gauge, Tag, ShieldAlert, Layers, Cloud
 } from 'lucide-react';
 import { BLOG_POSTS } from '../constants';
 
@@ -117,6 +117,13 @@ const Home = () => {
               path: '/tools/render-blocking-audit',
               icon: Layers,
               color: 'text-blue-400'
+            },
+            { 
+              name: 'CDN Usage Test', 
+              desc: 'Verify if your website resources are being served via a global Content Delivery Network.',
+              path: '/tools/cdn-usage-test',
+              icon: Cloud,
+              color: 'text-brand-400'
             },
           ].map((tool, i) => (
             <motion.div
