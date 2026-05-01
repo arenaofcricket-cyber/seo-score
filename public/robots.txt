@@ -1,6 +1,4 @@
-# SEOScore.site Robots.txt
 User-agent: *
 Allow: /
 
-# Sitemap Location
-Sitemap: https://seoscore.site/sitemap.xml
+Sitemap: https://seoscore.online/sitemap.xml
