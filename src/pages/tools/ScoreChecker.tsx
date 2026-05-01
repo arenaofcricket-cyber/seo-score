@@ -14,6 +14,8 @@ const ScoreChecker = () => {
   const [result, setResult] = React.useState<any>(null);
   const [previewDevice, setPreviewDevice] = React.useState<'desktop' | 'mobile'>('desktop');
   const [isGeneratingPdf, setIsGeneratingPdf] = React.useState(false);
+  const [metaTitle, setMetaTitle] = React.useState('');
+  const [metaDescription, setMetaDescription] = React.useState('');
 
   const downloadPDF = async () => {
     if (!result) return;
@@ -426,25 +428,109 @@ const ScoreChecker = () => {
           <p className="text-slate-500 text-sm italic">Analyze your site with our **seo analyzer tool free** of charge.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="input-container max-w-3xl mx-auto mb-8">
-          <Globe className="ml-4 text-slate-500" size={20} />
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://example.com"
-            className="flex-1 bg-transparent border-none outline-none px-4 text-white placeholder:text-slate-600 focus:ring-0"
-            required
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary flex items-center gap-2"
-          >
-            {loading ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
-            {loading ? 'Analyzing...' : 'Analyze Now'}
-          </button>
-        </form>
+        <div className="max-w-3xl mx-auto space-y-6">
+          <form onSubmit={handleSubmit} className="input-container mb-0">
+            <Globe className="ml-4 text-slate-500" size={20} />
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com"
+              className="flex-1 bg-transparent border-none outline-none px-4 text-white placeholder:text-slate-600 focus:ring-0"
+              required
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary flex items-center gap-2"
+            >
+              {loading ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
+              {loading ? 'Analyzing...' : 'Analyze Now'}
+            </button>
+          </form>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Meta Title Field */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-end">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Meta Title (Optional)</label>
+                <span className={`text-[10px] font-bold ${
+                  metaTitle.length === 0 ? 'text-slate-600' :
+                  metaTitle.length < 30 ? 'text-amber-500' :
+                  metaTitle.length <= 60 ? 'text-emerald-500' :
+                  'text-red-500'
+                }`}>
+                  {metaTitle.length} / 60
+                </span>
+              </div>
+              <div className={`relative rounded-xl border transition-all ${
+                metaTitle.length === 0 ? 'bg-zinc-950/50 border-white/5' :
+                metaTitle.length < 30 ? 'bg-amber-500/5 border-amber-500/20' :
+                metaTitle.length <= 60 ? 'bg-emerald-500/5 border-emerald-500/20' :
+                'bg-red-500/5 border-red-500/20'
+              }`}>
+                <input
+                  type="text"
+                  value={metaTitle}
+                  onChange={(e) => setMetaTitle(e.target.value)}
+                  placeholder="Enter custom title to test"
+                  className="w-full bg-transparent border-none outline-none px-4 py-3 text-white text-sm placeholder:text-slate-700 focus:ring-0"
+                />
+              </div>
+              {metaTitle.length > 0 && (
+                <div className="flex items-center gap-1.5 px-1">
+                  {metaTitle.length < 30 ? (
+                    <><AlertTriangle size={10} className="text-amber-500" /><span className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter">Too Short</span></>
+                  ) : metaTitle.length <= 60 ? (
+                    <><CheckCircle2 size={10} className="text-emerald-500" /><span className="text-[9px] font-bold text-emerald-500/80 uppercase tracking-tighter">Ideal Length</span></>
+                  ) : (
+                    <><AlertTriangle size={10} className="text-red-500" /><span className="text-[9px] font-bold text-red-500/80 uppercase tracking-tighter">Too Long</span></>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Meta Description Field */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-end">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Meta Description (Optional)</label>
+                <span className={`text-[10px] font-bold ${
+                  metaDescription.length === 0 ? 'text-slate-600' :
+                  metaDescription.length < 120 ? 'text-amber-500' :
+                  metaDescription.length <= 160 ? 'text-emerald-500' :
+                  'text-red-500'
+                }`}>
+                  {metaDescription.length} / 160
+                </span>
+              </div>
+              <div className={`relative rounded-xl border transition-all ${
+                metaDescription.length === 0 ? 'bg-zinc-950/50 border-white/5' :
+                metaDescription.length < 120 ? 'bg-amber-500/5 border-amber-500/20' :
+                metaDescription.length <= 160 ? 'bg-emerald-500/5 border-emerald-500/20' :
+                'bg-red-500/5 border-red-500/20'
+              }`}>
+                <textarea
+                  value={metaDescription}
+                  onChange={(e) => setMetaDescription(e.target.value)}
+                  placeholder="Enter custom description to test"
+                  rows={1}
+                  className="w-full bg-transparent border-none outline-none px-4 py-3 text-white text-sm placeholder:text-slate-700 focus:ring-0 resize-none"
+                />
+              </div>
+              {metaDescription.length > 0 && (
+                <div className="flex items-center gap-1.5 px-1">
+                  {metaDescription.length < 120 ? (
+                    <><AlertTriangle size={10} className="text-amber-500" /><span className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter">Too Short</span></>
+                  ) : metaDescription.length <= 160 ? (
+                    <><CheckCircle2 size={10} className="text-emerald-500" /><span className="text-[9px] font-bold text-emerald-500/80 uppercase tracking-tighter">Ideal Length</span></>
+                  ) : (
+                    <><AlertTriangle size={10} className="text-red-500" /><span className="text-[9px] font-bold text-red-500/80 uppercase tracking-tighter">Too Long</span></>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
         <AnimatePresence>
           {error && (
