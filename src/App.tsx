@@ -21,6 +21,8 @@ import TitleGenerator from './pages/tools/TitleGenerator';
 import TagGenerator from './pages/tools/TagGenerator';
 import SpeedChecker from './pages/tools/SpeedChecker';
 import MobileTest from './pages/tools/MobileTest';
+import AdsTxtValidator from './pages/tools/AdsTxtValidator';
+import RenderBlockingAudit from './pages/tools/RenderBlockingAudit';
 import Blog from './pages/Blog';
 import BlogPostPage from './pages/BlogPostPage';
 import About from './pages/About';
@@ -28,6 +30,7 @@ import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import Disclaimer from './pages/Disclaimer';
 import ToolsGuide from './pages/ToolsGuide';
+import NotFound from './pages/NotFound';
 
 // Components
 import Footer from './components/Footer';
@@ -153,6 +156,8 @@ const Header = () => {
     if (location.pathname.includes('youtube-tag-generator')) return 'YT Tag Generator';
     if (location.pathname.includes('website-speed-checker')) return 'Speed Checker';
     if (location.pathname.includes('mobile-test')) return 'Mobile Friendly Test';
+    if (location.pathname.includes('ads-txt-validator')) return 'Ads.txt Validator';
+    if (location.pathname.includes('render-blocking-audit')) return 'Render Blocking Audit';
     if (location.pathname.includes('blog')) return 'Learning Center';
     return 'SEOScore';
   };
@@ -195,13 +200,15 @@ export default function App() {
               <Route path="/tools/youtube-tag-generator" element={<TagGenerator />} />
               <Route path="/tools/website-speed-checker" element={<SpeedChecker />} />
               <Route path="/tools/mobile-test" element={<MobileTest />} />
+              <Route path="/tools/ads-txt-validator" element={<AdsTxtValidator />} />
+              <Route path="/tools/render-blocking-audit" element={<RenderBlockingAudit />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:id" element={<BlogPostPage />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/disclaimer" element={<Disclaimer />} />
-              <Route path="*" element={<Home />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           <Footer />

@@ -5,7 +5,7 @@ import {
   Activity, Zap, 
   ArrowRight, BookOpen, 
   CheckCircle2, TrendingUp, Globe, Youtube, ShieldCheck, RefreshCw,
-  Gauge, Tag
+  Gauge, Tag, ShieldAlert, Layers
 } from 'lucide-react';
 import { BLOG_POSTS } from '../constants';
 
@@ -103,6 +103,20 @@ const Home = () => {
               path: '/tools/youtube-tag-generator',
               icon: Youtube,
               color: 'text-red-400'
+            },
+            { 
+              name: 'Ads.txt Validator', 
+              desc: 'Secure your ad revenue by validating your transparency records.',
+              path: '/tools/ads-txt-validator',
+              icon: ShieldAlert,
+              color: 'text-brand-400'
+            },
+            { 
+              name: 'Render Blocking Audit', 
+              desc: 'Eliminate resources that slow down your critical rendering path.',
+              path: '/tools/render-blocking-audit',
+              icon: Layers,
+              color: 'text-blue-400'
             },
           ].map((tool, i) => (
             <motion.div

@@ -289,6 +289,59 @@ export async function getMobileAudit(url: string) {
   return JSON.parse(response.text || "{}");
 }
 
+export async function getRenderBlockingAudit(url: string) {
+  const prompt = `Analyze render-blocking resources for: "${url}".
+  
+  Provide a JSON object with:
+  "overallScore": number (0-100),
+  "criticalChain": array of { "url": string, "type": "CSS" | "JS", "size": string, "impact": "High" | "Medium" },
+  "stats": {
+    "scripts": number,
+    "stylesheets": number,
+    "potentialSavings": string
+  },
+  "recommendations": array of { "title": string, "desc": string, "fix": string, "type": "defer" | "async" | "inline" | "preload" }
+  };
+
+  Generate a realistic technical audit for this domain's loading performance.`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+  return JSON.parse(response.text || "{}");
+}
+export async function getAdsTxtAudit(domain: string) {
+  const prompt = `Perform a technical SEO audit for the ads.txt file of: "${domain}".
+  The user is reporting an "Unexpected Content-Type: text/html" error.
+  
+  Provide a JSON object with:
+  "status": "Valid" | "Invalid" | "Warning",
+  "contentType": "text/html" | "text/plain",
+  "issues": array of { "title": string, "severity": "Critical" | "Warning", "fix": string },
+  "serverFixes": {
+    "apache": string,
+    "nginx": string,
+    "htaccess": string
+  },
+  "contentPreview": string (simulated ads.txt content)
+  };
+
+  Provide exact configuration snippets to fix the Content-Type header issue.`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+  return JSON.parse(response.text || "{}");
+}
+
 export async function generateTitleSuggestions(title: string) {
   const prompt = `Analyze this SEO meta title: "${title}".
   Provide 3 specific improvements based on:
