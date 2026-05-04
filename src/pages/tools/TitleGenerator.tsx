@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Link } from 'react-router-dom';
 import { 
   Globe, 
   Search, 
@@ -19,8 +20,44 @@ import {
   RefreshCw,
   Loader2,
   List,
-  Type
+  Type,
+  XCircle,
+  Activity,
+  ArrowRight
 } from 'lucide-react';
+
+const CircularProgress = ({ current, max, color }: { current: number, max: number, color: string }) => {
+  const percentage = Math.min((current / max) * 100, 100);
+  const radius = 7;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <svg className="w-4 h-4 -rotate-90">
+      <circle
+        cx="8"
+        cy="8"
+        r={radius}
+        fill="transparent"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        className="text-white/5"
+      />
+      <circle
+        cx="8"
+        cy="8"
+        r={radius}
+        fill="transparent"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        className="transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)"
+      />
+    </svg>
+  );
+};
 import { generateTitleVariations, generateTitleSuggestions } from '../../services/geminiService';
 
 const TitleGenerator = () => {
@@ -70,9 +107,9 @@ const TitleGenerator = () => {
     setSelectedVariation(index);
   };
 
-  const TITLE_IDEAL_MIN = 30;
+  const TITLE_IDEAL_MIN = 50;
   const TITLE_IDEAL_MAX = 60;
-  const DESC_IDEAL_MIN = 120;
+  const DESC_IDEAL_MIN = 140;
   const DESC_IDEAL_MAX = 160;
 
   const getDomain = (inputUrl: string) => {
@@ -148,6 +185,16 @@ const TitleGenerator = () => {
   const titleStatus = title.length === 0 ? 'empty' : title.length < TITLE_IDEAL_MIN ? 'short' : title.length <= TITLE_IDEAL_MAX ? 'perfect' : 'long';
   const descStatus = description.length === 0 ? 'empty' : description.length < DESC_IDEAL_MIN ? 'short' : description.length <= DESC_IDEAL_MAX ? 'perfect' : 'long';
 
+  const titleHasKeyword = React.useMemo(() => 
+    keyword.trim() !== '' && title.toLowerCase().includes(keyword.toLowerCase().trim()), 
+    [keyword, title]
+  );
+  
+  const descHasKeyword = React.useMemo(() => 
+    keyword.trim() !== '' && description.toLowerCase().includes(keyword.toLowerCase().trim()), 
+    [keyword, description]
+  );
+
   const copyMetaTags = () => {
     const metaHtml = `<title>${title || 'Your Page Title'}</title>\n<meta name="description" content="${description || 'Your meta description'}">`;
     navigator.clipboard.writeText(metaHtml);
@@ -158,14 +205,27 @@ const TitleGenerator = () => {
   const renderTruncatedTitle = (text: string, isMobile: boolean = false) => {
     const display = text || 'Your page title will appear here';
     const limit = isMobile ? 70 : 60;
+    
+    // Highlight keyword part
+    const highlightKeyword = (input: string) => {
+      if (!keyword) return input;
+      const regex = new RegExp(`(${keyword})`, 'gi');
+      const parts = input.split(regex);
+      return parts.map((part, i) => 
+        part.toLowerCase() === keyword.toLowerCase() 
+          ? <span key={i} className="font-bold">{part}</span> 
+          : part
+      );
+    };
+
     if (display.length > limit) {
       return (
         <span>
-          {display.slice(0, limit - 3)}<span className={isMobile ? "" : "text-amber-600 font-bold"}>...</span>
+          {highlightKeyword(display.slice(0, limit - 3))}<span className={isMobile ? "" : "text-amber-600 font-bold"}>...</span>
         </span>
       );
     }
-    return display;
+    return highlightKeyword(display);
   };
 
   const renderTruncatedDescription = (text: string, isMobile: boolean = false) => {
@@ -176,14 +236,26 @@ const TitleGenerator = () => {
     const display = text || defaultText;
     const limit = isMobile ? 120 : 160;
     
+    // Highlight keyword part
+    const highlightKeyword = (input: string) => {
+      if (!keyword) return input;
+      const regex = new RegExp(`(${keyword})`, 'gi');
+      const parts = input.split(regex);
+      return parts.map((part, i) => 
+        part.toLowerCase() === keyword.toLowerCase() 
+          ? <span key={i} className="font-bold text-[#202124]">{part}</span> 
+          : part
+      );
+    };
+
     if (display.length > limit) {
       return (
         <span>
-          {display.slice(0, limit - 3)}<span className={isMobile ? "" : "text-amber-600 font-bold"}>...</span>
+          {highlightKeyword(display.slice(0, limit - 3))}<span className={isMobile ? "" : "text-amber-600 font-bold"}>...</span>
         </span>
       );
     }
-    return display;
+    return highlightKeyword(display);
   };
 
   return (
@@ -231,10 +303,10 @@ const TitleGenerator = () => {
             animate={{ opacity: 1, x: 0 }}
             className="bg-zinc-900 border border-white/5 rounded-3xl p-6 shadow-xl space-y-6 sticky top-8"
           >
-            {/* AI Generator Input */}
+            {/* AI Snippet Generator Input */}
             <div className="space-y-3 p-4 bg-brand-500/5 border border-brand-500/10 rounded-2xl">
               <label className="text-[10px] font-black uppercase tracking-widest text-brand-400 flex items-center gap-2">
-                <Sparkles size={12} /> AI Title Generator
+                <Sparkles size={12} /> AI Snippet Generator
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -251,10 +323,347 @@ const TitleGenerator = () => {
                 <button
                   onClick={handleGenerate}
                   disabled={isGenerating || !keyword}
-                  className="bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-brand-500/20 active:scale-95"
+                  className="bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-brand-500/20 active:scale-95 flex items-center gap-2"
                 >
-                  {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                  {isGenerating ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span className="font-bold text-xs">Generating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={16} />
+                      <span className="font-bold text-xs uppercase tracking-wider">Generate</span>
+                    </>
+                  )}
                 </button>
+              </div>
+            </div>
+
+            {/* Character Count Analysis & Fields */}
+            <div className="grid grid-cols-1 gap-6">
+              {/* Meta Title Field */}
+              <div className="space-y-2 relative">
+                <div className="flex justify-between items-end px-1">
+                  <div className="flex items-center gap-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Meta Title</label>
+                    {keyword && (
+                      <motion.div
+                        initial={{ opacity: 0, x: -5 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md border ${
+                          titleHasKeyword 
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' 
+                            : 'bg-zinc-800 border-white/5 text-slate-500'
+                        }`}
+                        title={titleHasKeyword ? 'Keyword included' : 'Keyword missing'}
+                      >
+                        {titleHasKeyword ? <Check size={8} /> : <AlertTriangle size={8} />}
+                        <span className="text-[8px] font-black uppercase tracking-tight">Keyword</span>
+                      </motion.div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {title.length > 0 && (
+                      <div className="flex items-center gap-1 mr-1">
+                        <CircularProgress 
+                          current={title.length} 
+                          max={60} 
+                          color={
+                            titleStatus === 'perfect' ? '#10b981' :
+                            titleStatus === 'long' ? '#ef4444' :
+                            '#f59e0b'
+                          }
+                        />
+                      </div>
+                    )}
+                    {title.length > 0 && (
+                      <motion.div 
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className={`p-0.5 rounded-full ${
+                          titleStatus === 'perfect' ? 'bg-emerald-500/20 text-emerald-500' :
+                          titleStatus === 'long' ? 'bg-red-500/20 text-red-500' :
+                          'bg-amber-500/20 text-amber-500'
+                        }`}
+                      >
+                        {titleStatus === 'perfect' ? <Check size={8} /> : 
+                         titleStatus === 'long' ? <AlertTriangle size={8} /> : 
+                         <AlertTriangle size={8} />}
+                      </motion.div>
+                    )}
+                    <span className={`text-[10px] font-bold tabular-nums ${
+                      title.length === 0 ? 'text-slate-600' :
+                      title.length < TITLE_IDEAL_MIN ? 'text-amber-500' :
+                      title.length <= TITLE_IDEAL_MAX ? 'text-emerald-500' :
+                      'text-red-500'
+                    }`}>
+                      {title.length} / {TITLE_IDEAL_MIN}-{TITLE_IDEAL_MAX}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className={`relative rounded-xl border transition-all ${
+                  title.length === 0 ? 'bg-zinc-950/50 border-white/5' :
+                  title.length < TITLE_IDEAL_MIN ? 'bg-amber-500/5 border-amber-500/20 shadow-[0_0_15px_-5px_rgba(245,158,11,0.1)]' :
+                  title.length <= TITLE_IDEAL_MAX ? 'bg-emerald-500/5 border-emerald-500/20 shadow-[0_0_15px_-5px_rgba(16,185,129,0.1)]' :
+                  'bg-red-500/5 border-red-500/20 shadow-[0_0_15px_-5px_rgba(239,68,68,0.1)]'
+                }`}>
+                  <input
+                    type="text"
+                    value={title}
+                    onFocus={() => setShowTitleTips(true)}
+                    onBlur={() => setShowTitleTips(false)}
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                      if (e.target.value.length === 0) setSuggestions([]);
+                    }}
+                    placeholder="Enter meta title..."
+                    className="w-full bg-transparent border-none outline-none px-4 py-3 text-white text-sm placeholder:text-slate-700 focus:ring-0"
+                  />
+                  {/* Progress bar inside footer of input */}
+                  <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-white/5 overflow-hidden rounded-b-xl">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min((title.length / 60) * 100, 100)}%` }}
+                      className={`h-full ${
+                        titleStatus === 'perfect' ? 'bg-emerald-500' :
+                        titleStatus === 'long' ? 'bg-red-500' :
+                        'bg-amber-500'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {title.length > 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 pt-1"
+                  >
+                    {title.length < TITLE_IDEAL_MIN ? (
+                      <div className="flex items-center gap-1"><AlertTriangle size={10} className="text-amber-500" /><span className="text-[9px] font-bold text-amber-500 uppercase tracking-tighter">Needs More Detail (Aim for 50-60)</span></div>
+                    ) : title.length <= TITLE_IDEAL_MAX ? (
+                      <motion.div 
+                        initial={{ scale: 0.9 }}
+                        animate={{ scale: [0.9, 1.1, 1] }}
+                        className="flex items-center gap-1"
+                      >
+                        <CheckCircle2 size={10} className="text-emerald-500" /><span className="text-[9px] font-extrabold text-emerald-500 uppercase tracking-tighter">Perfect Length!</span>
+                      </motion.div>
+                    ) : (
+                      <div className="flex items-center gap-1"><AlertTriangle size={10} className="text-red-500" /><span className="text-[9px] font-bold text-red-500 uppercase tracking-tighter">Over Limit (Likely truncated)</span></div>
+                    )}
+
+                    {keyword && (
+                      <div className={`flex items-center gap-1 ${titleHasKeyword ? 'text-emerald-500' : 'text-slate-500'}`}>
+                        {titleHasKeyword ? <Check size={10} /> : <AlertTriangle size={10} />}
+                        <span className="text-[9px] font-bold uppercase tracking-tighter">
+                          {titleHasKeyword ? 'Keyword Included' : 'Keyword Missing'}
+                        </span>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+                
+                {/* Tips Tooltip Logic */}
+                <AnimatePresence>
+                  {showTitleTips && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 5 }}
+                      className="absolute z-50 bottom-full left-0 right-0 mb-3 bg-zinc-800 border border-white/10 rounded-2xl p-4 shadow-2xl"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                          <Sparkles size={16} />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-white">Title Tips</p>
+                          <ul className="text-[10px] text-slate-400 space-y-1">
+                            <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Use primary keyword at start</li>
+                            <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Keep it under pixel limit (max 60 chars)</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* AI Suggestions Button */}
+                {title.length > 5 && (
+                  <button
+                    onClick={getSuggestions}
+                    disabled={isAnalyzing}
+                    className="mt-2 w-full py-2 rounded-xl border border-brand-500/20 bg-brand-500/5 text-brand-400 font-bold text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-brand-500/10 transition-all disabled:opacity-50"
+                  >
+                    {isAnalyzing ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
+                    {isAnalyzing ? 'Analyzing...' : 'Get SEO Tips'}
+                  </button>
+                )}
+                
+                <AnimatePresence>
+                  {suggestions.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="p-3 bg-brand-500/5 border border-brand-500/10 rounded-xl space-y-1.5 mt-2"
+                    >
+                      {suggestions.map((s, i) => (
+                        <div key={i} className="flex gap-2 text-[10px] text-slate-300 leading-tight">
+                          <span className="text-brand-500">•</span> {s}
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Meta Description Field */}
+              <div className="space-y-2 relative">
+                <div className="flex justify-between items-end px-1">
+                  <div className="flex items-center gap-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Meta Description</label>
+                    {keyword && (
+                      <motion.div
+                        initial={{ opacity: 0, x: -5 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md border ${
+                          descHasKeyword 
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' 
+                            : 'bg-zinc-800 border-white/5 text-slate-500'
+                        }`}
+                        title={descHasKeyword ? 'Keyword included' : 'Keyword missing'}
+                      >
+                        {descHasKeyword ? <Check size={8} /> : <AlertTriangle size={8} />}
+                        <span className="text-[8px] font-black uppercase tracking-tight">Keyword</span>
+                      </motion.div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {description.length > 0 && (
+                      <div className="flex items-center gap-1 mr-1">
+                        <CircularProgress 
+                          current={description.length} 
+                          max={160} 
+                          color={
+                            descStatus === 'perfect' ? '#10b981' :
+                            descStatus === 'long' ? '#ef4444' :
+                            '#f59e0b'
+                          }
+                        />
+                      </div>
+                    )}
+                    {description.length > 0 && (
+                      <motion.div 
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className={`p-0.5 rounded-full ${
+                          descStatus === 'perfect' ? 'bg-emerald-500/20 text-emerald-500' :
+                          descStatus === 'long' ? 'bg-red-500/20 text-red-500' :
+                          'bg-amber-500/20 text-amber-500'
+                        }`}
+                      >
+                        {descStatus === 'perfect' ? <Check size={8} /> : 
+                         descStatus === 'long' ? <AlertTriangle size={8} /> : 
+                         <AlertTriangle size={8} />}
+                      </motion.div>
+                    )}
+                    <span className={`text-[10px] font-bold tabular-nums ${
+                      description.length === 0 ? 'text-slate-600' :
+                      description.length < DESC_IDEAL_MIN ? 'text-amber-500' :
+                      description.length <= DESC_IDEAL_MAX ? 'text-emerald-500' :
+                      'text-red-500'
+                    }`}>
+                      {description.length} / {DESC_IDEAL_MIN}-{DESC_IDEAL_MAX}
+                    </span>
+                  </div>
+                </div>
+
+                <div className={`relative rounded-xl border transition-all ${
+                  description.length === 0 ? 'bg-zinc-950/50 border-white/5' :
+                  description.length < DESC_IDEAL_MIN ? 'bg-amber-500/5 border-amber-500/20 shadow-[0_0_15px_-5px_rgba(245,158,11,0.1)]' :
+                  description.length <= DESC_IDEAL_MAX ? 'bg-emerald-500/5 border-emerald-500/20 shadow-[0_0_15px_-5px_rgba(16,185,129,0.1)]' :
+                  'bg-red-500/5 border-red-500/20 shadow-[0_0_15px_-5px_rgba(239,68,68,0.1)]'
+                }`}>
+                  <textarea
+                    value={description}
+                    onFocus={() => setShowDescTips(true)}
+                    onBlur={() => setShowDescTips(false)}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter meta description..."
+                    rows={3}
+                    className="w-full bg-transparent border-none outline-none px-4 py-3 text-white text-sm placeholder:text-slate-700 focus:ring-0 resize-none leading-relaxed"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-white/5 overflow-hidden rounded-b-xl">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min((description.length / 160) * 100, 100)}%` }}
+                      className={`h-full ${
+                        descStatus === 'perfect' ? 'bg-emerald-500' :
+                        descStatus === 'long' ? 'bg-red-500' :
+                        'bg-amber-500'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {description.length > 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 pt-1"
+                  >
+                    {description.length < DESC_IDEAL_MIN ? (
+                      <div className="flex items-center gap-1"><AlertTriangle size={10} className="text-amber-500" /><span className="text-[9px] font-bold text-amber-500 uppercase tracking-tighter">Brief Content (Aim for 140-160)</span></div>
+                    ) : description.length <= DESC_IDEAL_MAX ? (
+                      <motion.div 
+                        initial={{ scale: 0.9 }}
+                        animate={{ scale: [0.9, 1.1, 1] }}
+                        className="flex items-center gap-1"
+                      >
+                        <CheckCircle2 size={10} className="text-emerald-500" /><span className="text-[9px] font-extrabold text-emerald-500 uppercase tracking-tighter">Ideal for SERP!</span>
+                      </motion.div>
+                    ) : (
+                      <div className="flex items-center gap-1"><AlertTriangle size={10} className="text-red-500" /><span className="text-[9px] font-bold text-red-500 uppercase tracking-tighter">Too Long (Will be cut off)</span></div>
+                    )}
+
+                    {keyword && (
+                      <div className={`flex items-center gap-1 ${descHasKeyword ? 'text-emerald-500' : 'text-slate-500'}`}>
+                        {descHasKeyword ? <Check size={10} /> : <AlertTriangle size={10} />}
+                        <span className="text-[9px] font-bold uppercase tracking-tighter">
+                          {descHasKeyword ? 'Keyword Included' : 'Keyword Missing'}
+                        </span>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                <AnimatePresence>
+                  {showDescTips && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 5 }}
+                      className="absolute z-50 bottom-full left-0 right-0 mb-3 bg-zinc-800 border border-white/10 rounded-2xl p-4 shadow-2xl"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
+                          <Sparkles size={16} />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-white">Description Tips</p>
+                          <ul className="text-[10px] text-slate-400 space-y-1">
+                            <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Include a Call to Action</li>
+                            <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Use keywords naturally</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
@@ -271,7 +680,7 @@ const TitleGenerator = () => {
                       className="text-[10px] text-red-500 font-bold bg-red-500/10 px-2 py-0.5 rounded flex items-center gap-1"
                     >
                       <AlertTriangle size={10} />
-                      {urlError}
+                      Invalid URL
                     </motion.span>
                   ) : url.length > 0 && (
                     <motion.span 
@@ -282,228 +691,55 @@ const TitleGenerator = () => {
                       className="text-[10px] text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded flex items-center gap-1"
                     >
                       <CheckCircle2 size={10} />
-                      Valid URL
+                      Verified Format
                     </motion.span>
                   )}
                 </AnimatePresence>
               </div>
-              <input
-                type="text"
-                value={url}
-                onChange={(e) => {
-                  setUrl(e.target.value);
-                  validateUrl(e.target.value);
-                }}
-                placeholder="https://yoursite.com/your-page"
-                className={`w-full bg-zinc-950/50 px-4 py-3 rounded-xl border outline-none transition-all text-white placeholder:text-slate-700 text-sm ${
-                  urlError ? 'border-red-500/50 focus:border-red-500' : 
-                  url.length > 0 ? 'border-emerald-500/30 focus:border-emerald-500/50' :
-                  'border-white/10 focus:border-blue-500/50'
-                }`}
-              />
-            </div>
-
-            <div className="space-y-2 relative">
-              <div className="flex justify-between items-center px-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Meta Title</label>
-                <motion.div 
-                  animate={titleStatus === 'long' ? { scale: [1, 1.05, 1] } : {}}
-                  className={`flex items-center gap-2 px-2.5 py-1 rounded-lg transition-all border ${
-                    titleStatus === 'perfect' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                    titleStatus === 'long' ? 'bg-red-500 text-white border-red-600 shadow-lg shadow-red-900/40' :
-                    titleStatus === 'short' && title.length > 0 ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                    'bg-zinc-800/50 text-slate-500 border-white/5'
-                  }`}
-                >
-                  <span className="text-[9px] font-black uppercase tracking-[0.1em]">
-                    {titleStatus === 'perfect' ? 'Ideal' : 
-                     titleStatus === 'long' ? 'Too Long' : 
-                     titleStatus === 'short' ? 'Too Short' : 'Empty'}
-                  </span>
-                  <div className={`w-1 h-1 rounded-full ${
-                    titleStatus === 'perfect' ? 'bg-emerald-500 animate-pulse' :
-                    titleStatus === 'long' ? 'bg-white' :
-                    titleStatus === 'short' ? 'bg-amber-500' : 'bg-slate-600'
-                  }`} />
-                  <span className="text-[10px] font-bold tabular-nums">
-                    {title.length} / 60
-                  </span>
-                </motion.div>
-              </div>
-              
-              <AnimatePresence>
-                {showTitleTips && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute z-20 bottom-full left-0 right-0 mb-3 bg-zinc-800 border border-white/10 rounded-2xl p-4 shadow-2xl pointer-events-none"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
-                        <Sparkles size={16} />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs font-bold text-white">Title Best Practices</p>
-                        <ul className="text-[10px] text-slate-400 space-y-1 leading-relaxed">
-                          <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Keep it between 50–60 characters</li>
-                          <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Place primary keyword near the beginning</li>
-                          <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Include your brand name if possible</li>
-                        </ul>
-                      </div>
-                    </div>
-                    <div className="absolute -bottom-1 left-6 w-2 h-2 bg-zinc-800 border-r border-b border-white/10 rotate-45" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <input
-                type="text"
-                value={title}
-                onFocus={() => setShowTitleTips(true)}
-                onBlur={() => setShowTitleTips(false)}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                  if (e.target.value.length === 0) setSuggestions([]);
-                }}
-                placeholder="Enter your page title here..."
-                maxLength={100}
-                className={`w-full bg-zinc-950/50 px-4 py-3 rounded-xl border outline-none transition-all text-white placeholder:text-slate-700 text-sm ${
-                  titleStatus === 'perfect' ? 'border-emerald-500/30 focus:border-emerald-500/50' :
-                  titleStatus === 'long' ? 'border-red-500/30 focus:border-red-500/50' :
-                  titleStatus === 'short' && title.length > 0 ? 'border-amber-500/30 focus:border-amber-500/50' :
-                  'border-white/10 focus:border-blue-500/50'
-                }`}
-              />
-              <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min((title.length / 60) * 100, 100)}%` }}
-                  className={`h-full ${
-                    titleStatus === 'perfect' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
-                    titleStatus === 'long' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' :
-                    'bg-amber-500'
+              <div className="relative">
+                <input
+                  type="text"
+                  value={url}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                    validateUrl(e.target.value);
+                  }}
+                  placeholder="https://yoursite.com/your-page"
+                  className={`w-full bg-zinc-950/50 pl-4 pr-10 py-3 rounded-xl border outline-none transition-all text-white placeholder:text-slate-700 text-sm ${
+                    urlError ? 'border-red-500/50 focus:border-red-500' : 
+                    url.length > 0 ? 'border-emerald-500/30 focus:border-emerald-500/50' :
+                    'border-white/10 focus:border-blue-500/50'
                   }`}
                 />
-              </div>
-
-              {/* Smart Suggestions */}
-              {title.length > 5 && (
-                <div className="mt-3">
-                  <button
-                    onClick={getSuggestions}
-                    disabled={isAnalyzing}
-                    className="w-full py-2.5 rounded-xl border border-brand-500/20 bg-brand-500/5 text-brand-400 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-brand-500/10 transition-all disabled:opacity-50 shadow-sm"
-                  >
-                    {isAnalyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                    {isAnalyzing ? 'Analyzing Title...' : 'Get SEO Tips for Title'}
-                  </button>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <AnimatePresence mode="wait">
+                    {urlError ? (
+                      <motion.div
+                        key="err-icon"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                      >
+                        <XCircle size={16} className="text-red-500" />
+                      </motion.div>
+                    ) : url.length > 0 ? (
+                      <motion.div
+                        key="success-icon"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                      >
+                        <CheckCircle2 size={16} className="text-emerald-500" />
+                      </motion.div>
+                    ) : (
+                      <Globe size={16} className="text-slate-700" />
+                    )}
+                  </AnimatePresence>
                 </div>
-              )}
-
-              <AnimatePresence>
-                {suggestions.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="p-3 bg-brand-500/5 border border-brand-500/10 rounded-xl space-y-2 mt-2"
-                  >
-                    <p className="text-[8px] font-black uppercase tracking-widest text-brand-400">SEO Improvements</p>
-                    <div className="space-y-1.5">
-                      {suggestions.map((s, i) => (
-                        <div key={i} className="flex gap-2 text-[10px] text-slate-300 leading-tight">
-                          <span className="text-brand-500 font-bold">•</span>
-                          {s}
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <div className="space-y-2 relative">
-              <div className="flex justify-between items-center px-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Meta Description</label>
-                <motion.div 
-                  animate={descStatus === 'long' ? { scale: [1, 1.05, 1] } : {}}
-                  className={`flex items-center gap-2 px-2.5 py-1 rounded-lg transition-all border ${
-                    descStatus === 'perfect' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                    descStatus === 'long' ? 'bg-red-500 text-white border-red-600 shadow-lg shadow-red-900/40' :
-                    descStatus === 'short' && description.length > 0 ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                    'bg-zinc-800/50 text-slate-500 border-white/5'
-                  }`}
-                >
-                  <span className="text-[9px] font-black uppercase tracking-[0.1em]">
-                    {descStatus === 'perfect' ? 'Ideal Length' : 
-                     descStatus === 'long' ? 'Too Long' : 
-                     descStatus === 'short' ? 'Too Short' : 'Empty'}
-                  </span>
-                  <div className={`w-1 h-1 rounded-full ${
-                    descStatus === 'perfect' ? 'bg-emerald-500 animate-pulse' :
-                    descStatus === 'long' ? 'bg-white' :
-                    descStatus === 'short' ? 'bg-amber-500' : 'bg-slate-600'
-                  }`} />
-                  <span className="text-[10px] font-bold tabular-nums">
-                    {description.length} / 160
-                  </span>
-                </motion.div>
-              </div>
-
-              <AnimatePresence>
-                {showDescTips && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute z-20 bottom-full left-0 right-0 mb-3 bg-zinc-800 border border-white/10 rounded-2xl p-4 shadow-2xl pointer-events-none"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
-                        <Sparkles size={16} />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs font-bold text-white">Description Best Practices</p>
-                        <ul className="text-[10px] text-slate-400 space-y-1 leading-relaxed">
-                          <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Aim for 150–160 characters</li>
-                          <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Use a clear call-to-action (CTA)</li>
-                          <li className="flex items-center gap-1.5"><CheckCircle2 size={10} className="text-emerald-500" /> Include relevant secondary keywords</li>
-                        </ul>
-                      </div>
-                    </div>
-                    <div className="absolute -bottom-1 left-6 w-2 h-2 bg-zinc-800 border-r border-b border-white/10 rotate-45" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <textarea
-                value={description}
-                onFocus={() => setShowDescTips(true)}
-                onBlur={() => setShowDescTips(false)}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe what this page is about in 150–160 characters..."
-                rows={4}
-                maxLength={300}
-                className={`w-full bg-zinc-950/50 px-4 py-3 rounded-xl border outline-none transition-all text-white placeholder:text-slate-700 text-sm resize-none leading-relaxed ${
-                  descStatus === 'perfect' ? 'border-emerald-500/30 focus:border-emerald-500/50' :
-                  descStatus === 'long' ? 'border-red-500/30 focus:border-red-500/50' :
-                  descStatus === 'short' && description.length > 0 ? 'border-amber-500/30 focus:border-amber-500/50' :
-                  'border-white/10 focus:border-blue-500/50'
-                }`}
-              />
-              <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min((description.length / 160) * 100, 100)}%` }}
-                  className={`h-full ${
-                    descStatus === 'perfect' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
-                    descStatus === 'long' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' :
-                    'bg-amber-500'
-                  }`}
-                />
               </div>
             </div>
+
+
 
             {/* AI Variations List */}
             <AnimatePresence>
@@ -580,7 +816,15 @@ const TitleGenerator = () => {
         <div className="xl:col-span-7 space-y-8 order-1 xl:order-2">
           <div className="bg-zinc-900 border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
             <div className="bg-zinc-950 px-6 py-4 border-b border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 italic">Google Snippet Preview</span>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                  </span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Live Snippet Preview</span>
+                </div>
+              </div>
               <div className="flex bg-zinc-900 p-1 rounded-2xl gap-1 shadow-inner border border-white/5">
                 <button 
                   onClick={() => setDevice('desktop')}
@@ -841,6 +1085,56 @@ const TitleGenerator = () => {
                     {f.a}
                 </p>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Related Tools */}
+      <section className="space-y-8 pt-12 border-t border-white/5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+            <Search className="text-blue-500" />
+            Related SEO Tools
+          </h2>
+          <p className="text-slate-500 text-xs">Explore more professional tools to boost your search rankings</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            { name: 'SEO Score Checker', path: '/tools/seo-score-checker', icon: Activity, desc: 'Analyze your overall SEO performance and health score.' },
+            { name: 'Keyword Density', path: '/tools/keyword-density', icon: Hash, desc: 'Check keyword frequency and optimization on any page.' },
+            { name: 'SERP Preview Tool', path: '/tools/serp-preview', icon: Search, desc: 'Visualize how your meta tags appear in Google results.' },
+          ].map((tool, i) => (
+            <Link 
+              key={i}
+              to={tool.path}
+              className={`group p-6 rounded-[2rem] border transition-all flex flex-col gap-4 text-left shadow-lg ${
+                tool.path === '/tools/serp-preview' 
+                  ? 'bg-blue-500/10 border-blue-500/20 shadow-blue-500/5' 
+                  : 'bg-zinc-900 border-white/5 hover:border-blue-500/20 hover:bg-zinc-800/50 hover:shadow-blue-500/5'
+              }`}
+            >
+              <div className="flex justify-between items-start">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
+                  tool.path === '/tools/serp-preview'
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : 'bg-zinc-950 border border-white/5 text-slate-500 group-hover:text-blue-400 group-hover:scale-110'
+                }`}>
+                  <tool.icon size={20} />
+                </div>
+                {tool.path === '/tools/serp-preview' && (
+                  <span className="text-[8px] font-black uppercase tracking-widest text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full border border-blue-400/20">Current Tool</span>
+                )}
+              </div>
+              <div className="space-y-1">
+                <h4 className={`font-bold text-sm flex items-center justify-between ${tool.path === '/tools/serp-preview' ? 'text-blue-400' : 'text-white group-hover:text-blue-400'} transition-all`}>
+                  {tool.name}
+                  <ArrowRight size={14} className={`transition-all ${tool.path === '/tools/serp-preview' ? 'opacity-100' : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'}`} />
+                </h4>
+                <p className="text-slate-500 text-[11px] leading-relaxed line-clamp-2">
+                  {tool.desc}
+                </p>
+              </div>
+            </Link>
           ))}
         </div>
       </section>

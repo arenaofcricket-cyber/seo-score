@@ -23,9 +23,12 @@ const CDNCrawler = () => {
     "Finalizing performance report..."
   ];
 
-  const handleAudit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!url) return;
+  const handleAudit = async (e?: React.FormEvent, directUrl?: string) => {
+    if (e) e.preventDefault();
+    const targetUrl = directUrl || url;
+    if (!targetUrl) return;
+
+    if (directUrl) setUrl(directUrl);
 
     setLoading(true);
     setResult(null);
@@ -37,7 +40,7 @@ const CDNCrawler = () => {
     }, 700);
 
     try {
-      const data = await getCDNAudit(url);
+      const data = await getCDNAudit(targetUrl);
       setLoadingStep(loadingSteps.length - 1);
       await new Promise(r => setTimeout(r, 500));
       setResult(data);
@@ -47,6 +50,11 @@ const CDNCrawler = () => {
       clearInterval(stepInterval);
       setLoading(false);
     }
+  };
+
+  const tryExample = () => {
+    const exampleUrl = "https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js";
+    handleAudit(undefined, exampleUrl);
   };
 
   const getProgressColor = (score: number) => {
@@ -78,7 +86,9 @@ const CDNCrawler = () => {
                 <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Latency Reduction</p>
                 <div className="flex items-center gap-2 justify-end">
                    <Activity size={18} className="text-brand-500" />
-                   <span className="text-2xl font-black text-white italic">~120ms faster</span>
+                   <span className="text-2xl font-black text-white italic">
+                     {result?.performanceImpact?.estimatedLatencySaved ? `~${result.performanceImpact.estimatedLatencySaved} faster` : '~120ms faster'}
+                   </span>
                 </div>
              </div>
           </div>
@@ -90,7 +100,7 @@ const CDNCrawler = () => {
             onSubmit={handleAudit}
             className="group relative bg-zinc-900 border border-white/5 rounded-[2rem] p-3 md:p-4 flex flex-col md:flex-row gap-4 focus-within:border-brand-500/50 transition-all shadow-2xl"
           >
-            <div className="flex-grow flex items-center bg-zinc-950/50 rounded-2xl px-6">
+            <div className="flex-grow flex items-center bg-zinc-950/50 rounded-2xl px-6 relative">
               <Globe className="text-slate-600 group-focus-within:text-brand-500 transition-colors" size={20} />
               <input 
                 type="text" 
@@ -99,6 +109,15 @@ const CDNCrawler = () => {
                 placeholder="yoursite.com"
                 className="w-full bg-transparent border-none py-5 px-4 text-white font-medium outline-none placeholder:text-slate-700"
               />
+              {!url && !loading && (
+                <button
+                  type="button"
+                  onClick={tryExample}
+                  className="absolute right-4 px-3 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-500 hover:border-brand-500/50 transition-all active:scale-95"
+                >
+                  Detect CDN
+                </button>
+              )}
             </div>
             <button 
               disabled={loading || !url}
@@ -184,6 +203,39 @@ const CDNCrawler = () => {
                 </div>
               </div>
 
+              {/* Performance Impact Metrics */}
+              {result.performanceImpact && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-6 bg-zinc-900/50 border border-white/5 rounded-3xl flex items-center justify-between group hover:border-brand-500/20 transition-all">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Latency Saved</p>
+                      <p className="text-2xl font-black text-white italic tracking-tighter">{result.performanceImpact.estimatedLatencySaved}</p>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center text-brand-500">
+                      <Zap size={18} />
+                    </div>
+                  </div>
+                  <div className="p-6 bg-zinc-900/50 border border-white/5 rounded-3xl flex items-center justify-between group hover:border-brand-500/20 transition-all">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Bandwidth Saved</p>
+                      <p className="text-2xl font-black text-white italic tracking-tighter">{result.performanceImpact.bandwidthSaved}</p>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                      <BarChart3 size={18} />
+                    </div>
+                  </div>
+                  <div className="p-6 bg-zinc-900/50 border border-white/5 rounded-3xl flex items-center justify-between group hover:border-brand-500/20 transition-all">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">TTI Improvement</p>
+                      <p className="text-2xl font-black text-white italic tracking-tighter">{result.performanceImpact.ttiImprovement}</p>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                      <Cpu size={18} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Recommendations & Unoptimized */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-12 space-y-6">
@@ -213,9 +265,10 @@ const CDNCrawler = () => {
                       <table className="w-full border-collapse">
                          <thead>
                             <tr className="bg-white/5 border-b border-white/5">
-                               <th className="px-8 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-500">Resource</th>
+                                <th className="px-8 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-500">Resource</th>
                                <th className="px-8 py-5 text-center text-[10px] font-black uppercase tracking-widest text-slate-500">Type</th>
                                <th className="px-8 py-5 text-right text-[10px] font-black uppercase tracking-widest text-slate-500">Est. Size</th>
+                               <th className="px-8 py-5 text-left text-[10px] font-black uppercase tracking-widest text-slate-500">Optimization</th>
                             </tr>
                          </thead>
                          <tbody className="divide-y divide-white/5">
@@ -226,7 +279,7 @@ const CDNCrawler = () => {
                                        {res.type === 'Image' ? <ImageIcon size={16} className="text-blue-500" /> : 
                                         res.type === 'Script' ? <FileCode size={16} className="text-amber-500" /> : 
                                         <Server size={16} className="text-slate-500" />}
-                                       <span className="text-[12px] font-mono text-slate-300 truncate max-w-sm group-hover:text-brand-400 transition-colors">{res.url}</span>
+                                       <span className="text-[12px] font-mono text-slate-300 truncate max-w-xs md:max-w-sm group-hover:text-brand-400 transition-colors">{res.url}</span>
                                     </div>
                                  </td>
                                  <td className="px-8 py-5 text-center">
@@ -236,6 +289,12 @@ const CDNCrawler = () => {
                                  </td>
                                  <td className="px-8 py-5 text-right font-mono text-xs text-slate-500">
                                     {res.size}
+                                 </td>
+                                 <td className="px-8 py-5">
+                                    <div className="flex items-center gap-2">
+                                       <ArrowRight size={12} className="text-brand-500" />
+                                       <span className="text-[10px] font-bold text-slate-400 italic">{res.suggestion}</span>
+                                    </div>
                                  </td>
                               </tr>
                             ))}

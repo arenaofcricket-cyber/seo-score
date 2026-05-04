@@ -39,8 +39,8 @@ const Blog = () => {
     });
   }, [selectedCategory, searchQuery]);
 
-  const categories = ['SEO Basics', 'Technical SEO', 'YouTube Growth', 'Content Strategy'];
-  const tags = ['Backlinks', 'Speed', 'Keywords', 'Google', 'Algorithm', 'Analytics'];
+  const categories = ['SEO Basics', 'Technical SEO', 'YouTube Growth', 'Content Strategy', 'SEO Strategy', 'SEO for Beginners', 'Advanced SEO'];
+  const tags = ['Backlinks', 'Speed', 'Keywords', 'Google', 'Algorithm', 'Analytics', 'AI SEO', 'ChatGPT', 'Perplexity', 'GEO', 'AEO'];
 
   const filteredPosts = useMemo(() => {
     return BLOG_POSTS.filter(post => {

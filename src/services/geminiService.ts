@@ -349,16 +349,21 @@ export async function getCDNAudit(url: string) {
   "overallScore": number (0-100),
   "cdnFound": boolean,
   "detectedCDNs": array of strings (e.g., Cloudflare, Akamai, Fastly),
+  "performanceImpact": {
+    "estimatedLatencySaved": string (e.g., "145ms"),
+    "bandwidthSaved": string (e.g., "1.2GB/mo"),
+    "ttiImprovement": string (e.g., "0.8s")
+  },
   "resourceBreakdown": {
     "images": { "onCDN": number, "total": number },
     "scripts": { "onCDN": number, "total": number },
     "styles": { "onCDN": number, "total": number }
   },
   "recommendations": array of { "title": string, "desc": string, "impact": "High" | "Medium" },
-  "unoptimizedResources": array of { "url": string, "type": "Image" | "Script" | "CSS", "size": string }
+  "unoptimizedResources": array of { "url": string, "type": "Image" | "Script" | "CSS", "size": string, "suggestion": string }
   };
 
-  Generate a realistic audit of how many of this domain's resources are served through a CDN.`;
+  Generate a realistic audit of how many of this domain's resources are served through a CDN and specifically analyze the performance impact (latency, bandwidth, and TTI) for this specific domain.`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
