@@ -456,16 +456,16 @@ const ScoreChecker = () => {
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Meta Title (Optional)</label>
                 <span className={`text-[10px] font-bold ${
                   metaTitle.length === 0 ? 'text-slate-600' :
-                  metaTitle.length < 30 ? 'text-amber-500' :
+                  metaTitle.length < 50 ? 'text-amber-500' :
                   metaTitle.length <= 60 ? 'text-emerald-500' :
                   'text-red-500'
                 }`}>
-                  {metaTitle.length} / 60
+                  {metaTitle.length} / 50-60
                 </span>
               </div>
               <div className={`relative rounded-xl border transition-all ${
                 metaTitle.length === 0 ? 'bg-zinc-950/50 border-white/5' :
-                metaTitle.length < 30 ? 'bg-amber-500/5 border-amber-500/20' :
+                metaTitle.length < 50 ? 'bg-amber-500/5 border-amber-500/20' :
                 metaTitle.length <= 60 ? 'bg-emerald-500/5 border-emerald-500/20' :
                 'bg-red-500/5 border-red-500/20'
               }`}>
@@ -479,7 +479,7 @@ const ScoreChecker = () => {
               </div>
               {metaTitle.length > 0 && (
                 <div className="flex items-center gap-1.5 px-1">
-                  {metaTitle.length < 30 ? (
+                  {metaTitle.length < 50 ? (
                     <><AlertTriangle size={10} className="text-amber-500" /><span className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter">Too Short</span></>
                   ) : metaTitle.length <= 60 ? (
                     <><CheckCircle2 size={10} className="text-emerald-500" /><span className="text-[9px] font-bold text-emerald-500/80 uppercase tracking-tighter">Ideal Length</span></>
@@ -496,30 +496,30 @@ const ScoreChecker = () => {
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Meta Description (Optional)</label>
                 <span className={`text-[10px] font-bold ${
                   metaDescription.length === 0 ? 'text-slate-600' :
-                  metaDescription.length < 120 ? 'text-amber-500' :
+                  metaDescription.length < 140 ? 'text-amber-500' :
                   metaDescription.length <= 160 ? 'text-emerald-500' :
                   'text-red-500'
                 }`}>
-                  {metaDescription.length} / 160
+                  {metaDescription.length} / 140-160
                 </span>
               </div>
               <div className={`relative rounded-xl border transition-all ${
                 metaDescription.length === 0 ? 'bg-zinc-950/50 border-white/5' :
-                metaDescription.length < 120 ? 'bg-amber-500/5 border-amber-500/20' :
+                metaDescription.length < 140 ? 'bg-amber-500/5 border-amber-500/20' :
                 metaDescription.length <= 160 ? 'bg-emerald-500/5 border-emerald-500/20' :
                 'bg-red-500/5 border-red-500/20'
               }`}>
                 <textarea
                   value={metaDescription}
                   onChange={(e) => setMetaDescription(e.target.value)}
-                  placeholder="Enter custom description to test"
-                  rows={1}
+                  placeholder="Use our free SEO Score Checker to analyze your website performance and get actionable insights. Improve your search engine rankings today by testing now!"
+                  rows={2}
                   className="w-full bg-transparent border-none outline-none px-4 py-3 text-white text-sm placeholder:text-slate-700 focus:ring-0 resize-none"
                 />
               </div>
               {metaDescription.length > 0 && (
                 <div className="flex items-center gap-1.5 px-1">
-                  {metaDescription.length < 120 ? (
+                  {metaDescription.length < 140 ? (
                     <><AlertTriangle size={10} className="text-amber-500" /><span className="text-[9px] font-bold text-amber-500/80 uppercase tracking-tighter">Too Short</span></>
                   ) : metaDescription.length <= 160 ? (
                     <><CheckCircle2 size={10} className="text-emerald-500" /><span className="text-[9px] font-bold text-emerald-500/80 uppercase tracking-tighter">Ideal Length</span></>
@@ -655,38 +655,38 @@ const ScoreChecker = () => {
             >
               {/* 📊 Score Breakdown Header */}
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                 <div className="bg-gradient-to-br from-brand-500/20 to-transparent border border-brand-500/20 p-8 rounded-3xl flex flex-col items-center justify-center relative overflow-hidden group">
+                 <div className="bg-gradient-to-br from-brand-500/20 to-transparent border border-brand-500/20 p-6 md:p-8 rounded-3xl flex flex-col items-center justify-center relative overflow-hidden group">
                     <div className="absolute inset-0 bg-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="relative w-32 h-32 flex items-center justify-center mb-4">
+                    <div className="relative w-28 h-28 md:w-32 md:h-32 flex items-center justify-center mb-4">
                       <svg className="w-full h-full transform -rotate-90">
-                        <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
+                        <circle cx="50%" cy="50%" r="45%" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
                         <circle
-                          cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent"
-                          strokeDasharray={364.4}
-                          strokeDashoffset={364.4 - (364.4 * (result.score || 0)) / 100}
+                          cx="50%" cy="50%" r="45%" stroke="currentColor" strokeWidth="8" fill="transparent"
+                          strokeDasharray="280"
+                          strokeDashoffset={280 - (280 * (result.score || 0)) / 100}
                           className={`${(result.score || 0) >= 90 ? 'text-brand-500' : (result.score || 0) >= 50 ? 'text-amber-500' : 'text-red-500'} transition-all duration-1000`}
                         />
                       </svg>
-                      <span className="absolute text-4xl font-black text-white">{result.score}</span>
+                      <span className="absolute text-3xl md:text-4xl font-black text-white">{result.score}</span>
                     </div>
-                    <div className="text-xs uppercase font-black tracking-[0.2em] text-brand-400">Overall Score</div>
+                    <div className="text-[10px] md:text-xs uppercase font-black tracking-[0.2em] text-brand-400">Overall Score</div>
                  </div>
 
-                 <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+                 <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-6">
                     {[
                       { label: 'On-Page SEO', score: result.onPageScore || 85, icon: Search, color: 'text-blue-400', bg: 'bg-blue-400/10' },
                       { label: 'Technical SEO', score: result.technicalScore || 70, icon: Zap, color: 'text-purple-400', bg: 'bg-purple-400/10' },
                       { label: 'Content Score', score: result.contentScore || 80, icon: BookOpen, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
                     ].map((cat, i) => (
-                      <div key={i} className="bg-zinc-800/50 border border-white/5 p-6 rounded-2xl flex flex-col justify-between group hover:border-white/10 transition-colors">
+                      <div key={i} className="bg-zinc-800/50 border border-white/5 p-5 md:p-6 rounded-2xl flex flex-col justify-between group hover:border-white/10 transition-colors">
                         <div className="flex justify-between items-start mb-6">
-                           <div className={`p-3 rounded-xl ${cat.bg} ${cat.color}`}>
-                              <cat.icon size={20} />
+                           <div className={`p-2.5 md:p-3 rounded-xl ${cat.bg} ${cat.color}`}>
+                              <cat.icon size={18} className="md:w-5 md:h-5" />
                            </div>
-                           <div className="text-3xl font-black text-white">{cat.score}%</div>
+                           <div className="text-2xl md:text-3xl font-black text-white">{cat.score}%</div>
                         </div>
                         <div>
-                          <div className="text-xs uppercase font-bold tracking-widest text-slate-500 mb-2">{cat.label}</div>
+                          <div className="text-[10px] md:text-xs uppercase font-bold tracking-widest text-slate-500 mb-2">{cat.label}</div>
                           <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
                              <motion.div 
                                initial={{ width: 0 }}
@@ -731,10 +731,10 @@ const ScoreChecker = () => {
                     <div className="absolute top-0 right-0 p-8 opacity-5">
                       <Zap size={120} />
                     </div>
-                    <h3 className="font-bold text-xl text-white mb-6 flex items-center gap-2">
+                    <h3 className="font-bold text-lg md:text-xl text-white mb-6 flex items-center gap-2">
                       <Gauge size={20} className="text-brand-400" /> Core Web Vitals
                     </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                       {[
                         { label: 'First Contentful Paint', sub: '(FCP)', value: result.metrics?.fcp || 'N/A', icon: Activity, desc: 'Time until first text/image is painted.' },
                         { label: 'Largest Contentful Paint', sub: '(LCP)', value: result.metrics?.lcp || 'N/A', icon: Zap, desc: 'Time until the largest content element is visible.' },
@@ -742,7 +742,7 @@ const ScoreChecker = () => {
                         { label: 'Total Blocking Time', sub: '(TBT)', value: result.metrics?.fid || 'N/A', icon: Loader2, desc: 'Total time tasks were blocked from reacting to input.' },
                         { label: 'Speed Index', sub: '', value: result.metrics?.speedIndex || 'N/A', icon: Gauge, desc: 'How quickly the page contents are visibly populated.' },
                       ].map((metric, i) => (
-                        <div key={i} className="space-y-2">
+                        <div key={i} className="space-y-2 p-4 bg-zinc-950/30 rounded-2xl border border-white/5">
                           <div className="flex items-center gap-2 text-slate-500">
                             <metric.icon size={14} className="text-brand-500" />
                             <span className="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">{metric.label} {metric.sub}</span>

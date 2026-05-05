@@ -201,12 +201,14 @@ export async function generateTitleVariations(keyword: string, type: 'blog' | 'p
 export async function generateDetailedTags(topic: string, platform: 'YouTube' | 'Blog' | 'Instagram' = 'YouTube') {
   const prompt = `Generate 15 highly relevant tags for a ${platform} content about "${topic}". 
   
-  For ${platform === 'Instagram' ? 'Hashtags' : 'Tags'}, provide a JSON array of objects, each with:
-  "tag": string (including '#' for Instagram),
-  "volume": "High" | "Medium" | "Low" (estimated search volume or popularity),
-  "relevance": number (0-100).
+  For ${platform === 'Instagram' ? 'Hashtags' : 'Tags'}, provide a JSON object with:
+  "tags": array of objects, each with:
+    "tag": string (including '#' for Instagram),
+    "volume": "High" | "Medium" | "Low" (estimated search volume or popularity),
+    "relevance": number (0-100)
+  ${platform === 'YouTube' ? ',"meta": { "title": "string (optimized YouTube title)", "description": "string (optimized YouTube description with call to action)" }' : ''}
 
-  Return ONLY the JSON array.`;
+  Return ONLY the JSON object.`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
@@ -215,7 +217,7 @@ export async function generateDetailedTags(topic: string, platform: 'YouTube' | 
       responseMimeType: "application/json",
     },
   });
-  return JSON.parse(response.text || "[]");
+  return JSON.parse(response.text || "{}");
 }
 
 export async function getSpeedAudit(url: string) {
@@ -359,11 +361,11 @@ export async function getCDNAudit(url: string) {
     "scripts": { "onCDN": number, "total": number },
     "styles": { "onCDN": number, "total": number }
   },
-  "recommendations": array of { "title": string, "desc": string, "impact": "High" | "Medium" },
+  "recommendations": array of { "title": string, "desc": string, "impact": "High" | "Medium", "steps": array of strings (actionable technical steps) },
   "unoptimizedResources": array of { "url": string, "type": "Image" | "Script" | "CSS", "size": string, "suggestion": string }
   };
 
-  Generate a realistic audit of how many of this domain's resources are served through a CDN and specifically analyze the performance impact (latency, bandwidth, and TTI) for this specific domain.`;
+  Generate a realistic audit of how many of this domain's resources are served through a CDN and specifically analyze the performance impact (latency, bandwidth, and TTI) for this specific domain. Ensure recommendations include specific technical steps like "Configure Cache-Control headers" or "Enable Brotli compression".`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",

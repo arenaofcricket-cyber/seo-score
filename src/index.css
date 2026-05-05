@@ -51,3 +51,11 @@
 .micro-label {
   @apply text-[10px] uppercase tracking-widest text-slate-500 font-bold;
 }
+
+.responsive-table {
+  @apply block w-full overflow-x-auto;
+}
+
+.responsive-table table {
+  @apply min-w-[640px] md:min-w-0 md:w-full;
+}

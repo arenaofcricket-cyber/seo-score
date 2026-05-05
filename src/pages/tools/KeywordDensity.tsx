@@ -183,7 +183,7 @@ const KeywordDensity = () => {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Start typing or paste your content here to begin analysis..."
-                className="flex-1 w-full min-h-[400px] bg-zinc-950/50 px-6 py-5 rounded-2xl border border-white/10 focus:border-brand-500/50 outline-none transition-all resize-none text-slate-300 placeholder:text-slate-700 text-lg shadow-inner leading-relaxed"
+                className="flex-1 w-full min-h-[300px] md:min-h-[400px] bg-zinc-950/50 px-4 md:px-6 py-4 md:py-5 rounded-2xl border border-white/10 focus:border-brand-500/50 outline-none transition-all resize-none text-slate-300 placeholder:text-slate-700 text-base md:text-lg shadow-inner leading-relaxed"
               />
               
               <div className="mt-4 flex items-center gap-2 text-[10px] text-slate-500 italic">

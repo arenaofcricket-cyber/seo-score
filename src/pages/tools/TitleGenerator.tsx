@@ -229,9 +229,7 @@ const TitleGenerator = () => {
   };
 
   const renderTruncatedDescription = (text: string, isMobile: boolean = false) => {
-    const defaultText = isMobile 
-      ? 'Your meta description will appear here. Mobile previews highlight the first 120 characters most clearly.'
-      : 'Your meta description will appear here. Make it compelling to improve click-through rates from search results.';
+    const defaultText = "SERP Preview Tool: See how your meta title and description look on Google results. Optimize your CTR and search rankings today with our free tool. Try it now!";
     
     const display = text || defaultText;
     const limit = isMobile ? 120 : 160;
@@ -593,7 +591,7 @@ const TitleGenerator = () => {
                     onFocus={() => setShowDescTips(true)}
                     onBlur={() => setShowDescTips(false)}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Enter meta description..."
+                    placeholder="SERP Preview Tool: See how your meta title and description look on Google results. Optimize your CTR and search rankings today with our free tool. Try it now!"
                     rows={3}
                     className="w-full bg-transparent border-none outline-none px-4 py-3 text-white text-sm placeholder:text-slate-700 focus:ring-0 resize-none leading-relaxed"
                   />
@@ -706,7 +704,7 @@ const TitleGenerator = () => {
                   }}
                   placeholder="https://yoursite.com/your-page"
                   className={`w-full bg-zinc-950/50 pl-4 pr-10 py-3 rounded-xl border outline-none transition-all text-white placeholder:text-slate-700 text-sm ${
-                    urlError ? 'border-red-500/50 focus:border-red-500' : 
+                    urlError ? 'border-red-500/50 focus:border-red-500 bg-red-500/5' : 
                     url.length > 0 ? 'border-emerald-500/30 focus:border-emerald-500/50' :
                     'border-white/10 focus:border-blue-500/50'
                   }`}
@@ -737,6 +735,19 @@ const TitleGenerator = () => {
                   </AnimatePresence>
                 </div>
               </div>
+              <AnimatePresence>
+                {urlError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex items-center gap-1.5 mt-1 px-1"
+                  >
+                    <AlertTriangle size={10} className="text-red-500" />
+                    <span className="text-[10px] font-bold text-red-500/80 uppercase tracking-tight">{urlError}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
 

@@ -93,26 +93,42 @@ const Sidebar = () => {
       {/* Mobile Toggle */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 right-4 z-[60] p-2 bg-zinc-900 border border-white/10 rounded-lg text-white"
+        className="lg:hidden fixed bottom-6 right-6 z-[60] w-14 h-14 bg-brand-500 rounded-full shadow-2xl shadow-brand-500/40 flex items-center justify-center text-black active:scale-90 transition-transform"
       >
-        {isOpen ? <X size={20} /> : <Menu size={20} />}
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
+      {/* Sidebar Overlay/Backdrop */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsOpen(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[45] lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-zinc-900 border-r border-white/5 flex flex-col transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-6">
-          <Link to="/" className="flex items-center gap-2 text-brand-500 font-bold text-xl tracking-tight">
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-zinc-900 border-r border-white/5 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
+        <div className="p-6 flex items-center justify-between">
+          <Link to="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-brand-500 font-bold text-xl tracking-tight">
             <div className="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center">
               <div className="w-4 h-4 border-2 border-brand-500 rounded-sm"></div>
             </div>
             SEOSCORE
           </Link>
+          <button onClick={() => setIsOpen(false)} className="lg:hidden p-2 text-slate-500 hover:text-white transition-colors">
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex-1 px-4 py-4 space-y-8 overflow-y-auto">
           {groups.map((group) => (
             <div key={group.title}>
-              <p className="micro-label mb-4 px-2">{group.title}</p>
+              <p className="micro-label mb-4 px-2 opacity-60 text-emerald-500/80">{group.title}</p>
               <ul className="space-y-1">
                 {group.links.map((link) => (
                   <li key={link.path}>
@@ -125,24 +141,16 @@ const Sidebar = () => {
         </nav>
 
         <div className="p-6 border-t border-white/5 space-y-4">
-          <div className="flex items-center gap-3 text-xs text-slate-500">
-            <Link to="/about" className="hover:text-white transition-colors">About</Link>
-            <span>•</span>
-            <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
-            <span>•</span>
-            <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+          <div className="flex flex-wrap items-center gap-3 text-[10px] text-slate-500">
+            <Link to="/about" onClick={() => setIsOpen(false)} className="hover:text-white transition-colors">About</Link>
+            <span className="opacity-20">•</span>
+            <Link to="/contact" onClick={() => setIsOpen(false)} className="hover:text-white transition-colors">Contact</Link>
+            <span className="opacity-20">•</span>
+            <Link to="/privacy" onClick={() => setIsOpen(false)} className="hover:text-white transition-colors">Privacy</Link>
           </div>
-          <div className="text-[10px] text-slate-600">© 2024 SEOScore Analytics</div>
+          <div className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">© 2026 SEOScore Analytics</div>
         </div>
       </aside>
-
-      {/* Backdrop */}
-      {isOpen && (
-        <div 
-          onClick={() => setIsOpen(false)}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-        />
-      )}
     </>
   );
 };
@@ -165,14 +173,14 @@ const Header = () => {
   };
 
   return (
-    <header className="h-20 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-zinc-950/50 backdrop-blur-md sticky top-0 z-30">
+    <header className="h-16 md:h-20 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-zinc-950/50 backdrop-blur-md sticky top-0 z-30">
       <div className="flex items-center gap-3 md:gap-6 flex-1 max-w-2xl min-w-0">
         <Link to="/" className="flex lg:hidden items-center gap-2 text-brand-500 font-bold text-lg tracking-tight shrink-0">
           <div className="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center">
             <div className="w-4 h-4 border-2 border-brand-500 rounded-sm"></div>
           </div>
         </Link>
-        <span className="text-white font-bold text-lg hidden lg:block tracking-tighter italic uppercase whitespace-nowrap">{getTitle()}</span>
+        <span className="text-white font-bold text-base md:text-lg hidden sm:block lg:tracking-tighter lg:italic lg:uppercase whitespace-nowrap overflow-hidden text-ellipsis">{getTitle()}</span>
         <div className="h-4 w-[1px] bg-white/10 hidden lg:block"></div>
         <div className="flex-1 max-w-md min-w-0">
           <GlobalSearch />
@@ -183,7 +191,10 @@ const Header = () => {
           <Link to="/blog" className="hover:text-brand-400 transition-colors">Resources</Link>
           <Link to="/tools-guide" className="hover:text-brand-400 transition-colors">Tools Guide</Link>
         </nav>
-        <div className="px-3 py-1.5 md:px-4 md:py-2 bg-brand-500 text-black rounded-xl text-[9px] md:text-[10px] uppercase font-black tracking-widest shadow-lg shadow-brand-500/20 active:scale-95 transition-all cursor-pointer whitespace-nowrap">Upgrade to Pro</div>
+        <div className="px-3 py-2 md:px-4 md:py-2 bg-brand-500 text-black rounded-xl text-[8px] md:text-[10px] uppercase font-black tracking-widest shadow-lg shadow-brand-500/20 active:scale-95 transition-all cursor-pointer whitespace-nowrap">
+          <span className="hidden sm:inline">Upgrade to Pro</span>
+          <span className="sm:hidden">Pro</span>
+        </div>
       </div>
     </header>
   );

@@ -11,7 +11,9 @@ const TagGenerator = () => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [results, setResults] = React.useState<{tag: string, volume: string, relevance: number}[]>([]);
+  const [meta, setMeta] = React.useState<{title: string, description: string} | null>(null);
   const [copied, setCopied] = React.useState(false);
+  const [copiedMeta, setCopiedMeta] = React.useState<'title' | 'desc' | null>(null);
 
   React.useEffect(() => {
     document.title = `Free ${platform} Tag Generator Tool – Get Tags Free | SEOScore`;
@@ -40,13 +42,19 @@ const TagGenerator = () => {
     }, 1000);
 
     try {
-      const tags = await generateDetailedTags(topic, platform);
-      if (!tags || tags.length === 0) {
+      const data = await generateDetailedTags(topic, platform);
+      if (!data || (!data.tags && !data.length)) {
         throw new Error('No tags could be generated for this topic.');
       }
       setLoadingStep(loadingSteps.length - 1);
       await new Promise(r => setTimeout(r, 500));
-      setResults(tags);
+      
+      if (data.tags) {
+        setResults(data.tags);
+        if (data.meta) setMeta(data.meta);
+      } else {
+        setResults(data);
+      }
     } catch (error) {
       console.error(error);
       setError('Failed to generate tags. Please try again with a different topic.');
@@ -61,6 +69,12 @@ const TagGenerator = () => {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const copyMeta = (text: string, type: 'title' | 'desc') => {
+    navigator.clipboard.writeText(text);
+    setCopiedMeta(type);
+    setTimeout(() => setCopiedMeta(null), 2000);
   };
 
   return (
@@ -355,6 +369,144 @@ const TagGenerator = () => {
                     </motion.div>
                   ))}
                 </div>
+
+                {/* YouTube Meta Suggestions */}
+                {platform === 'YouTube' && meta && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-12 p-8 bg-zinc-900 border border-white/5 rounded-3xl space-y-8"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
+                        <Sparkles size={20} />
+                      </div>
+                      <div>
+                        <h3 className="text-white font-semibold">YouTube Meta Suggestions</h3>
+                        <p className="text-xs text-slate-500">Optimized title and description for higher SEO ranking</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-6">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">AI Suggested Title</label>
+                          <button 
+                            onClick={() => copyMeta(meta.title, 'title')}
+                            className="text-xs font-bold text-brand-500 hover:text-brand-400 flex items-center gap-1.5 transition-colors"
+                          >
+                            {copiedMeta === 'title' ? <Check size={12} /> : <Copy size={12} />}
+                            {copiedMeta === 'title' ? 'Copied' : 'Copy Title'}
+                          </button>
+                        </div>
+                        <div className="p-4 bg-zinc-950 rounded-xl border border-white/5 text-slate-200 font-bold text-sm leading-relaxed">
+                          {meta.title}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">AI Suggested Description</label>
+                          <button 
+                            onClick={() => copyMeta(meta.description, 'desc')}
+                            className="text-xs font-bold text-brand-500 hover:text-brand-400 flex items-center gap-1.5 transition-colors"
+                          >
+                            {copiedMeta === 'desc' ? <Check size={12} /> : <Copy size={12} />}
+                            {copiedMeta === 'desc' ? 'Copied' : 'Copy Description'}
+                          </button>
+                        </div>
+                        <div className="p-4 bg-zinc-950 rounded-xl border border-white/5 text-slate-300 text-sm leading-relaxed min-h-[100px] whitespace-pre-wrap">
+                          {meta.description}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* SERP Preview Component */}
+                {platform === 'YouTube' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-16 p-8 bg-zinc-950/40 rounded-3xl border border-white/5 relative overflow-hidden"
+                  >
+                    <div className="flex items-center gap-3 mb-8">
+                       <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
+                          <Search size={20} />
+                       </div>
+                       <div>
+                          <h3 className="text-white font-semibold">YouTube SERP Preview</h3>
+                          <p className="text-xs text-slate-500">Visualizing search visibility for "{topic}"</p>
+                       </div>
+                    </div>
+
+                    <div className="max-w-2xl bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                      {/* Search Bar Simulation */}
+                      <div className="px-4 py-3 bg-zinc-800/50 border-b border-white/5 flex items-center gap-3">
+                        <div className="w-3 h-3 rounded-full bg-red-500" />
+                        <div className="flex-1 bg-zinc-950 rounded-lg px-3 py-1.5 text-[11px] text-slate-400 border border-white/5">
+                          {topic}
+                        </div>
+                        <Search size={14} className="text-slate-500" />
+                      </div>
+
+                      {/* Result Item */}
+                      <div className="p-4 flex flex-col sm:flex-row gap-4 hover:bg-white/[0.02] transition-colors">
+                        <div className="relative w-full sm:w-48 aspect-video bg-zinc-800 rounded-xl overflow-hidden shrink-0 group">
+                           {/* Simulated Thumbnail */}
+                           <div className="absolute inset-0 bg-gradient-to-br from-zinc-700 to-zinc-900 flex items-center justify-center">
+                              <PlayCircle size={32} className="text-white/20 group-hover:text-white/40 transition-all group-hover:scale-110" />
+                           </div>
+                           <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-black/80 rounded text-[10px] font-bold text-white">
+                             12:45
+                           </div>
+                           {/* Match indicator */}
+                           <div className="absolute top-2 left-2 flex gap-1">
+                              {results.slice(0, 2).map((r, i) => (
+                                <div key={i} className="px-1.5 py-0.5 bg-red-500/90 rounded text-[8px] font-black uppercase text-white shadow-lg">
+                                   Match: {r.tag.replace(/^#/, '')}
+                                </div>
+                              ))}
+                           </div>
+                        </div>
+
+                        <div className="flex-1 space-y-2">
+                           <h4 className="text-base font-bold text-slate-100 leading-tight line-clamp-2 hover:text-blue-400 cursor-pointer">
+                              Mastering {topic}: The Ultimate Guide for {new Date().getFullYear()}
+                           </h4>
+                           <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
+                              <span>SEOScore Channel</span>
+                              <span>•</span>
+                              <span>1.2M views</span>
+                              <span>•</span>
+                              <span>2 days ago</span>
+                           </div>
+                           <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                              In this video, we explore how {results.slice(0, 3).map(r => r.tag).join(', ')} play a critical role in your success. 
+                              Learn the secrets of ranking first for {topic} using our AI optimization tools.
+                           </p>
+                           {/* Tags influencing visibility label */}
+                           <div className="flex flex-wrap gap-1.5 mt-3">
+                              {results.slice(0, 5).map((res, i) => (
+                                <span key={i} className="text-[9px] font-bold text-red-400 opacity-60">
+                                   #{res.tag.replace(/^#/, '')}
+                                </span>
+                              ))}
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 p-4 bg-brand-500/5 border border-brand-500/10 rounded-2xl flex items-start gap-3">
+                       <AlertCircle size={16} className="text-brand-500 shrink-0 mt-0.5" />
+                       <div className="text-[11px] text-slate-400 leading-relaxed">
+                          <strong className="text-brand-400 uppercase tracking-widest text-[10px] block mb-1">AI Optimization Insight:</strong>
+                          By including <strong>{results.slice(0, 1)[0]?.tag}</strong> and <strong>{results.slice(1, 2)[0]?.tag}</strong>, 
+                          your video has a <strong>{Math.floor(results.reduce((acc, r) => acc + r.relevance, 0) / results.length)}% higher chance</strong> of appearing in the "Suggested" sidebar for users watching similar content.
+                       </div>
+                    </div>
+                  </motion.div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

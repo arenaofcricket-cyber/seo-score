@@ -290,27 +290,30 @@ const BacklinkChecker = () => {
                 </div>
                 <div className="divide-y divide-white/5">
                   {result.recentLinks.map((link: any, i: number) => (
-                    <div key={i} className="p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-zinc-800/20 transition-all group/row">
+                    <div key={i} className="p-4 md:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4 md:gap-6 hover:bg-zinc-800/20 transition-all group/row">
                       <div className="flex-1 min-w-0 space-y-3">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded shrink-0 ${
+                        <div className="flex items-start md:items-center gap-3">
+                          <div className={`p-2 rounded shrink-0 mt-1 md:mt-0 ${
                             link.status === 'High Authority' ? 'bg-emerald-500/10 text-emerald-400' :
                             link.status === 'Toxic' ? 'bg-red-500/10 text-red-500' : 'bg-slate-700/50 text-slate-400'
                           }`}>
                             <ExternalLink size={14} />
                           </div>
-                          <div className="truncate">
+                          <div className="min-w-0 flex-1">
                             <div className="text-sm font-bold text-slate-200 truncate group flex items-center gap-2">
                               {link.url}
                               <button 
-                                onClick={() => copyToClipboard(link.url)}
-                                className="opacity-0 group-hover/row:opacity-100 p-1.5 hover:bg-white/10 rounded transition-all text-slate-500 hover:text-brand-400"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  copyToClipboard(link.url);
+                                }}
+                                className="hidden md:flex opacity-0 group-hover/row:opacity-100 p-1.5 hover:bg-white/10 rounded transition-all text-slate-500 hover:text-brand-400"
                                 title="Copy URL"
                               >
                                 {copiedUrl === link.url ? <Check size={12} /> : <Copy size={12} />}
                               </button>
                             </div>
-                            <div className="flex items-center gap-2 mt-0.5">
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
                               <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.25 rounded-sm ${
                                 link.status === 'High Authority' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' :
                                 link.status === 'Toxic' ? 'bg-red-500/20 text-red-400 border border-red-500/20' :
@@ -318,7 +321,7 @@ const BacklinkChecker = () => {
                               }`}>
                                 {link.status || 'Verified'}
                               </span>
-                              <div className="w-1 h-1 rounded-full bg-slate-800" />
+                              <div className="w-1 h-1 rounded-full bg-slate-800 hidden sm:block" />
                               <span className="text-[9px] text-zinc-500 font-bold uppercase">{link.platform || 'General'}</span>
                             </div>
                           </div>
@@ -332,8 +335,8 @@ const BacklinkChecker = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 shrink-0">
-                        <div className="text-right">
+                      <div className="flex items-center justify-between lg:justify-end gap-4 shrink-0 pl-11 lg:pl-0">
+                        <div className="text-left lg:text-right">
                           <div className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded shadow-sm border ${
                             link.type === 'Do-follow' 
                             ? 'bg-brand-500/10 text-brand-400 border-brand-500/10' 

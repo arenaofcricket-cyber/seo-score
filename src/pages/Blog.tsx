@@ -39,8 +39,25 @@ const Blog = () => {
     });
   }, [selectedCategory, searchQuery]);
 
-  const categories = ['SEO Basics', 'Technical SEO', 'YouTube Growth', 'Content Strategy', 'SEO Strategy', 'SEO for Beginners', 'Advanced SEO'];
-  const tags = ['Backlinks', 'Speed', 'Keywords', 'Google', 'Algorithm', 'Analytics', 'AI SEO', 'ChatGPT', 'Perplexity', 'GEO', 'AEO'];
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    BLOG_POSTS.forEach(post => cats.add(post.category));
+    return Array.from(cats).sort();
+  }, []);
+
+  const tagCounts = useMemo(() => {
+    const counts: { [key: string]: number } = {};
+    BLOG_POSTS.forEach(post => {
+      post.tags.forEach(tag => {
+        counts[tag] = (counts[tag] || 0) + 1;
+      });
+    });
+    return counts;
+  }, []);
+
+  const sortedTags = useMemo(() => {
+    return Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]);
+  }, [tagCounts]);
 
   const filteredPosts = useMemo(() => {
     return BLOG_POSTS.filter(post => {
@@ -254,25 +271,59 @@ const Blog = () => {
           </ul>
         </div>
 
-        {/* Tags */}
-        <div className="bg-zinc-900 border border-white/5 p-6 rounded-2xl shadow-xl">
-          <h3 className="micro-label mb-4 flex items-center gap-2 text-slate-500 font-black">
-             <TagIcon size={14} className="text-brand-500" /> Popular Tags
+        {/* Tag Cloud */}
+        <div className="bg-zinc-900 border border-white/5 p-6 rounded-2xl shadow-xl overflow-hidden relative group">
+          <div className="absolute -top-10 -right-10 w-24 h-24 bg-brand-500/5 blur-2xl rounded-full group-hover:bg-brand-500/10 transition-colors" />
+          <h3 className="micro-label mb-6 flex items-center gap-2 text-slate-500 font-black">
+             <TagIcon size={14} className="text-brand-500" /> Exploratory Cloud
           </h3>
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag, i) => (
+          <div className="flex flex-wrap gap-x-2 gap-y-3">
+            {sortedTags.map((tag, i) => {
+              const count = tagCounts[tag];
+              const isSelected = selectedTag === tag;
+              
+              // Scale size based on frequency, but keep it within bounds
+              const minSize = 0.65;
+              const maxSize = 1.1;
+              const maxCount = Math.max(...Object.values(tagCounts));
+              const size = minSize + (count / maxCount) * (maxSize - minSize);
+
+              return (
+                <motion.button 
+                  key={i} 
+                  layout
+                  onClick={() => setSelectedTag(isSelected ? null : tag)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{ fontSize: `${size}rem` }}
+                  className={`relative px-3 py-1.5 rounded-full font-bold uppercase transition-all duration-300 flex items-center gap-2 ${
+                    isSelected
+                    ? 'bg-gradient-to-r from-brand-500 to-emerald-500 text-black shadow-lg shadow-brand-500/20'
+                    : 'bg-white/5 border border-white/5 text-slate-500 hover:text-brand-400 hover:border-brand-500/30 hover:bg-zinc-800'
+                  }`}
+                >
+                  {tag}
+                  <span className={`text-[8px] px-1.5 py-0.5 rounded-full ${
+                    isSelected ? 'bg-black/20 text-black' : 'bg-white/5 text-slate-600'
+                  }`}>
+                    {count}
+                  </span>
+                </motion.button>
+              );
+            })}
+          </div>
+          <div className="mt-6 pt-4 border-t border-white/5 flex justify-between items-center">
+            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest italic">
+              {Object.keys(tagCounts).length} Unique Topics
+            </p>
+            {selectedTag && (
               <button 
-                key={i} 
-                onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                className={`px-3 py-1.5 border rounded-xl text-[10px] font-bold uppercase transition-all ${
-                  selectedTag === tag
-                  ? 'bg-brand-500 border-brand-500 text-black'
-                  : 'bg-zinc-800 border-white/5 text-slate-500 hover:border-brand-500/30 hover:text-brand-400'
-                }`}
+                onClick={() => setSelectedTag(null)}
+                className="text-[9px] font-black text-brand-500 hover:text-brand-400 uppercase tracking-tighter"
               >
-                {tag}
+                Clear Tag
               </button>
-            ))}
+            )}
           </div>
         </div>
 
