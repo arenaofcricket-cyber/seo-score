@@ -1,186 +1,198 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- General Pages -->
+  <!-- Core Pages -->
   <url>
-    <loc>https://seoscore.online/</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog</loc>
-    <lastmod>2026-05-01</lastmod>
-    <changefreq>daily</changefreq>
+    <loc>https://seoscore.site/tools-guide</loc>
+    <lastmod>2026-05-05</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/about</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/blog</loc>
+    <lastmod>2026-05-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://seoscore.site/about</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/faq</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/contact</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/privacy</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/privacy</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/terms</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/disclaimer</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <!-- SEO Tools -->
   <url>
-    <loc>https://seoscore.online/tools/seo-score-checker</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/tools/seo-score-checker</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/tools/keyword-density</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/tools/keyword-density</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/tools/serp-preview</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/tools/backlink-checker</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/tools/youtube-tag-generator</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/tools/serp-preview</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/tools/website-speed-checker</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/tools/youtube-tag-generator</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/tools/mobile-test</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/tools/website-speed-checker</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/tools/ads-txt-validator</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/tools/mobile-test</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/tools/render-blocking-audit</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/tools/ads-txt-validator</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/tools/cdn-usage-test</loc>
-    <lastmod>2026-05-01</lastmod>
+    <loc>https://seoscore.site/tools/render-blocking-audit</loc>
+    <lastmod>2026-05-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://seoscore.site/tools/cdn-usage-test</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- Blog Posts -->
   <url>
-    <loc>https://seoscore.online/blog/what-is-seo</loc>
+    <loc>https://seoscore.site/blog/what-is-seo</loc>
     <lastmod>2026-03-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/improve-speed</loc>
+    <loc>https://seoscore.site/blog/improve-speed</loc>
     <lastmod>2026-04-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/backlinks-beginner</loc>
+    <loc>https://seoscore.site/blog/backlinks-beginner</loc>
     <lastmod>2026-05-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/yt-seo-2026</loc>
+    <loc>https://seoscore.site/blog/yt-seo-2026</loc>
     <lastmod>2026-06-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/on-page-seo-checklist</loc>
+    <loc>https://seoscore.site/blog/on-page-seo-checklist</loc>
     <lastmod>2026-07-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/what-are-backlinks-guide</loc>
+    <loc>https://seoscore.site/blog/what-are-backlinks-guide</loc>
     <lastmod>2026-08-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/build-high-quality-backlinks</loc>
+    <loc>https://seoscore.site/blog/build-high-quality-backlinks</loc>
     <lastmod>2026-08-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/seo-optimization-checklist</loc>
+    <loc>https://seoscore.site/blog/seo-optimization-checklist</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/how-to-improve-seo-score</loc>
+    <loc>https://seoscore.site/blog/how-to-improve-seo-score</loc>
     <lastmod>2026-10-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/ai-seo-future</loc>
+    <loc>https://seoscore.site/blog/ai-seo-future</loc>
     <lastmod>2026-11-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/local-seo-guide</loc>
+    <loc>https://seoscore.site/blog/local-seo-guide</loc>
     <lastmod>2026-12-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/voice-search-optimization</loc>
+    <loc>https://seoscore.site/blog/voice-search-optimization</loc>
     <lastmod>2026-12-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/ai-seo-guide-2026</loc>
+    <loc>https://seoscore.site/blog/ai-seo-guide-2026</loc>
     <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/chatgpt-for-seo-beginners</loc>
+    <loc>https://seoscore.site/blog/chatgpt-for-seo-beginners</loc>
     <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://seoscore.online/blog/how-to-get-cited-by-ai-in-search-results</loc>
+    <loc>https://seoscore.site/blog/how-to-get-cited-by-ai-in-search-results</loc>
     <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

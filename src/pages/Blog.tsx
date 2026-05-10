@@ -7,7 +7,7 @@ import { BLOG_POSTS } from '../constants';
 const Blog = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
     // 📝 Dynamic Meta Tags for the Blog Page
@@ -17,6 +17,9 @@ const Blog = () => {
     if (selectedCategory) {
       title = `${selectedCategory} Guides | SEOScore Blog`;
       description = `Expert guides and tips on ${selectedCategory} to help you grow your search visibility.`;
+    } else if (selectedTags.length > 0) {
+      title = `${selectedTags.join(', ')} Guides | SEOScore Blog`;
+      description = `Read our latest articles about ${selectedTags.slice(0, 3).join(', ')} and more.`;
     } else if (searchQuery) {
       title = `Search results for "${searchQuery}" | SEOScore Blog`;
     }
@@ -37,7 +40,7 @@ const Blog = () => {
                    document.querySelector(`meta[name="${property}"]`);
       if (element) element.setAttribute('content', content);
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, selectedTags]);
 
   const categories = useMemo(() => {
     const cats = new Set<string>();
@@ -64,15 +67,25 @@ const Blog = () => {
       const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory ? post.category === selectedCategory : true;
-      const matchesTag = selectedTag ? post.tags.includes(selectedTag) : true;
-      return matchesSearch && matchesCategory && matchesTag;
+      const matchesTags = selectedTags.length > 0 
+        ? selectedTags.every(tag => post.tags.includes(tag)) 
+        : true;
+      return matchesSearch && matchesCategory && matchesTags;
     });
-  }, [searchQuery, selectedCategory, selectedTag]);
+  }, [searchQuery, selectedCategory, selectedTags]);
 
   const clearFilters = () => {
     setSelectedCategory(null);
-    setSelectedTag(null);
+    setSelectedTags([]);
     setSearchQuery('');
+  };
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag) 
+        : [...prev, tag]
+    );
   };
 
   return (
@@ -116,7 +129,7 @@ const Blog = () => {
             Deep dives into search engine optimization, content strategy, and digital growth.
           </p>
           
-          {(selectedCategory || selectedTag || searchQuery) && (
+          {(selectedCategory || selectedTags.length > 0 || searchQuery) && (
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -128,19 +141,20 @@ const Blog = () => {
               {selectedCategory && (
                 <button 
                   onClick={() => setSelectedCategory(null)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 border border-white/10 rounded-lg text-xs font-bold text-white hover:bg-zinc-700 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 border border-brand-500/20 rounded-lg text-xs font-bold text-brand-400 hover:bg-zinc-700 transition-colors"
                 >
                   Category: {selectedCategory} <X size={12} className="text-slate-500" />
                 </button>
               )}
-              {selectedTag && (
+              {selectedTags.map(tag => (
                 <button 
-                  onClick={() => setSelectedTag(null)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 border border-white/10 rounded-lg text-xs font-bold text-white hover:bg-zinc-700 transition-colors"
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-brand-500/10 border border-brand-500/50 rounded-lg text-xs font-bold text-brand-400 hover:bg-brand-500/20 transition-colors"
                 >
-                  Tag: {selectedTag} <X size={12} className="text-slate-500" />
+                  Tag: {tag} <X size={12} className="text-brand-500" />
                 </button>
-              )}
+              ))}
               {searchQuery && (
                 <button 
                   onClick={() => setSearchQuery('')}
@@ -280,7 +294,7 @@ const Blog = () => {
           <div className="flex flex-wrap gap-x-2 gap-y-3">
             {sortedTags.map((tag, i) => {
               const count = tagCounts[tag];
-              const isSelected = selectedTag === tag;
+              const isSelected = selectedTags.includes(tag);
               
               // Scale size based on frequency, but keep it within bounds
               const minSize = 0.65;
@@ -292,13 +306,13 @@ const Blog = () => {
                 <motion.button 
                   key={i} 
                   layout
-                  onClick={() => setSelectedTag(isSelected ? null : tag)}
+                  onClick={() => toggleTag(tag)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   style={{ fontSize: `${size}rem` }}
                   className={`relative px-3 py-1.5 rounded-full font-bold uppercase transition-all duration-300 flex items-center gap-2 ${
                     isSelected
-                    ? 'bg-gradient-to-r from-brand-500 to-emerald-500 text-black shadow-lg shadow-brand-500/20'
+                    ? 'bg-gradient-to-r from-brand-500 to-emerald-500 text-black shadow-lg shadow-brand-500/20 ring-2 ring-brand-500 ring-offset-2 ring-offset-zinc-950'
                     : 'bg-white/5 border border-white/5 text-slate-500 hover:text-brand-400 hover:border-brand-500/30 hover:bg-zinc-800'
                   }`}
                 >
@@ -316,12 +330,12 @@ const Blog = () => {
             <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest italic">
               {Object.keys(tagCounts).length} Unique Topics
             </p>
-            {selectedTag && (
+            {selectedTags.length > 0 && (
               <button 
-                onClick={() => setSelectedTag(null)}
+                onClick={() => setSelectedTags([])}
                 className="text-[9px] font-black text-brand-500 hover:text-brand-400 uppercase tracking-tighter"
               >
-                Clear Tag
+                Clear {selectedTags.length > 1 ? 'All Tags' : 'Tag'}
               </button>
             )}
           </div>

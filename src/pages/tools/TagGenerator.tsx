@@ -42,7 +42,7 @@ const TagGenerator = () => {
     }, 1000);
 
     try {
-      const data = await generateDetailedTags(topic, platform);
+      const data = await generateDetailedTags(topic, platform, keywords);
       if (!data || (!data.tags && !data.length)) {
         throw new Error('No tags could be generated for this topic.');
       }
@@ -184,7 +184,7 @@ const TagGenerator = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
                 <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
                   <Search size={16} className="text-brand-500" />
@@ -198,6 +198,22 @@ const TagGenerator = () => {
                     placeholder={`e.g. ${platform === 'YouTube' ? 'Budget Travel Tips' : platform === 'Blog' ? 'Next.js 15 Tutorial' : 'Minimalist Workspace'}`}
                     className="w-full bg-zinc-950/50 px-6 py-5 rounded-2xl border border-white/10 focus:border-brand-500/50 outline-none transition-all text-white placeholder:text-slate-600 text-lg shadow-inner"
                     required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
+                  <Activity size={16} className="text-brand-500" />
+                  Keywords to Include (Optional)
+                </label>
+                <div className="relative group">
+                  <input
+                    type="text"
+                    value={keywords}
+                    onChange={(e) => setKeywords(e.target.value)}
+                    placeholder="e.g. SEO, Growth, Tutorial"
+                    className="w-full bg-zinc-950/50 px-6 py-5 rounded-2xl border border-white/10 focus:border-brand-500/50 outline-none transition-all text-white placeholder:text-slate-600 text-lg shadow-inner"
                   />
                 </div>
               </div>
@@ -344,24 +360,38 @@ const TagGenerator = () => {
                           <span className="text-brand-500/50 font-bold">#</span>
                           <span className="text-white text-sm font-bold truncate">{res.tag.replace(/^#/, '')}</span>
                         </div>
-                        <div className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest ${
-                          res.volume === 'High' ? 'bg-red-500/10 text-red-400' :
-                          res.volume === 'Medium' ? 'bg-amber-500/10 text-amber-400' :
-                          'bg-blue-500/10 text-blue-400'
-                        }`}>
-                          {res.volume} Vol
+                        <div className="flex flex-col items-end shrink-0">
+                          <span className="text-[7px] font-black uppercase tracking-widest text-slate-500 mb-0.5">Search Vol</span>
+                          <div className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest ${
+                            res.volume === 'High' ? 'bg-red-500/10 text-red-400' :
+                            res.volume === 'Medium' ? 'bg-amber-500/10 text-amber-400' :
+                            'bg-blue-500/10 text-blue-400'
+                          }`}>
+                            {res.volume}
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="mt-3 flex items-center justify-between relative z-10">
-                         <div className="flex-1 bg-white/5 h-1 rounded-full overflow-hidden mr-3">
+                      <div className="mt-4 space-y-1.5 relative z-10">
+                         <div className="flex items-center justify-between">
+                           <span className="text-[7px] font-black uppercase tracking-widest text-slate-500">Relevance Score</span>
+                           <span className={`text-[10px] font-black tabular-nums ${
+                             res.relevance > 80 ? 'text-emerald-500' :
+                             res.relevance > 50 ? 'text-amber-500' :
+                             'text-red-500'
+                           }`}>{res.relevance}/100</span>
+                         </div>
+                         <div className="flex-1 bg-white/5 h-1.5 rounded-full overflow-hidden">
                             <motion.div 
                               initial={{ width: 0 }}
                               animate={{ width: `${res.relevance}%` }}
-                              className="h-full bg-brand-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]"
+                              className={`h-full shadow-[0_0_8px_rgba(16,185,129,0.3)] ${
+                                res.relevance > 80 ? 'bg-emerald-500' :
+                                res.relevance > 50 ? 'bg-amber-500' :
+                                'bg-red-500'
+                              }`}
                             />
                          </div>
-                         <span className="text-[9px] font-bold text-slate-500 whitespace-nowrap">{res.relevance}% Rel</span>
                       </div>
 
                       {/* Hover background effect */}

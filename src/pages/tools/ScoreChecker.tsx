@@ -16,6 +16,7 @@ const ScoreChecker = () => {
   const [isGeneratingPdf, setIsGeneratingPdf] = React.useState(false);
   const [metaTitle, setMetaTitle] = React.useState('');
   const [metaDescription, setMetaDescription] = React.useState('');
+  const [showScoreHero, setShowScoreHero] = React.useState(false);
 
   const downloadPDF = async () => {
     if (!result) return;
@@ -216,6 +217,7 @@ const ScoreChecker = () => {
     setResult(null);
     setError(null);
     setLoadingStep(0);
+    setShowScoreHero(false);
 
     // Simulated progress for better UX
     const interval = setInterval(() => {
@@ -253,6 +255,7 @@ const ScoreChecker = () => {
       } else {
         setResult(aiData);
       }
+      setShowScoreHero(true);
     } catch (err) {
       console.error(err);
       setError('Unable to analyze this URL. It might be blocking automated crawlers or could be offline.');
@@ -442,12 +445,110 @@ const ScoreChecker = () => {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary flex items-center gap-2"
+              className="btn-primary flex items-center gap-2 group relative overflow-hidden"
             >
-              {loading ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
-              {loading ? 'Analyzing...' : 'Analyze Now'}
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+              <div className="relative z-10 flex items-center gap-2">
+                {loading ? <Loader2 className="animate-spin" size={18} /> : <Gauge size={18} />}
+                <span>{loading ? 'Analyzing...' : 'Fetch SEO Score'}</span>
+              </div>
             </button>
           </form>
+
+          <AnimatePresence>
+            {result && showScoreHero && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="mt-8 relative"
+              >
+                <div className="absolute -inset-1 bg-gradient-to-r from-brand-500 via-blue-500 to-purple-500 rounded-[2.5rem] blur opacity-25" />
+                <div className="relative bg-zinc-950 border border-white/10 p-8 md:p-12 rounded-[2rem] flex flex-col items-center text-center">
+                  <div className="absolute top-4 right-4 group">
+                    <button 
+                      onClick={() => setShowScoreHero(false)}
+                      className="p-2 text-slate-600 hover:text-white transition-colors"
+                    >
+                      <XCircle size={20} />
+                    </button>
+                  </div>
+
+                  <div className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-400 mb-6 flex items-center gap-2">
+                    <Sparkles size={12} className="animate-pulse" />
+                    Overall SEO Health Score
+                    <Sparkles size={12} className="animate-pulse" />
+                  </div>
+
+                  <div className="relative mb-8">
+                     <div className="absolute inset-0 blur-3xl bg-brand-500/20 rounded-full" />
+                     <div className="relative w-40 h-40 md:w-48 md:h-48 flex items-center justify-center">
+                        <svg className="w-full h-full transform -rotate-90">
+                          <circle cx="50%" cy="50%" r="45%" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-white/5" />
+                          <motion.circle
+                            initial={{ strokeDashoffset: 280 }}
+                            animate={{ strokeDashoffset: 280 - (280 * (result.score || 0)) / 100 }}
+                            transition={{ duration: 1.5, ease: "easeOut" }}
+                            cx="50%" cy="50%" r="45%" stroke="currentColor" strokeWidth="12" fill="transparent"
+                            strokeDasharray="280"
+                            className={`${(result.score || 0) >= 90 ? 'text-emerald-500' : (result.score || 0) >= 50 ? 'text-amber-500' : 'text-red-500'} transition-all drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]`}
+                          />
+                        </svg>
+                        <div className="absolute flex flex-col items-center">
+                          <span className="text-5xl md:text-7xl font-black text-white italic tracking-tighter">
+                            {result.score}
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">out of 100</span>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="max-w-xl mx-auto space-y-4">
+                    <h3 className="text-2xl font-bold text-white">
+                      Your website is {(result.score || 0) >= 90 ? 'Perfectly Optimized!' : (result.score || 0) >= 70 ? 'Doing Great!' : (result.score || 0) >= 50 ? 'Needs Improvement' : 'Critically Low'}
+                    </h3>
+                    <p className="text-slate-400 leading-relaxed italic">
+                      "We detected {result.cons?.length || 0} critical issues and {result.pros?.length || 0} success points. Your site performs better than {result.score}% of websites analyzed this week."
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mt-12 bg-white/5 p-6 rounded-2xl border border-white/5">
+                    {[
+                      { label: 'Performance', val: result.performanceScore },
+                      { label: 'SEO', val: result.seoScore },
+                      { label: 'Accessibility', val: result.accessibilityScore },
+                      { label: 'Best Practices', val: result.bestPracticesScore }
+                    ].map((item, i) => (
+                      <div key={i} className="space-y-1">
+                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-500">{item.label}</div>
+                        <div className={`text-lg font-bold ${item.val >= 90 ? 'text-emerald-500' : item.val >= 50 ? 'text-amber-500' : 'text-red-500'}`}>{item.val}%</div>
+                        <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${item.val}%` }}
+                            className={`h-full ${item.val >= 90 ? 'bg-emerald-500' : item.val >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-8">
+                    <button 
+                      onClick={() => {
+                        const el = document.getElementById('full-report');
+                        el?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="text-xs font-bold text-brand-500 hover:text-brand-400 transition-colors uppercase tracking-[0.2em] flex items-center gap-2 group"
+                    >
+                      View Full Analysis Report
+                      <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Meta Title Field */}
@@ -648,6 +749,7 @@ const ScoreChecker = () => {
 
           {result && !loading && (
             <motion.div
+              id="full-report"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -854,6 +956,7 @@ const ScoreChecker = () => {
                           src={url}
                           className="w-full h-full bg-white pointer-events-none"
                           title="Site Preview"
+                          loading="lazy"
                         />
                       </div>
                       

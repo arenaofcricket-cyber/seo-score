@@ -155,6 +155,7 @@ const TitleGenerator = () => {
   };
 
   React.useEffect(() => {
+    document.title = 'Google SERP Preview Tool – Visualize Google Search Results | SEOScore';
     setFaviconError(false);
   }, [domain]);
 
@@ -176,6 +177,7 @@ const TitleGenerator = () => {
         src={faviconUrl} 
         alt=""
         onError={() => setFaviconError(true)}
+        loading="lazy"
         referrerPolicy="no-referrer"
         className={`${containerSize} rounded-sm object-contain shrink-0`}
       />
@@ -263,13 +265,13 @@ const TitleGenerator = () => {
         {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebPage",
-          "name": "Free SERP Preview Tool",
+          "name": "Google SERP Preview Tool",
           "description": "Visualize how your meta title and description appear in Google search results with our free preview tool.",
           "breadcrumb": {
             "@type": "BreadcrumbList",
             "itemListElement": [
               { "@type": "ListItem", "position": 1, "name": "Tools", "item": "https://seoscore.site/tools" },
-              { "@type": "ListItem", "position": 2, "name": "SERP Preview Tool", "item": "https://seoscore.site/tools/serp-preview" }
+              { "@type": "ListItem", "position": 2, "name": "Google SERP Preview Tool", "item": "https://seoscore.site/tools/serp-preview" }
             ]
           }
         })}
@@ -570,9 +572,9 @@ const TitleGenerator = () => {
                       </motion.div>
                     )}
                     <span className={`text-[10px] font-bold tabular-nums ${
-                      description.length === 0 ? 'text-slate-600' :
-                      description.length < DESC_IDEAL_MIN ? 'text-amber-500' :
-                      description.length <= DESC_IDEAL_MAX ? 'text-emerald-500' :
+                      descStatus === 'empty' ? 'text-slate-600' :
+                      descStatus === 'short' ? 'text-amber-500' :
+                      descStatus === 'perfect' ? 'text-emerald-500' :
                       'text-red-500'
                     }`}>
                       {description.length} / {DESC_IDEAL_MIN}-{DESC_IDEAL_MAX}
@@ -614,19 +616,19 @@ const TitleGenerator = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 pt-1"
                   >
-                    {description.length < DESC_IDEAL_MIN ? (
-                      <div className="flex items-center gap-1"><AlertTriangle size={10} className="text-amber-500" /><span className="text-[9px] font-bold text-amber-500 uppercase tracking-tighter">Brief Content (Aim for 140-160)</span></div>
-                    ) : description.length <= DESC_IDEAL_MAX ? (
+                    {descStatus === 'short' ? (
+                      <div className="flex items-center gap-1"><AlertTriangle size={10} className="text-amber-500" /><span className="text-[9px] font-bold text-amber-500 uppercase tracking-tighter">Needs More Detail (Aim for 140-160)</span></div>
+                    ) : descStatus === 'perfect' ? (
                       <motion.div 
                         initial={{ scale: 0.9 }}
                         animate={{ scale: [0.9, 1.1, 1] }}
                         className="flex items-center gap-1"
                       >
-                        <CheckCircle2 size={10} className="text-emerald-500" /><span className="text-[9px] font-extrabold text-emerald-500 uppercase tracking-tighter">Ideal for SERP!</span>
+                        <CheckCircle2 size={10} className="text-emerald-500" /><span className="text-[9px] font-extrabold text-emerald-500 uppercase tracking-tighter">Perfect Length!</span>
                       </motion.div>
-                    ) : (
-                      <div className="flex items-center gap-1"><AlertTriangle size={10} className="text-red-500" /><span className="text-[9px] font-bold text-red-500 uppercase tracking-tighter">Too Long (Will be cut off)</span></div>
-                    )}
+                    ) : descStatus === 'long' ? (
+                      <div className="flex items-center gap-1"><AlertTriangle size={10} className="text-red-500" /><span className="text-[9px] font-bold text-red-500 uppercase tracking-tighter">Over Limit (Likely truncated)</span></div>
+                    ) : null}
 
                     {keyword && (
                       <div className={`flex items-center gap-1 ${descHasKeyword ? 'text-emerald-500' : 'text-slate-500'}`}>
@@ -659,6 +661,45 @@ const TitleGenerator = () => {
                           </ul>
                         </div>
                       </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* AI Suggestions Button */}
+                {description.length > 5 && (
+                  <button
+                    onClick={async () => {
+                      setIsAnalyzing(true);
+                      try {
+                        const data = await generateTitleSuggestions(`DESCRIPTION ANALYSIS: ${description}`);
+                        setSuggestions(data);
+                      } catch (error) {
+                        console.error('Failed to get suggestions:', error);
+                      } finally {
+                        setIsAnalyzing(false);
+                      }
+                    }}
+                    disabled={isAnalyzing}
+                    className="mt-2 w-full py-2 rounded-xl border border-brand-500/20 bg-brand-500/5 text-brand-400 font-bold text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-brand-500/10 transition-all disabled:opacity-50"
+                  >
+                    {isAnalyzing ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
+                    {isAnalyzing ? 'Analyzing...' : 'Get Description Tips'}
+                  </button>
+                )}
+                
+                <AnimatePresence>
+                  {suggestions.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="p-3 bg-brand-500/5 border border-brand-500/10 rounded-xl space-y-1.5 mt-2"
+                    >
+                      {suggestions.map((s, i) => (
+                        <div key={i} className="flex gap-2 text-[10px] text-slate-300 leading-tight">
+                          <span className="text-brand-500">•</span> {s}
+                        </div>
+                      ))}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -1028,7 +1069,7 @@ const TitleGenerator = () => {
                 label="Meta Score"
                 value={description.length}
                 status={descStatus}
-                ideal="120-160"
+                ideal="140-160"
                 hint={descStatus === 'long' ? 'Too long' : descStatus === 'short' ? 'Too short' : descStatus === 'perfect' ? 'Perfect' : 'Empty'}
             />
           </div>
@@ -1113,7 +1154,7 @@ const TitleGenerator = () => {
           {[
             { name: 'SEO Score Checker', path: '/tools/seo-score-checker', icon: Activity, desc: 'Analyze your overall SEO performance and health score.' },
             { name: 'Keyword Density', path: '/tools/keyword-density', icon: Hash, desc: 'Check keyword frequency and optimization on any page.' },
-            { name: 'SERP Preview Tool', path: '/tools/serp-preview', icon: Search, desc: 'Visualize how your meta tags appear in Google results.' },
+            { name: 'Google SERP Preview Tool', path: '/tools/serp-preview', icon: Search, desc: 'Visualize how your meta tags appear in Google results.' },
           ].map((tool, i) => (
             <Link 
               key={i}

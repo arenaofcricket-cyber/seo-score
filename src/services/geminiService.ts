@@ -198,8 +198,9 @@ export async function generateTitleVariations(keyword: string, type: 'blog' | 'p
   return JSON.parse(response.text || "[]");
 }
 
-export async function generateDetailedTags(topic: string, platform: 'YouTube' | 'Blog' | 'Instagram' = 'YouTube') {
+export async function generateDetailedTags(topic: string, platform: 'YouTube' | 'Blog' | 'Instagram' = 'YouTube', keywords: string = '') {
   const prompt = `Generate 15 highly relevant tags for a ${platform} content about "${topic}". 
+  ${keywords ? `Additional keywords to prioritize: ${keywords}.` : ''}
   
   For ${platform === 'Instagram' ? 'Hashtags' : 'Tags'}, provide a JSON object with:
   "tags": array of objects, each with:
@@ -357,9 +358,9 @@ export async function getCDNAudit(url: string) {
     "ttiImprovement": string (e.g., "0.8s")
   },
   "resourceBreakdown": {
-    "images": { "onCDN": number, "total": number },
-    "scripts": { "onCDN": number, "total": number },
-    "styles": { "onCDN": number, "total": number }
+    "images": { "onCDN": number, "total": number, "avgSize": string, "isCDNDelivered": boolean },
+    "scripts": { "onCDN": number, "total": number, "avgSize": string, "isCDNDelivered": boolean },
+    "styles": { "onCDN": number, "total": number, "avgSize": string, "isCDNDelivered": boolean }
   },
   "recommendations": array of { "title": string, "desc": string, "impact": "High" | "Medium", "steps": array of strings (actionable technical steps) },
   "unoptimizedResources": array of { "url": string, "type": "Image" | "Script" | "CSS", "size": string, "suggestion": string }

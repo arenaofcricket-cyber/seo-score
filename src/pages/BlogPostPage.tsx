@@ -128,6 +128,14 @@ const BlogPostPage = () => {
                 </Link>
               ),
               p: ({ children }) => <p className="mb-6">{children}</p>,
+              img: ({ ...props }) => (
+                <img 
+                  {...props} 
+                  loading="lazy" 
+                  className="rounded-xl border border-white/5 my-8 shadow-2xl" 
+                  referrerPolicy="no-referrer"
+                />
+              ),
               ul: ({ children }) => <ul className="list-disc list-inside space-y-2 mb-6">{children}</ul>,
               ol: ({ children }) => <ol className="list-decimal list-inside space-y-2 mb-6">{children}</ol>,
             }}

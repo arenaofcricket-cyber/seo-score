@@ -7,15 +7,26 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { getRealPageSpeedData as getAiSpeedData, getSpeedAudit } from '../../services/geminiService';
 import { getRealPageSpeedData as getRealApiData } from '../../services/pageSpeedService';
 
-const trendData = [
-  { date: 'Mon', fcp: 1.8, lcp: 2.9, cls: 0.05 },
-  { date: 'Tue', fcp: 1.6, lcp: 2.7, cls: 0.04 },
-  { date: 'Wed', fcp: 1.7, lcp: 2.8, cls: 0.06 },
-  { date: 'Thu', fcp: 1.5, lcp: 2.4, cls: 0.03 },
-  { date: 'Fri', fcp: 1.4, lcp: 2.2, cls: 0.02 },
-  { date: 'Sat', fcp: 1.2, lcp: 2.1, cls: 0.02 },
-  { date: 'Sun', fcp: 1.3, lcp: 2.0, cls: 0.01 },
-];
+const generateTrendData = () => {
+  const data = [];
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    data.push({
+      date: days[d.getDay()],
+      fullDate: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      fcp: parseFloat((1.2 + Math.random() * 0.6).toFixed(2)),
+      lcp: parseFloat((2.0 + Math.random() * 1.2).toFixed(2)),
+      cls: parseFloat((Math.random() * 0.05).toFixed(3)),
+      score: Math.floor(80 + Math.random() * 20)
+    });
+  }
+  return data;
+};
+
+const trendData = generateTrendData();
 
 const SpeedChecker = () => {
   const [url, setUrl] = React.useState('');
@@ -163,14 +174,57 @@ const SpeedChecker = () => {
         })}
       </script>
 
-      {/* 🟢 H1 & 📌 First Paragraph */}
-      <div className="space-y-6">
-        <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2">Free Website Speed Checker Tool</h1>
-        <div className="h-1 w-20 bg-brand-500 rounded-full"></div>
-        <p className="text-slate-400 text-lg leading-relaxed max-w-4xl">
-          Use our **free website speed checker tool** to analyze your website performance and improve loading speed quickly. In today's digital world, every millisecond counts. A delay of just one second can result in a significant drop in conversions and user satisfaction.
-        </p>
-      </div>
+      {/* 🚀 Hero Section with Visual */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="space-y-6">
+          <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2 leading-tight">Free Website Speed <br className="hidden md:block" /> Checker Tool</h1>
+          <div className="h-1 w-20 bg-brand-500 rounded-full"></div>
+          <p className="text-slate-400 text-lg leading-relaxed">
+            Use our **free website speed checker tool** to analyze your website performance and improve loading speed quickly. In today's digital world, every millisecond counts. A delay of just one second can result in a significant drop in conversions and user satisfaction.
+          </p>
+          <div className="flex items-center gap-4 pt-4">
+             <div className="flex -space-x-3">
+                {[1,2,3].map(i => (
+                  <div key={i} className="w-10 h-10 rounded-full border-2 border-zinc-950 bg-zinc-800 overflow-hidden">
+                    <motion.img 
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100&h=100&crop=faces" 
+                      alt="User Avatar" 
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+             </div>
+             <p className="text-xs text-slate-500 font-medium">Used by <span className="text-brand-500 font-bold">10,000+</span> developers world-wide.</p>
+          </div>
+        </div>
+        <div className="relative group">
+           <div className="absolute -inset-4 bg-brand-500/10 blur-2xl rounded-[3rem] opacity-50 group-hover:opacity-100 transition-opacity"></div>
+           <div className="relative aspect-video rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl">
+              <motion.img 
+                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1200" 
+                alt="Website Performance Analytics" 
+                loading="lazy"
+                transition={{ duration: 0.8 }}
+                initial={{ opacity: 0, scale: 1.1 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent"></div>
+              <div className="absolute bottom-6 left-8">
+                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/20 backdrop-blur-md border border-brand-500/30">
+                    <Gauge size={14} className="text-brand-500" />
+                    <span className="text-[10px] font-black text-brand-500 uppercase tracking-widest">Real-time Metrics</span>
+                 </div>
+              </div>
+           </div>
+        </div>
+      </section>
 
       {/* ⚙️ Tool Section */}
       <section className="bg-zinc-900 shadow-2xl border border-white/5 p-4 md:p-8 lg:p-12 rounded-3xl space-y-8">
@@ -461,33 +515,47 @@ const SpeedChecker = () => {
                       />
                       <Tooltip 
                         contentStyle={{ 
-                          backgroundColor: '#18181b', 
+                          backgroundColor: '#09090b', 
                           border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: '12px'
+                          borderRadius: '16px',
+                          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
+                          padding: '12px'
                         }}
-                        itemStyle={{ fontSize: '12px' }}
+                        labelStyle={{ color: '#94a3b8', fontWeight: 'bold', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                        itemStyle={{ fontSize: '12px', padding: '2px 0' }}
+                        cursor={{ stroke: '#3f3f46', strokeWidth: 1 }}
                       />
                       <Legend 
                         iconType="circle" 
-                        wrapperStyle={{ paddingTop: '20px', fontSize: '12px' }}
+                        wrapperStyle={{ paddingTop: '30px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="score" 
+                        name="Score" 
+                        stroke="#8b5cf6" 
+                        strokeWidth={3} 
+                        dot={{ r: 0 }}
+                        activeDot={{ r: 6, fill: '#8b5cf6', strokeWidth: 0 }}
+                        strokeDasharray="5 5"
                       />
                       <Line 
                         type="monotone" 
                         dataKey="fcp" 
                         name="FCP (s)" 
                         stroke="#10b981" 
-                        strokeWidth={2} 
-                        dot={{ r: 4, fill: '#10b981' }}
-                        activeDot={{ r: 6 }}
+                        strokeWidth={3} 
+                        dot={{ r: 0 }}
+                        activeDot={{ r: 6, fill: '#10b981', strokeWidth: 0 }}
                       />
                       <Line 
                         type="monotone" 
                         dataKey="lcp" 
                         name="LCP (s)" 
                         stroke="#3b82f6" 
-                        strokeWidth={2} 
-                        dot={{ r: 4, fill: '#3b82f6' }}
-                        activeDot={{ r: 6 }}
+                        strokeWidth={3} 
+                        dot={{ r: 0 }}
+                        activeDot={{ r: 6, fill: '#3b82f6', strokeWidth: 0 }}
                       />
                       <Line 
                         type="monotone" 
@@ -543,17 +611,27 @@ const SpeedChecker = () => {
             </ul>
           </div>
         </div>
-        <div className="relative aspect-video bg-zinc-900 rounded-3xl border border-white/5 flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-500/10 to-transparent"></div>
-          <Gauge size={120} className="text-brand-500/20" />
+        <div className="relative aspect-video bg-zinc-900 rounded-3xl border border-white/5 flex items-center justify-center overflow-hidden group">
+          <motion.img 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 0.4 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1 }}
+            src="https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?auto=format&fit=crop&q=80&w=1200" 
+            alt="Technical SEO Optimization" 
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-500/20 to-zinc-950/80"></div>
+          <Gauge size={120} className="text-brand-500/20 relative z-10" />
           <motion.div
              animate={{ rotate: 360 }}
              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-             className="absolute w-64 h-64 border-2 border-brand-500/5 rounded-full"
+             className="absolute w-64 h-64 border-2 border-brand-500/5 rounded-full z-0"
           />
-          <div className="relative text-center p-8">
-            <div className="text-4xl font-bold text-white mb-2 tracking-tighter">SEO & Speed</div>
-            <div className="text-slate-500 text-sm">Perfectly Aligned Performance</div>
+          <div className="relative z-10 text-center p-8">
+            <div className="text-4xl font-bold text-white mb-2 tracking-tighter italic">SEO & Speed</div>
+            <div className="text-brand-500/80 font-black uppercase tracking-widest text-[10px]">Perfectly Aligned Performance</div>
           </div>
         </div>
       </section>

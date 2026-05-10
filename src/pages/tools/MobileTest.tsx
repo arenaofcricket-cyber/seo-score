@@ -260,6 +260,7 @@ const MobileTest = () => {
                       src={url}
                       className="w-full h-full border-none"
                       title="Mobile Preview"
+                      loading="lazy"
                       referrerPolicy="no-referrer"
                     />
 

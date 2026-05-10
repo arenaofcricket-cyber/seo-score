@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://seoscore.online/sitemap.xml
+Sitemap: https://seoscore.site/sitemap.xml

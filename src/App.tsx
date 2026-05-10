@@ -56,7 +56,7 @@ const Sidebar = () => {
         { name: 'SEO Score Checker', path: '/tools/seo-score-checker', icon: Activity },
         { name: 'Keyword Density', path: '/tools/keyword-density', icon: Hash },
         { name: 'Backlink Checker', path: '/tools/backlink-checker', icon: Globe },
-        { name: 'SERP Preview Tool', path: '/tools/serp-preview', icon: Search },
+        { name: 'Google SERP Preview Tool', path: '/tools/serp-preview', icon: Search },
       ]
     },
     {
@@ -161,7 +161,7 @@ const Header = () => {
     if (location.pathname === '/') return 'Overview Dashboard';
     if (location.pathname.includes('seo-score-checker')) return 'SEO Score Checker';
     if (location.pathname.includes('keyword-density')) return 'Keyword Density';
-    if (location.pathname.includes('serp-preview')) return 'SERP Preview Tool';
+    if (location.pathname.includes('serp-preview')) return 'Google SERP Preview Tool';
     if (location.pathname.includes('youtube-tag-generator')) return 'YT Tag Generator';
     if (location.pathname.includes('website-speed-checker')) return 'Speed Checker';
     if (location.pathname.includes('mobile-test')) return 'Mobile Friendly Test';
